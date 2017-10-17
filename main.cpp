@@ -1,12 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /* 
  * File:   main.cpp
- * Author: Admin
+ * Author: marko.cepo
  *
  * Created on September 5, 2017, 4:20 PM
  */
@@ -17,6 +12,9 @@
 #include <string>
 #include <cmath>
 
+
+#include "edlib/edlib.h"
+
 using namespace std;
 
 /*
@@ -24,28 +22,28 @@ using namespace std;
  */
 
 void prettyPrint(int** D, string X, string Y) {
-    
-    
-    ofstream outputFile("output.txt");
 
-    if (!outputFile) {
-        cout << "Unable to open output file";
-    }
-    
-    outputFile << "\t\t*";
+
+//    ofstream outputFile("output.txt");
+//
+//    if (!outputFile) {
+//        cout << "Unable to open output file";
+//    }
+
+    cout << "\t\t*";
     for (int i = 0; i < X.size(); i++) {
-        outputFile << "\t" << X[i];
+        cout << "\t" << X[i];
     }
-    outputFile << endl;
+    cout << endl;
 
-    outputFile << "\t*";
+    cout << "\t*";
 
-    for (int j = 0; j < Y.size()+1; j++) {
-        for (int i = 0; i < X.size()+1; i++) {
-            outputFile << "\t" << D[i][j];
+    for (int j = 0; j < Y.size() + 1; j++) {
+        for (int i = 0; i < X.size() + 1; i++) {
+            cout << "\t" << D[i][j];
         }
-        outputFile << endl;
-        outputFile << "\t" << Y[j];
+        cout << endl;
+        cout << "\t" << Y[j];
     }
 }
 
@@ -89,8 +87,17 @@ int main(int argc, char** argv) {
             }
         }
     }
-    
+
     prettyPrint(D, X, Y);
+
+    const char * X_char = X.c_str();
+    const char * Y_char = Y.c_str();
+    
+    EdlibAlignResult result = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
+    if (result.status == EDLIB_STATUS_OK) {
+        printf("\n EDLIB CONTROL -> edit_distance = %d\n", result.editDistance);
+    }
+    edlibFreeAlignResult(result);
 
     return 0;
 }
