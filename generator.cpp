@@ -6,31 +6,40 @@
  * Created on November 5, 2017, 4:20 PM
  */
 
+
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cmath>
 
-
 using namespace std;
 
+
+#define DEFAULT_STRING_LENGTH 100
+
+const char charMapper[] = "ACGT"; 
+
 /*
- * 
+ *
  */
-
-//    ofstream outputFile("output.txt");
-//
-//    if (!outputFile) {
-//        cout << "Unable to open output file";
-//    }
-
 
 int main(int argc, char** argv) {
 
-    char charMapper[] = "ACGT";
+    clock_t start = clock();
+    int inputStringLength;
 
-    int inputStringLength = 100;
+    if ( argc != 2 ) {
+        inputStringLength = DEFAULT_STRING_LENGTH;
+    } else {
+        inputStringLength = atoi(argv[1]);
+    }
+
+    cout << "String length -> " << inputStringLength << " characters" << endl;
+
+    cout << "Generating strings ... ";
+
+
     string X="", Y="";
 
     ofstream outputFile("input.txt");
@@ -39,17 +48,21 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    srand(time(0));
 
     for (int i = 0; i < inputStringLength; i++) {
         X = X + charMapper[(rand() % 4)] ;
         Y = Y + charMapper[(rand() % 4)] ;
     }
 
-    cout << X << endl;
-    outputFile << X << endl;
-    cout << Y << endl;
+    outputFile << X << "\n";
     outputFile << Y;
 
+    outputFile.close();
+
+    double execTime = (clock() - start) /(double) CLOCKS_PER_SEC;
+
+    cout << "generated in " << execTime << " seconds." << endl;
 
 return 0;
 }
