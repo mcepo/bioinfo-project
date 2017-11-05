@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/loki/CLionProjects/BioInf/TableBlock.cpp
+TableBlock.h
+/home/loki/CLionProjects/BioInf/TableBlock.h
+
+/home/loki/CLionProjects/BioInf/TableBlock.h
+vector
+-
+algorithm
+-
+iostream
+-
+
+/home/loki/CLionProjects/BioInf/main.cpp
+iostream
+-
+vector
+-
+TableBlock.h
+/home/loki/CLionProjects/BioInf/TableBlock.h
+

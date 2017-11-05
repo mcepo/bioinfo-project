@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/BioInf.dir/main.cpp.o CMakeFiles/BioInf.dir/TableBlock.cpp.o  -o BioInf 
