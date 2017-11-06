@@ -1,0 +1,6 @@
+/nbproject/private/launcher.properties
+/nbproject/*
+/cmake-build-debug/*
+/.idea/*
+/*.exe
+/*.o
