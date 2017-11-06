@@ -1,3 +1,0 @@
-/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/BioInf.dir

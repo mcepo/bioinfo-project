@@ -6,12 +6,13 @@
  * Created on November 5, 2017, 4:20 PM
  */
 
-
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <time.h>
 
 using namespace std;
 

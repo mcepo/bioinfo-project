@@ -1,61 +1,26 @@
-
-/* 
- * File:   main.cpp
- * Author: marko.cepo
- *
- * Created on September 5, 2017, 4:20 PM
- */
-
-#include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <string>
-#include <cmath>
 
-
+#include "TableBlock.h"
 #include "edlib/edlib.h"
 
-using namespace std;
-
-/*
- * 
- */
-
-void prettyPrint(int** D, string X, string Y) {
-
-
-//    ofstream outputFile("output.txt");
-//
-//    if (!outputFile) {
-//        cout << "Unable to open output file";
-//    }
-
-    cout << "\t\t*";
-    for (int i = 0; i < X.size(); i++) {
-        cout << "\t" << X[i];
-    }
-    cout << endl;
-
-    cout << "\t*";
-
-    for (int j = 0; j < Y.size() + 1; j++) {
-        for (int i = 0; i < X.size() + 1; i++) {
-            cout << "\t" << D[i][j];
-        }
-        cout << endl;
-        cout << "\t" << Y[j];
-    }
-}
+#define DEFAULT_FILENAME "input.txt"
 
 int main(int argc, char** argv) {
 
-    int i;
-    string X, Y;
+    string inputFilename, X, Y;
 
-    int** D = NULL;
+    int blockSize = 3;
 
+    if (argc != 2) {
+        inputFilename = DEFAULT_FILENAME;
+    } else {
+        inputFilename = argv[1];
+    }
 
-    ifstream inputFile("input10.txt");
+    ifstream inputFile(inputFilename);
     if (inputFile) {
         getline(inputFile, X);
         getline(inputFile, Y);
@@ -64,40 +29,214 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    cout << "X -> size: " << X.size() << " value: " << X << endl;
-    cout << "Y -> size: " << Y.size() << " value: " << Y << endl;
+    int xLen = X.size();
+    int yLen = Y.size();
 
-    D = new int*[X.size() + 1];
+    int numBlocksPerRow = xLen / blockSize;
+    int numRowsToCalculate = yLen / blockSize;
+    unsigned char lastBlockColumnCount = blockSize;
+    unsigned char lastRowTableSize = blockSize;
 
-    for (int i = 0, count = 0; i < X.size() + 1; i++) {
-        D[i] = new int[Y.size() + 1 ];
-        D[i][0] = count;
-        D[0][i] = count;
-        count++;
+    unsigned char lastRowTableCount;
+    lastRowTableCount = (unsigned char) numBlocksPerRow;
+
+    if ((xLen % blockSize) != 0) {
+        numBlocksPerRow++;
+        lastBlockColumnCount = (unsigned char) (xLen % blockSize);
     }
 
-    for (int j = 1; j < Y.size() + 1; j++) {
-        for (int i = 1; i < X.size() + 1; i++) {
-            if (X[i - 1] == Y[j - 1]) {
-                D[i][j] = D[i - 1][j - 1];
-            } else {
+    if (yLen % blockSize != 0) {
+        lastRowTableSize = (unsigned char) yLen % blockSize;
+        lastRowTableCount = (unsigned char) yLen / lastRowTableSize;
+        numRowsToCalculate += 1;
+    }
 
-                D[i][j] = fmin(D[i - 1][j], D[i - 1][j - 1]);
-                D[i][j] = fmin(D[i][j], D[i][j - 1]) + 1;
+    unsigned char lastRowLastBlockColumnCount = lastRowTableSize;
+
+    if (xLen % lastRowTableSize != 0) {
+        lastRowLastBlockColumnCount = (unsigned char) xLen % lastRowTableSize;
+        lastRowTableCount++;
+    }
+
+    vector<TableBlock> blocks;
+    blocks.reserve((unsigned long) numBlocksPerRow);
+
+    vector<char> x__, y__, b__, c__;
+
+    b__.reserve((unsigned long) xLen);
+    c__.reserve((unsigned long) yLen);
+
+
+    for (int i = 0; i < blockSize; i++) {
+        b__.push_back(+1);
+        c__.push_back(+1);
+    }
+
+    // the magic
+
+    //int row = 0;
+    vector<char> currentY, currentC, currentB, currentX;
+    currentX.reserve((unsigned long) blockSize);
+    currentB.reserve((unsigned long) blockSize);
+    currentY.reserve((unsigned long) blockSize);
+    currentC.reserve((unsigned long) blockSize);
+
+    for (int row = 0; row < numRowsToCalculate; row++) {
+
+        cout << "------------------------" << endl;
+
+        currentY.clear();
+
+        //if(currentY.capacity() != blockSize){
+        //    cout << "err";
+        //}
+
+        for (int i = 0; i < blockSize; i++) {
+            char element = Y[(blockSize * row) + i];
+            currentY.push_back(element); // ok
+        }
+
+
+        if (row == 0) {
+            for (int i = 0; i < blockSize; i++) {
+                currentB.push_back(+1); // ok
             }
+        }
+
+        bool viseNeDiraj = false;
+
+        /// chained
+        if ((row == (numRowsToCalculate - 1)) && (lastRowTableSize != blockSize)) {
+            numBlocksPerRow = lastRowTableCount;
+            currentB.clear();
+            for (auto tmp : blocks) {
+                vector<char> tmpChar = tmp.horizontalF(false);
+                for (char cc : tmpChar) {
+                    currentB.push_back(cc);
+                }
+            }
+            viseNeDiraj = true;
+            blockSize = lastRowTableSize;
+            blocks.clear();
+        }
+
+        for (int col = 0; col < numBlocksPerRow; col++) {
+
+            if (row != 0 && !viseNeDiraj) {
+                currentB.clear();
+                currentB = blocks.at((unsigned int) col).horizontalF(false);
+            }
+
+            if (col == 0) {
+                currentC.clear();
+                for (int i = 0; i < blockSize; i++) { // do dynamicaly
+                    currentC.push_back(+1); // ok
+                }
+            }
+
+            currentX.clear();
+
+            for (int i = 0; i < blockSize; i++) {
+                currentX.push_back(X[(blockSize * col) + i]);
+            }
+
+
+            if (col == (numBlocksPerRow - 1)) {
+                if (row != (numRowsToCalculate - 1)) { // zadnji stupac
+                    TableBlock blk(blockSize, currentB, currentC, currentX, currentY, 0, lastBlockColumnCount);
+
+                    blk.calculate();
+                    if (row == 0) {
+                        blocks.push_back(blk);
+                    } else {
+                        blocks.at((unsigned int) col) = blk;
+                    }
+                } else { //zadnji red, zadnji stupac
+                    TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY, 0, lastRowLastBlockColumnCount);
+                    blk.calculate();
+                    for (int i = 0; i < lastBlockColumnCount; i++) {
+                        currentB.erase(currentB.begin());
+                    }
+                    if (row == 0) {
+                        blocks.push_back(blk);
+                    } else {
+                        if (!viseNeDiraj) {
+                            blocks.at((unsigned int) col) = blk;
+                        } else {
+                            blocks.push_back(blk);
+                        }
+
+                    }
+                }
+            } else {
+                if (row != (numRowsToCalculate - 1)) { // neki srednji cell
+                    TableBlock blk(blockSize, currentB, currentC, currentX, currentY);
+                    blk.calculate();
+                    if (row == 0) {
+                        blocks.push_back(blk);
+                    } else {
+                        blocks.at((unsigned int) col) = blk;
+                    }
+                } else { // zadnji red
+                    TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY);
+                    for (int i = 0; i < lastRowTableSize; i++) {
+                        currentB.erase(currentB.begin());
+                    }
+
+                    blk.calculate();
+                    if (row == 0) {
+                        blocks.push_back(blk);
+                    } else {
+                        if (!viseNeDiraj) {
+                            blocks.at((unsigned int) col) = blk;
+                        } else {
+                            blocks.push_back(blk);
+                        }
+
+                    }
+                }
+            }
+
+            cout << "################" << endl;
+            cout << "r: " << row << " c: " << col << endl;
+
+            blocks.at((unsigned long) col).print();
+            cout << "V: ";
+            currentC = blocks.at((unsigned long) col).verticalF();
+
+            cout << "H: ";
+            blocks.at((unsigned long) col).horizontalF();
+
+
         }
     }
 
-    prettyPrint(D, X, Y);
+    unsigned long result = 0L;
+
+    for (auto &block : blocks) {
+        for (unsigned long j = 0; j < block.horizontalF(false).size(); j++) {
+            result += block.horizontalF(false).at(j);
+        }
+    }
+
+    result += yLen;
+
+    cout << "rows of blocks:" << numRowsToCalculate << " last row size " << (int) lastRowTableSize << endl;
+
+    cout << "Calculated result (edit distance): " << result;
+
+    // EDLIB CONTROL
 
     const char * X_char = X.c_str();
     const char * Y_char = Y.c_str();
-    
-    EdlibAlignResult result = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
-    if (result.status == EDLIB_STATUS_OK) {
-        printf("\n EDLIB CONTROL -> edit_distance = %d\n", result.editDistance);
+
+    EdlibAlignResult resultCheck = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
+    if (resultCheck.status == EDLIB_STATUS_OK) {
+        printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
     }
-    edlibFreeAlignResult(result);
+    edlibFreeAlignResult(resultCheck);
 
     return 0;
 }
+
+
