@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/loki/CLionProjects/BioInf/TableBlock.cpp" "/home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles/BioInf.dir/TableBlock.cpp.o"
-  "/home/loki/CLionProjects/BioInf/main.cpp" "/home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles/BioInf.dir/main.cpp.o"
+  "/home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.cpp" "/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/BioInf.dir/TableBlock.cpp.o"
+  "/home/loki/CLionProjects/misc/bioinfo-project/tables__/main.cpp" "/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/BioInf.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

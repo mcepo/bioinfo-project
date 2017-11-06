@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/loki/CLionProjects/BioInf/TableBlock.cpp
+/home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.cpp
 TableBlock.h
-/home/loki/CLionProjects/BioInf/TableBlock.h
+/home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.h
 
-/home/loki/CLionProjects/BioInf/TableBlock.h
+/home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.h
 vector
 -
 algorithm
@@ -18,11 +18,11 @@ algorithm
 iostream
 -
 
-/home/loki/CLionProjects/BioInf/main.cpp
+/home/loki/CLionProjects/misc/bioinfo-project/tables__/main.cpp
 iostream
 -
 vector
 -
 TableBlock.h
-/home/loki/CLionProjects/BioInf/TableBlock.h
+/home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.h
 

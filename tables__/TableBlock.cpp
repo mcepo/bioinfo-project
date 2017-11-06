@@ -19,8 +19,8 @@
 //
 //}
 
-TableBlock::TableBlock(unsigned char t, vector<char> b, vector<char> c,
-                       vector<char> x, vector<char> y, unsigned long a,
+TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
+                       vector<char> &x, vector<char> &y, unsigned long a,
                        unsigned char numCol){
 
     // TODO: bounds, ranges and sizes check...
@@ -36,8 +36,11 @@ TableBlock::TableBlock(unsigned char t, vector<char> b, vector<char> c,
     B.reserve(T);
     char sum;
     sum = (char) (0 + A);
+    //cout << "(0) " << b.size() << endl;
     for(unsigned char i = 0; i < COL; i++){
+        //cout << "(1) " << B.size() << endl;
         B.push_back( (long) (sum + b.at(i)) );
+        //cout << "(2) " << B.size() << endl;
         sum += b.at(i);
     }
 
@@ -49,8 +52,8 @@ TableBlock::TableBlock(unsigned char t, vector<char> b, vector<char> c,
         sum += c.at(i);
     }
 
-    X = move(x);
-    Y = move(y);
+    X = (x);
+    Y = (y);
 
 }
 

@@ -23,8 +23,8 @@ public:
     vector<char> lastColumn;
     vector<char> lastRow;
 
-    TableBlock(unsigned char t, vector<char> b, vector<char> c,
-               vector<char> x, vector<char> y, unsigned long a = 0, unsigned char numCol = 0); // offset encoded version
+    TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
+               vector<char> &x, vector<char> &y, unsigned long a = 0, unsigned char numCol = 0); // offset encoded version
 
     void calculate();
     void emptyTemp();

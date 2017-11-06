@@ -4,89 +4,43 @@
 #include "TableBlock.h"
 
 int main() {
-//    unsigned long a = 2;
-//    unsigned long b_[] = {1, 2, 3};
-//    unsigned long c_[] = {3, 3, 4};
-//    char x_[] = {'t', 'a', 'g'};
-//    char y_[] = {'c', 'a', 'a'};
 
 
-//    unsigned long b_[] = {1, 2, 3};
-//    unsigned long c_[] = {3, 3, 4};
-//    char x_[] = {'g', 't', 'a', 'g'};
-//    char y_[] = {'t', 'c', 'a', 'a'};
+    char s1[40] = {'a', 'c', 't', 'b', 'g', 'f', 'r', 't', 'z', 'l', 'a', 'c', 't', 'b', 'g', 'f', 'r', 't', 'z', 'l',
+                 'a', 'c', 't', 'b', 'g', 'f', 'r', 't', 'z', 'l', 'a', 'c', 't', 'b', 'g', 'f', 'r', 't', 'z', 'l'};
 
-//    unsigned long a = 3;
-//    unsigned long b_[] = {4, 5, 4};
-//    unsigned long c_[] = {4, 4, 5};
-//    char x_[] = {'g', 'c', 't', 'a'};
-//    char y_[] = {'a', 'c', 'g', 't'};
+    char s2[38] = {'a', 'c', 'b', 'g', 'f', 'f', 'f', 'r', 't', 'z', 'y', 'a', 'c', 'g', 'y', 'r', 't', 'r', 'a', 'c',
+                 'c', 'g', 'f', 'r', 't', 'z', 'l', 'c', 't', 'b', 'f', 'r', 'i', 't', 'z', 'l', 'e', 'k'};
 
-    char b_[] = {+1, +1, +1};
-    char c_[] = {-1, -1, +1};
-    char x_[] = {'t', 'a', 'g'};
-    char y_[] = {'t', 'g', 't'};
-
-    int tabl = 3;
-
-    std::vector<char> b, c;
-    std::vector<char> x, y;
-
-    for(int i = 0; i < tabl; i++){
-        b.push_back(b_[i]);
-    }
-
-    for(int i = 0; i < tabl; i++){
-        c.push_back(c_[i]);
-    }
-
-    for(int i = 0; i < tabl + 1; i++) {
-        x.push_back(x_[i]);
-    }
-
-    for(int i = 0; i < tabl + 1; i++) {
-        y.push_back(y_[i]);
-    }
-
-    TableBlock tablica((unsigned char) 3, b, c, x, y, 3, 2);
-    tablica.A = 3;
-    tablica.calculate();
-
-    //tablica.print();
-
-    //tablica.emptyTemp();
-    //tablica.horizontalF();
-    //tablica.verticalF();
-
-    ///////////////////////////////////
-    ////////// sequence alignment /////
-    ///////////////////////////////////
-
-    char s1[] = {'a', 'c', 'g', 't', 'c', 'g', 't', 'a', 'g', 'c', 't'}; //, 'a'};
-    char s2[] = {'a', 'c', 'g', 't', 'g', 't', 'c', 'a', 'a', 'c'};//, 'g'}; //, 't'};
+    //distance should be 16
 
     unsigned char tableDim = 3;
-    int seq1Len = 11;
-    int seq2Len = 10;
+    int seq1Len = 40;
+    int seq2Len = 38;
 
     int numBlocksPerRow = seq1Len / tableDim;
     int numRowsToCalculate = seq2Len / tableDim;
     unsigned char lastBlockColumnCount = tableDim;
     unsigned char lastRowTableSize = tableDim;
+    unsigned char lastRowTableCount;
+    lastRowTableCount = (unsigned char) numBlocksPerRow;
 
-    if(seq1Len % tableDim != 0){
+    if((seq1Len % tableDim) != 0){
         numBlocksPerRow++;
         lastBlockColumnCount = (unsigned char) (seq1Len % tableDim);
     }
 
     if(seq2Len % tableDim != 0){
         lastRowTableSize = (unsigned char) seq2Len % tableDim;
+        lastRowTableCount = (unsigned char) seq1Len / lastRowTableSize;
+        numRowsToCalculate += 1;
     }
 
     unsigned char lastRowLastBlockColumnCount = lastRowTableSize;
 
     if(seq1Len % lastRowTableSize != 0){
         lastRowLastBlockColumnCount = (unsigned char) seq1Len % lastRowTableSize;
+        lastRowTableCount ++;
     }
 
 
@@ -135,11 +89,26 @@ int main() {
             }
         }
 
+        bool viseNeDiraj = false;
 
         /// chained
+        if((row == (numRowsToCalculate - 1)) && (lastRowTableSize != tableDim)){
+            numBlocksPerRow = lastRowTableCount;
+            currentB.clear();
+            for (auto tmp : blocks) {
+                vector<char> tmpChar = tmp.horizontalF(false);
+                for (char cc : tmpChar) {
+                    currentB.push_back(cc);
+                }
+            }
+            viseNeDiraj = true;
+            tableDim = lastRowTableSize;
+            blocks.clear();
+        }
+
         for(int col = 0; col < numBlocksPerRow; col ++){
 
-            if(row != 0){
+            if(row != 0 && !viseNeDiraj){
                 currentB.clear();
                 currentB = blocks.at((unsigned int) col).horizontalF(false);
             }
@@ -152,18 +121,6 @@ int main() {
             }
 
             currentX.clear();
-            if(currentX.capacity() != tableDim){
-                cout << "err";
-            }
-
-            //if(row != 0){
-            //    currentB.clear();
-            //    if(currentB.capacity() != tableDim){
-            //        cout << "err";
-            //    }
-            //
-            //}
-
 
             for(int i = 0; i < tableDim; i++){
                 currentX.push_back(s1[(tableDim * col) + i]);
@@ -171,8 +128,9 @@ int main() {
 
 
             if(col == (numBlocksPerRow - 1)){
-                if(row != (numRowsToCalculate - 1)){
+                if(row != (numRowsToCalculate - 1)){ // zadnji stupac
                     TableBlock blk(tableDim, currentB, currentC, currentX, currentY, 0, lastBlockColumnCount);
+
                     blk.calculate();
                     if(row == 0) {
                         blocks.push_back(blk);
@@ -181,19 +139,27 @@ int main() {
                         blocks.at((unsigned int) col) = blk;
                     }
                 }
-                else{
+                else{ //zadnji red, zadnji stupac
                     TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY, 0, lastRowLastBlockColumnCount);
                     blk.calculate();
+                    for(int i = 0; i < lastBlockColumnCount; i++){
+                        currentB.erase(currentB.begin());
+                    }
                     if(row == 0) {
                         blocks.push_back(blk);
                     }
                     else{
+                        if(!viseNeDiraj){
                         blocks.at((unsigned int) col) = blk;
+                        } else{
+                            blocks.push_back(blk);
+                        }
+
                     }
                 }
             }
             else{
-                if(row != (numRowsToCalculate - 1)){
+                if(row != (numRowsToCalculate - 1)){ // neki srednji cell
                     TableBlock blk(tableDim, currentB, currentC, currentX, currentY);
                     blk.calculate();
                     if(row == 0) {
@@ -203,17 +169,30 @@ int main() {
                         blocks.at((unsigned int) col) = blk;
                     }
                 }
-                else{
+                else{ // zadnji red
                     TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY);
+                    for(int i = 0; i < lastRowTableSize; i++){
+                        currentB.erase(currentB.begin());
+                    }
+
                     blk.calculate();
                     if(row == 0) {
                         blocks.push_back(blk);
                     }
                     else{
-                        blocks.at((unsigned int) col) = blk;
+                        if(!viseNeDiraj){
+                            blocks.at((unsigned int) col) = blk;
+                        }
+                        else{
+                            blocks.push_back(blk);
+                        }
+
                     }
                 }
             }
+
+            cout << "################" << endl;
+            cout << "r: " << row << " c: " << col << endl;
 
             blocks.at((unsigned long) col).print();
             cout << "V: ";
@@ -222,20 +201,19 @@ int main() {
             cout << "H: ";
             blocks.at((unsigned long)  col).horizontalF();
 
-            //TODO: change C
 
         }
     }
 
     unsigned long result = 0L;
 
-    for(unsigned long i = 0; i < blocks.size(); i++){
-        for(unsigned long j = 0; j < blocks.at(i).horizontalF(false).size(); j++){
-            result += blocks.at(i).horizontalF(false).at(j);
+    for (auto &block : blocks) {
+        for(unsigned long j = 0; j < block.horizontalF(false).size(); j++){
+            result += block.horizontalF(false).at(j);
         }
     }
 
-    result += ((numRowsToCalculate - 1) * tableDim) + lastRowTableSize;
+    result += seq2Len;
 
     cout << "rows of blocks:" << numRowsToCalculate << " last row size " << (int) lastRowTableSize << endl;
 

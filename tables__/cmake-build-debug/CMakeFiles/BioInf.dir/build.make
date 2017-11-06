@@ -43,10 +43,10 @@ RM = /home/loki/Downloads/clion-2017.2.3/bin/cmake/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/loki/CLionProjects/BioInf
+CMAKE_SOURCE_DIR = /home/loki/CLionProjects/misc/bioinfo-project/tables__
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/loki/CLionProjects/BioInf/cmake-build-debug
+CMAKE_BINARY_DIR = /home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/BioInf.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/BioInf.dir/flags.make
 
 CMakeFiles/BioInf.dir/main.cpp.o: CMakeFiles/BioInf.dir/flags.make
 CMakeFiles/BioInf.dir/main.cpp.o: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BioInf.dir/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BioInf.dir/main.cpp.o -c /home/loki/CLionProjects/BioInf/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BioInf.dir/main.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BioInf.dir/main.cpp.o -c /home/loki/CLionProjects/misc/bioinfo-project/tables__/main.cpp
 
 CMakeFiles/BioInf.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BioInf.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/BioInf/main.cpp > CMakeFiles/BioInf.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/misc/bioinfo-project/tables__/main.cpp > CMakeFiles/BioInf.dir/main.cpp.i
 
 CMakeFiles/BioInf.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BioInf.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/BioInf/main.cpp -o CMakeFiles/BioInf.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/misc/bioinfo-project/tables__/main.cpp -o CMakeFiles/BioInf.dir/main.cpp.s
 
 CMakeFiles/BioInf.dir/main.cpp.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/BioInf.dir/main.cpp.o.provides.build: CMakeFiles/BioInf.dir/main.cpp.
 
 CMakeFiles/BioInf.dir/TableBlock.cpp.o: CMakeFiles/BioInf.dir/flags.make
 CMakeFiles/BioInf.dir/TableBlock.cpp.o: ../TableBlock.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BioInf.dir/TableBlock.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BioInf.dir/TableBlock.cpp.o -c /home/loki/CLionProjects/BioInf/TableBlock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BioInf.dir/TableBlock.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BioInf.dir/TableBlock.cpp.o -c /home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.cpp
 
 CMakeFiles/BioInf.dir/TableBlock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BioInf.dir/TableBlock.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/BioInf/TableBlock.cpp > CMakeFiles/BioInf.dir/TableBlock.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.cpp > CMakeFiles/BioInf.dir/TableBlock.cpp.i
 
 CMakeFiles/BioInf.dir/TableBlock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BioInf.dir/TableBlock.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/BioInf/TableBlock.cpp -o CMakeFiles/BioInf.dir/TableBlock.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/misc/bioinfo-project/tables__/TableBlock.cpp -o CMakeFiles/BioInf.dir/TableBlock.cpp.s
 
 CMakeFiles/BioInf.dir/TableBlock.cpp.o.requires:
 
@@ -117,7 +117,7 @@ BioInf: CMakeFiles/BioInf.dir/main.cpp.o
 BioInf: CMakeFiles/BioInf.dir/TableBlock.cpp.o
 BioInf: CMakeFiles/BioInf.dir/build.make
 BioInf: CMakeFiles/BioInf.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable BioInf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable BioInf"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/BioInf.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -135,6 +135,6 @@ CMakeFiles/BioInf.dir/clean:
 .PHONY : CMakeFiles/BioInf.dir/clean
 
 CMakeFiles/BioInf.dir/depend:
-	cd /home/loki/CLionProjects/BioInf/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/loki/CLionProjects/BioInf /home/loki/CLionProjects/BioInf /home/loki/CLionProjects/BioInf/cmake-build-debug /home/loki/CLionProjects/BioInf/cmake-build-debug /home/loki/CLionProjects/BioInf/cmake-build-debug/CMakeFiles/BioInf.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/loki/CLionProjects/misc/bioinfo-project/tables__ /home/loki/CLionProjects/misc/bioinfo-project/tables__ /home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug /home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug /home/loki/CLionProjects/misc/bioinfo-project/tables__/cmake-build-debug/CMakeFiles/BioInf.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/BioInf.dir/depend
 
