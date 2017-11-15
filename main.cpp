@@ -148,7 +148,6 @@ int main(int argc, char** argv) {
                         } else {
                             blocks.push_back(blk);
                         }
-
                     }
                 }
             } else {
@@ -161,7 +160,7 @@ int main(int argc, char** argv) {
                         blocks.at((unsigned int) col) = blk;
                     }
                 } else { // zadnji red
-                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row]);
+                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[blockSize * col], &Y[BLOCK_SIZE * row]);
                     for (int i = 0; i < lastRowTableSize; i++) {
                         currentB.erase(currentB.begin());
                     }
@@ -181,6 +180,9 @@ int main(int argc, char** argv) {
             }
 
             cout << "################" << endl;
+			
+			cout << "X: " << &X[blockSize * col] << endl;
+			cout << "Y: " << &Y[BLOCK_SIZE * row] << endl;
 			
             cout << "r: " << row << " c: " << col << endl;
 
