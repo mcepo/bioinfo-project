@@ -5,3 +5,5 @@
 /*.exe
 /*.o
 /*.txt
+/edlib/*.o
+/*.pnproj

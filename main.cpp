@@ -8,11 +8,15 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
+// defining block size here, needed since block size changes
+// in the last row, so i don't get the right substring in the TableBlock constructor
+#define BLOCK_SIZE 3
+
 int main(int argc, char** argv) {
 
     string inputFilename, X, Y;
 
-    int blockSize = 3;
+    int blockSize = BLOCK_SIZE;
 
     if (argc != 2) {
         inputFilename = DEFAULT_FILENAME;
@@ -28,7 +32,10 @@ int main(int argc, char** argv) {
         cout << "Unable to open file";
         return -1;
     }
-
+	
+	cout << "X: " << X << endl;
+	cout << "Y: " << Y << endl;
+	
     int xLen = X.size();
     int yLen = Y.size();
 
@@ -75,27 +82,13 @@ int main(int argc, char** argv) {
     // the magic
 
     //int row = 0;
-    vector<char> currentY, currentC, currentB, currentX;
-    currentX.reserve((unsigned long) blockSize);
+    vector<char> currentC, currentB;
     currentB.reserve((unsigned long) blockSize);
-    currentY.reserve((unsigned long) blockSize);
     currentC.reserve((unsigned long) blockSize);
 
     for (int row = 0; row < numRowsToCalculate; row++) {
 
         cout << "------------------------" << endl;
-
-        currentY.clear();
-
-        //if(currentY.capacity() != blockSize){
-        //    cout << "err";
-        //}
-
-        for (int i = 0; i < blockSize; i++) {
-            char element = Y[(blockSize * row) + i];
-            currentY.push_back(element); // ok
-        }
-
 
         if (row == 0) {
             for (int i = 0; i < blockSize; i++) {
@@ -134,16 +127,9 @@ int main(int argc, char** argv) {
                 }
             }
 
-            currentX.clear();
-
-            for (int i = 0; i < blockSize; i++) {
-                currentX.push_back(X[(blockSize * col) + i]);
-            }
-
-
             if (col == (numBlocksPerRow - 1)) {
                 if (row != (numRowsToCalculate - 1)) { // zadnji stupac
-                    TableBlock blk(blockSize, currentB, currentC, currentX, currentY, 0, lastBlockColumnCount);
+                    TableBlock blk(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0, lastBlockColumnCount);
 
                     blk.calculate();
                     if (row == 0) {
@@ -152,7 +138,7 @@ int main(int argc, char** argv) {
                         blocks.at((unsigned int) col) = blk;
                     }
                 } else { //zadnji red, zadnji stupac
-                    TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY, 0, lastRowLastBlockColumnCount);
+                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0, lastRowLastBlockColumnCount);
                     blk.calculate();
                     for (int i = 0; i < lastBlockColumnCount; i++) {
                         currentB.erase(currentB.begin());
@@ -170,7 +156,7 @@ int main(int argc, char** argv) {
                 }
             } else {
                 if (row != (numRowsToCalculate - 1)) { // neki srednji cell
-                    TableBlock blk(blockSize, currentB, currentC, currentX, currentY);
+                    TableBlock blk(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row]);
                     blk.calculate();
                     if (row == 0) {
                         blocks.push_back(blk);
@@ -178,7 +164,8 @@ int main(int argc, char** argv) {
                         blocks.at((unsigned int) col) = blk;
                     }
                 } else { // zadnji red
-                    TableBlock blk(lastRowTableSize, currentB, currentC, currentX, currentY);
+				
+                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row]);
                     for (int i = 0; i < lastRowTableSize; i++) {
                         currentB.erase(currentB.begin());
                     }
@@ -198,6 +185,7 @@ int main(int argc, char** argv) {
             }
 
             cout << "################" << endl;
+			
             cout << "r: " << row << " c: " << col << endl;
 
             blocks.at((unsigned long) col).print();
@@ -206,7 +194,6 @@ int main(int argc, char** argv) {
 
             cout << "H: ";
             blocks.at((unsigned long) col).horizontalF();
-
 
         }
     }
