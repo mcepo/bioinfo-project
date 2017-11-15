@@ -33,9 +33,6 @@ int main(int argc, char** argv) {
         return -1;
     }
 	
-	cout << "X: " << X << endl;
-	cout << "Y: " << Y << endl;
-	
     int xLen = X.size();
     int yLen = Y.size();
 
@@ -164,7 +161,6 @@ int main(int argc, char** argv) {
                         blocks.at((unsigned int) col) = blk;
                     }
                 } else { // zadnji red
-				
                     TableBlock blk(lastRowTableSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row]);
                     for (int i = 0; i < lastRowTableSize; i++) {
                         currentB.erase(currentB.begin());
