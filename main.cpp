@@ -61,17 +61,6 @@ int main(int argc, char** argv) {
     vector<TableBlock> blocks;
     blocks.reserve((unsigned long) numBlocksPerRow);
 
-    vector<char> x__, y__, b__, c__;
-
-    b__.reserve((unsigned long) xLen);
-    c__.reserve((unsigned long) yLen);
-
-
-    for (int i = 0; i < blockSize; i++) {
-        b__.push_back(+1);
-        c__.push_back(+1);
-    }
-
     // the magic
 
     //int row = 0;
@@ -117,6 +106,7 @@ int main(int argc, char** argv) {
             }
             viseNeDiraj = true;
             blockSize = lastRowTableSize;
+			cout<< "New blocksize: " << blockSize << endl; 
             blocks.clear();
         }
 
@@ -144,7 +134,6 @@ int main(int argc, char** argv) {
             if (col == (numBlocksPerRow - 1)) {
                 if (row != (numRowsToCalculate - 1)) { // zadnji stupac
                     TableBlock blk(blockSize, currentB, currentC, currentX, currentY, 0, lastBlockColumnCount);
-
                     blk.calculate();
                     if (row == 0) {
                         blocks.push_back(blk);
@@ -238,5 +227,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
-
