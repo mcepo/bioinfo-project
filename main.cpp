@@ -106,6 +106,7 @@ int main(int argc, char** argv) {
             }
             viseNeDiraj = true;
             blockSize = lastRowTableSize;
+			cout<< "New blocksize: " << blockSize << endl; 
             blocks.clear();
         }
 
