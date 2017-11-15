@@ -26,5 +26,5 @@ Will generate a file input.txt with two strings of length 1000 each in its own l
 After generating the strings, you can run the main file to get the edit distance between those two strings. Optionally main takes as an argument filename from which to read the lines (default input.txt)
 
 ```
-./main 1000
+./main input_file.txt
 ```
