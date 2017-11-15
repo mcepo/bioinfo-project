@@ -54,7 +54,6 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
 
     X = (x);
     Y = (y);
-
 }
 
 void TableBlock::calculate() {
@@ -188,8 +187,3 @@ vector<char> TableBlock::horizontalF(bool print){
 
     return lastRow;
 }
-
-
-
-
-
