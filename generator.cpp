@@ -36,9 +36,7 @@ int main(int argc, char** argv) {
         inputStringLength = atoi(argv[1]);
     }
 
-    cout << "String length -> " << inputStringLength << " characters" << endl;
-
-    cout << "Generating strings ... ";
+    cout << "Generating X&Y length "<< inputStringLength << " characters... ";
 
 
     string X="", Y="";
@@ -63,7 +61,7 @@ int main(int argc, char** argv) {
 
     double execTime = (clock() - start) /(double) CLOCKS_PER_SEC;
 
-    cout << "generated in " << execTime << " seconds." << endl;
+    cout << "generated in " << execTime << "s." << endl;
 
 return 0;
 }

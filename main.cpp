@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
     string inputFilename, X, Y;
 
-    int blockSize = 3;
+    int blockSize = 4;
 
     if (argc != 2) {
         inputFilename = DEFAULT_FILENAME;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
     for (int row = 0; row < numRowsToCalculate; row++) {
 
-        cout << "------------------------" << endl;
+    //    cout << "------------------------" << endl;
 
         currentY.clear();
 
@@ -106,7 +106,6 @@ int main(int argc, char** argv) {
             }
             viseNeDiraj = true;
             blockSize = lastRowTableSize;
-			cout<< "New blocksize: " << blockSize << endl; 
             blocks.clear();
         }
 
@@ -185,17 +184,16 @@ int main(int argc, char** argv) {
                 }
             }
 
-            cout << "################" << endl;
+        //    cout << "################" << endl;
 			
-            cout << "r: " << row << " c: " << col << endl;
+        //    cout << "r: " << row << " c: " << col << endl;
 
-            blocks.at((unsigned long) col).print();
-            cout << "V: ";
-            currentC = blocks.at((unsigned long) col).verticalF();
+        //    blocks.at((unsigned long) col).print();
+        //    cout << "V: ";
+            currentC = blocks.at((unsigned long) col).verticalF(false);
 
-            cout << "H: ";
-            blocks.at((unsigned long) col).horizontalF();
-
+        //    cout << "H: ";
+            blocks.at((unsigned long) col).horizontalF(false);
 
         }
     }
@@ -210,9 +208,9 @@ int main(int argc, char** argv) {
 
     result += yLen;
 
-    cout << "rows of blocks:" << numRowsToCalculate << " last row size " << (int) lastRowTableSize << endl;
+   // cout << "rows of blocks:" << numRowsToCalculate << " last row size " << (int) lastRowTableSize << endl;
 
-    cout << "Calculated result (edit distance): " << result;
+  //  cout << "Calculated result (edit distance): " << result;
 
     // EDLIB CONTROL
 
@@ -221,9 +219,17 @@ int main(int argc, char** argv) {
 
     EdlibAlignResult resultCheck = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
     if (resultCheck.status == EDLIB_STATUS_OK) {
-        printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
+  //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
     }
     edlibFreeAlignResult(resultCheck);
-
-    return 0;
+	
+	cout << "Input string length: " << xLen << endl;
+	cout << "Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
+	
+	if ((result - resultCheck.editDistance) == 0) {
+		cout << "***** PASSED" << endl;
+	} else {
+		cout << "********** FAILED  " << endl;
+	}
+	return 0;
 }
