@@ -23,6 +23,18 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
                        vector<char> &x, vector<char> &y, unsigned long a,
                        unsigned char numCol){
 
+    // temporary patch for vector type of x,y,b,c
+    // remove after merge
+    string sX(x.begin(), x.end());
+    string sY(y.begin(), y.end());
+    string sB(b.begin(), b.end());
+    string sC(c.begin(), c.end());
+    
+    this->sX = sX;
+    this->sY = sY;
+    this->sB = sB;
+    this->sC = sC;
+    
     // TODO: bounds, ranges and sizes check...
 
     if(numCol == 0){
