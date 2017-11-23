@@ -17,8 +17,10 @@ namespace std {
         std::size_t operator()(const TableBlock& k) const {
 
             size_t res = 17;
-            res = res * 31 + hash<string>()(k.sX);
-            res = res * 31 + hash<string>()(k.sY);
+			
+          //  res = res * 31 + hash<string>()(k.sX);
+          //  res = res * 31 + hash<string>()(k.sY);
+            res = res * 31 + hash<string>()(k.sXY);
             res = res * 31 + hash<string>()(k.sB);
             res = res * 31 + hash<string>()(k.sC);
             return res;
@@ -170,7 +172,6 @@ int main(int argc, char** argv) {
             for (int i = 0; i < blockSize; i++) {
                 currentX.push_back(X[(blockSize * col) + i]);
             }
-
 
             if (col == (numBlocksPerRow - 1)) {
                 if (row != (numRowsToCalculate - 1)) { // zadnji stupac

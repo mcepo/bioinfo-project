@@ -29,9 +29,57 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
     string sY(y.begin(), y.end());
     string sB(b.begin(), b.end());
     string sC(c.begin(), c.end());
-    
+	
+	vector<int> inputString;
+	
+	unordered_map<char, unsigned char> mapLetters;
+	unsigned char number = 1;
+	
+	for(auto const& value: x) {
+
+		auto foundLetter = mapLetters.find(value);
+
+		if (foundLetter == mapLetters.end()) {
+			// nisam ga pronašao
+			
+			mapLetters.insert({value, number});
+			inputString.push_back(number);
+			number++;
+			
+		} else {
+			// pronašao sam ga
+			inputString.push_back(foundLetter->second);
+		}
+	 }
+	 
+	for(auto const& value: y) {
+		
+		auto foundLetter = mapLetters.find(value);
+		
+		if (foundLetter == mapLetters.end()) {
+			// nisam ga pronašao
+			
+			mapLetters.insert({value, number});
+			inputString.push_back(number);
+			number++;
+			
+		} else {
+			// pronašao sam ga
+			inputString.push_back(foundLetter->second);
+		}
+	}
+	
+	string sXY(inputString.begin(), inputString.end());
+//	cout << sX << sY << endl;
+//	for (int i=0;i<sXY.length();i++) {
+//		int element = (int) sXY[i];
+//		cout << element;
+//	}
+//	cout << endl;
+	
     this->sX = sX;
     this->sY = sY;
+	this->sXY = sXY;
     this->sB = sB;
     this->sC = sC;
     

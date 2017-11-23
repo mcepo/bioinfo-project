@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -25,7 +26,9 @@ public:
 
 
     // temporary patch, remove after merge
-    string sX, sY, sB, sC;
+    string sX, sY;
+	string sB, sC;
+	string sXY;
 
     TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
             vector<char> &x, vector<char> &y, unsigned long a = 0, unsigned char numCol = 0); // offset encoded version
@@ -40,8 +43,10 @@ public:
 
     bool operator==(const TableBlock &other) const {
 
-        return (sX == other.sX
-                && sY == other.sY
+        return (
+				sXY == other.sXY
+		//		sX == other.sX
+        //        && sY == other.sY
                 && sB == other.sB
                 && sC == other.sC);
     }
