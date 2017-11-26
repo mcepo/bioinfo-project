@@ -8,3 +8,5 @@
 /edlib/*.o
 /*.pnproj
 /*.pnps
+/generator
+/main
