@@ -10,6 +10,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#define BLOCK_SIZE 3
+
 using namespace std;
 
 class TableBlock {
@@ -17,7 +19,6 @@ public:
     bool isCalculated = false;
 
     unsigned char T; //dimension of block (txt). Not more than 255
-    unsigned long A;
     vector<long> B, C, table;
     string X, Y;
 
@@ -28,8 +29,8 @@ public:
     string sB, sC;
     string sXY;
 
-    TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-            string x, string y, unsigned long a = 0); // offset encoded version
+    TableBlock( vector<char> &b, vector<char> &c,
+            string x, string y); // offset encoded version
 
     void calculate();
     void emptyTemp();
@@ -42,7 +43,7 @@ public:
     bool operator==(const TableBlock &other) const {
 
         return (
-                  sXY == other.sXY
+                 sXY == other.sXY
 //                  X == other.X
 //              &&  Y == other.Y
                 && sB == other.sB

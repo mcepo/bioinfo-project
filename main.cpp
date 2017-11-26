@@ -8,7 +8,6 @@
 #include "edlib/edlib.h"
 
 #define DEFAULT_FILENAME "input.txt"
-#define BLOCK_SIZE 4
 
 namespace std {
 
@@ -34,10 +33,10 @@ unordered_map<TableBlock, TableBlock> generatedBlocks;
 int calculated = 0;
 int found = 0;
 
-TableBlock getTableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-        string x, string y, unsigned long a = 0) {
+TableBlock getTableBlock(vector<char> &b, vector<char> &c,
+        string x, string y) {
 
-    TableBlock blk(t, b, c, x, y, a);
+    TableBlock blk(b, c, x, y);
 
     auto foundBlock = generatedBlocks.find(blk);
 
@@ -105,14 +104,17 @@ int main(int argc, char** argv) {
     currentB.reserve((unsigned long) blockSize);
     currentC.reserve((unsigned long) blockSize);
 
+    for (int i = 0; i < blockSize; i++) {
+        currentB.push_back(+1); // ok
+    }
+
     for (int row = 0; row < numRowsToCalculate; row++) {
 
         //    cout << "------------------------" << endl;
 
-        if (row == 0) {
-            for (int i = 0; i < blockSize; i++) {
-                currentB.push_back(+1); // ok
-            }
+        currentC.clear();
+        for (int i = 0; i < blockSize; i++) { // do dynamicaly
+            currentC.push_back(+1); // ok
         }
 
         for (int col = 0; col < numBlocksPerRow; col++) {
@@ -122,14 +124,7 @@ int main(int argc, char** argv) {
                 currentB = blocks.at((unsigned int) col).horizontalF(false);
             }
 
-            if (col == 0) {
-                currentC.clear();
-                for (int i = 0; i < blockSize; i++) { // do dynamicaly
-                    currentC.push_back(+1); // ok
-                }
-            }
-
-            TableBlock blk = getTableBlock(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0);
+            TableBlock blk = getTableBlock(currentB, currentC, &X[blockSize * col], &Y[blockSize * row]);
             if (row == 0) {
                 blocks.push_back(blk);
             } else {

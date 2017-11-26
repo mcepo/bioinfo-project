@@ -19,10 +19,10 @@
 //
 //}
 
-// can remove "a" and "t" they are of fixed size
+TableBlock::TableBlock(vector<char> &b, vector<char> &c,
+        string x, string y) {
 
-TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-        string x, string y, unsigned long a) {
+    T = BLOCK_SIZE;
 
     string sB(b.begin(), b.end());
     string sC(c.begin(), c.end());
@@ -32,7 +32,7 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
     unordered_map<char, unsigned char> mapLetters;
     unsigned char number = 1;
 
-    for(string::size_type i = 0; i < t && i < x.size(); ++i) {
+    for (string::size_type i = 0; i < T && i < x.size(); ++i) {
 
         auto foundLetter = mapLetters.find(x[i]);
 
@@ -48,7 +48,7 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
         }
     }
 
-    for(string::size_type i = 0; i < t && i < y.size(); ++i) {
+    for (string::size_type i = 0; i < T && i < y.size(); ++i) {
 
         auto foundLetter = mapLetters.find(y[i]);
 
@@ -78,13 +78,10 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
 
     // TODO: bounds, ranges and sizes check...
 
-    T = t;
-    A = a;
-
     // convert from offset to real
     B.reserve(T);
     char sum;
-    sum = (char) (0 + A);
+    sum = (char) 0;
     //cout << "(0) " << b.size() << endl;
     for (unsigned char i = 0; i < T; i++) {
         //cout << "(1) " << B.size() << endl;
@@ -94,7 +91,7 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
     }
 
     C.reserve(T);
-    sum = (char) (0 + A);
+    sum = (char) 0;
 
     for (unsigned char i = 0; i < T; i++) {
         C.push_back((long) (sum + c.at(i)));
@@ -113,7 +110,7 @@ void TableBlock::calculate() {
         table.push_back(0);
     }
 
-    table.at(0) = A;
+    table.at(0) = 0;
 
     // fill a first row
     for (unsigned char i = 1; i <= T; i++) {
