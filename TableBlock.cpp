@@ -20,15 +20,11 @@
 //}
 
 TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-                       string x, string y, unsigned long a,
-                       unsigned char numCol){
+                       string x, string y, unsigned long a){
+
 
     // TODO: bounds, ranges and sizes check...
 
-    if(numCol == 0){
-        numCol = t;
-    }
-    COL = numCol;
     T = t;
     A = a;
 
@@ -37,7 +33,7 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
     char sum;
     sum = (char) (0 + A);
     //cout << "(0) " << b.size() << endl;
-    for(unsigned char i = 0; i < COL; i++){
+    for(unsigned char i = 0; i < T; i++){
         //cout << "(1) " << B.size() << endl;
         B.push_back( (long) (sum + b.at(i)) );
         //cout << "(2) " << B.size() << endl;
@@ -58,34 +54,34 @@ TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
 
 void TableBlock::calculate() {
 
-    table.reserve((unsigned long) (T + 1) * (COL + 1));
+    table.reserve((unsigned long) (T + 1) * (T + 1));
 
-    for(int i = 0; i < (T + 1) * (COL + 1); i++){
+    for(int i = 0; i < (T + 1) * (T + 1); i++){
         table.push_back(0);
     }
 
     table.at(0) = A;
 
     // fill a first row
-    for(unsigned char i = 1; i <= COL; i++){
-        DATA(table, COL + 1, 0, i)  = (long) B.at((unsigned long) (i - 1));
+    for(unsigned char i = 1; i <= T; i++){
+        DATA(table, T + 1, 0, i)  = (long) B.at((unsigned long) (i - 1));
     }
 
     // fill a first column
     for(unsigned char i = 1; i <= T; i++){
-        DATA(table, COL + 1, i, 0)  = (long) C.at((unsigned long) (i - 1));
+        DATA(table, T + 1, i, 0)  = (long) C.at((unsigned long) (i - 1));
     }
 
     //this->print();
 
+    long top, left, diagonal, diagonalValue, cell;
+    
     for(unsigned char row = 1; row <= T; row++){
-        for(unsigned char col = 1; col <= COL; col++){
+        for(unsigned char col = 1; col <= T; col++){
 
-            long top, left, diagonal, diagonalValue, cell;
-
-            diagonal = DATA(table, COL + 1, row - 1, col - 1);
-            top  = DATA(table, COL + 1, row - 1, col    );
-            left = DATA(table, COL + 1, row, col - 1    );
+            diagonal = DATA(table, T + 1, row - 1, col - 1);
+            top  = DATA(table, T + 1, row - 1, col    );
+            left = DATA(table, T + 1, row, col - 1    );
 
             if(X[col - 1] == Y[row - 1]){
                 diagonalValue = diagonal;
@@ -93,33 +89,29 @@ void TableBlock::calculate() {
             else{
                 diagonalValue = diagonal + 1;
             }
-
             cell = min(min(diagonalValue, left + 1), top + 1);
-
-            DATA(table, COL + 1, row, col) = cell;
-
+            DATA(table, T + 1, row, col) = cell;
         }
     }
-
 
     // last column calculation
 
     lastColumn.reserve(T);
 
-    long first = DATA(table, COL, 0, COL);
+    long first = DATA(table, T, 0, T);
     for(int i = 0; i < T; i++){
-        long r = DATA(table, COL + 1, i + 1, COL);
+        long r = DATA(table, T + 1, i + 1, T);
         lastColumn.push_back((char) (r - first));
         first = r;
     }
 
     // last row calculation
 
-    lastRow.reserve(COL);
+    lastRow.reserve(T);
 
-    first = DATA(table, COL + 1, T, 0);
-    for(int i = 0; i < COL; i++){
-        long r = DATA(table, COL + 1, T, i + 1);
+    first = DATA(table, T + 1, T, 0);
+    for(int i = 0; i < T; i++){
+        long r = DATA(table, T + 1, T, i + 1);
         lastRow.push_back((char) (r - first));
         first = r;
     }
@@ -141,13 +133,13 @@ void TableBlock::print() {
 
     cout << "TB" << "| x  ";
 
-    for(unsigned int col = 0; col < COL; col++){
+    for(unsigned int col = 0; col < T; col++){
         cout << X[col] << "  ";
     }
 
-    cout << endl << "−−+";
+    cout << endl << "--+";
     for(unsigned int col = 0; col <= T; col++){
-        cout << "−−−";
+        cout << "---";
     }
 
     for(unsigned int row = 0; row <= T; row++){
@@ -157,8 +149,8 @@ void TableBlock::print() {
         else{
             cout << endl << Y[row - 1] << " | ";
         }
-        for(unsigned int col = 0; col <= COL; col++) {
-            cout << DATA(table, COL + 1, row, col) << "  ";
+        for(unsigned int col = 0; col <= T; col++) {
+            cout << DATA(table, T + 1, row, col) << "  ";
         }
     }
     cout << endl;

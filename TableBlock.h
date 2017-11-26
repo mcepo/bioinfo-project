@@ -15,7 +15,7 @@ class TableBlock{
 public:
     bool isCalculated = false;
 
-    unsigned char T, COL;            //dimension of block (txt). Not more than 255
+    unsigned char T;            //dimension of block (txt). Not more than 255
     unsigned long A;
     vector<long> B, C, table;
     string X, Y;
@@ -24,7 +24,7 @@ public:
     vector<char> lastRow;
 
     TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-               string x, string y, unsigned long a = 0, unsigned char numCol = 0); // offset encoded version
+               string x, string y, unsigned long a = 0); // offset encoded version
 
     void calculate();
     void emptyTemp();

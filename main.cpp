@@ -30,34 +30,30 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    cout << X.size() << endl;
+
+    int modX = X.size() % blockSize;
+    if (modX != 0) {
+        int appendLengthX = blockSize - modX;
+        for (int i = 0; i < appendLengthX; i++) {
+            X += '*';
+        }
+    }
+    int modY = Y.size() % blockSize;
+    if (modY != 0) {
+        int appendLengthY = blockSize - modY;
+        for (int i = 0; i < appendLengthY; i++) {
+            Y += '*';
+        }
+    }
+
     int xLen = X.size();
     int yLen = Y.size();
 
+    cout << xLen << endl;
+
     int numBlocksPerRow = xLen / blockSize;
     int numRowsToCalculate = yLen / blockSize;
-    unsigned char lastBlockColumnCount = blockSize;
-    unsigned char lastRowTableSize = blockSize;
-
-    unsigned char lastRowTableCount;
-    lastRowTableCount = (unsigned char) numBlocksPerRow;
-
-    if ((xLen % blockSize) != 0) {
-        numBlocksPerRow++;
-        lastBlockColumnCount = (unsigned char) (xLen % blockSize);
-    }
-
-    if (yLen % blockSize != 0) {
-        lastRowTableSize = (unsigned char) yLen % blockSize;
-        lastRowTableCount = (unsigned char) yLen / lastRowTableSize;
-        numRowsToCalculate += 1;
-    }
-
-    unsigned char lastRowLastBlockColumnCount = lastRowTableSize;
-
-    if (xLen % lastRowTableSize != 0) {
-        lastRowLastBlockColumnCount = (unsigned char) xLen % lastRowTableSize;
-        lastRowTableCount++;
-    }
 
     vector<TableBlock> blocks;
     blocks.reserve((unsigned long) numBlocksPerRow);
@@ -79,26 +75,9 @@ int main(int argc, char** argv) {
             }
         }
 
-        bool viseNeDiraj = false;
-
-        /// chained
-        if ((row == (numRowsToCalculate - 1)) && (lastRowTableSize != blockSize)) {
-            numBlocksPerRow = lastRowTableCount;
-            currentB.clear();
-            for (auto tmp : blocks) {
-                vector<char> tmpChar = tmp.horizontalF(false);
-                for (char cc : tmpChar) {
-                    currentB.push_back(cc);
-                }
-            }
-            viseNeDiraj = true;
-            blockSize = lastRowTableSize;
-            blocks.clear();
-        }
-
         for (int col = 0; col < numBlocksPerRow; col++) {
 
-            if (row != 0 && !viseNeDiraj) {
+            if (row != 0) {
                 currentB.clear();
                 currentB = blocks.at((unsigned int) col).horizontalF(false);
             }
@@ -110,74 +89,22 @@ int main(int argc, char** argv) {
                 }
             }
 
-            if (col == (numBlocksPerRow - 1)) {
-                if (row != (numRowsToCalculate - 1)) { // zadnji stupac
-                    TableBlock blk(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0, lastBlockColumnCount);
-                    blk.calculate();
-                    if (row == 0) {
-                        blocks.push_back(blk);
-                    } else {
-                        blocks.at((unsigned int) col) = blk;
-                    }
-                } else { //zadnji red, zadnji stupac
-                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0, lastRowLastBlockColumnCount);
-                    blk.calculate();
-                    for (int i = 0; i < lastBlockColumnCount; i++) {
-                        currentB.erase(currentB.begin());
-                    }
-                    if (row == 0) {
-                        blocks.push_back(blk);
-                    } else {
-                        if (!viseNeDiraj) {
-                            blocks.at((unsigned int) col) = blk;
-                        } else {
-                            blocks.push_back(blk);
-                        }
-                    }
-                }
+            TableBlock blk(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row], 0);
+            blk.calculate();
+            if (row == 0) {
+                blocks.push_back(blk);
             } else {
-                if (row != (numRowsToCalculate - 1)) { // neki srednji cell
-                    TableBlock blk(blockSize, currentB, currentC, &X[BLOCK_SIZE * col], &Y[BLOCK_SIZE * row]);
-                    blk.calculate();
-                    if (row == 0) {
-                        blocks.push_back(blk);
-                    } else {
-                        blocks.at((unsigned int) col) = blk;
-                    }
-                } else { // zadnji red
-                    TableBlock blk(lastRowTableSize, currentB, currentC, &X[blockSize * col], &Y[BLOCK_SIZE * row]);
-                    for (int i = 0; i < lastRowTableSize; i++) {
-                        currentB.erase(currentB.begin());
-                    }
-
-                    blk.calculate();
-                    if (row == 0) {
-                        blocks.push_back(blk);
-                    } else {
-                        if (!viseNeDiraj) {
-                            blocks.at((unsigned int) col) = blk;
-                        } else {
-                            blocks.push_back(blk);
-                        }
-
-                    }
-                }
+                blocks.at((unsigned int) col) = blk;
             }
 
-            cout << "################" << endl;
+            //            cout << "################" << endl;
 
-            cout << "X: " << &X[blockSize * col] << endl;
-            cout << "Y: " << &Y[BLOCK_SIZE * row] << endl;
-
-            cout << "r: " << row << " c: " << col << endl;
-
-            blocks.at((unsigned long) col).print();
-            cout << "V: ";
-            currentC = blocks.at((unsigned long) col).verticalF();
-
-            cout << "H: ";
+            //            cout << "r: " << row << " c: " << col << endl;
+            //            blocks.at((unsigned long) col).print();
+            //            cout << "V: ";
+            currentC = blocks.at((unsigned long) col).verticalF(false);
+            //            cout << "H: ";
             blocks.at((unsigned long) col).horizontalF(false);
-
         }
     }
 
