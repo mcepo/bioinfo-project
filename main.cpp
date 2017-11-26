@@ -30,8 +30,6 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    cout << X.size() << endl;
-
     int modX = X.size() % blockSize;
     if (modX != 0) {
         int appendLengthX = blockSize - modX;
@@ -49,8 +47,6 @@ int main(int argc, char** argv) {
 
     int xLen = X.size();
     int yLen = Y.size();
-
-    cout << xLen << endl;
 
     int numBlocksPerRow = xLen / blockSize;
     int numRowsToCalculate = yLen / blockSize;
@@ -123,19 +119,21 @@ int main(int argc, char** argv) {
     const char * X_char = X.c_str();
     const char * Y_char = Y.c_str();
 
-    EdlibAlignResult resultCheck = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
-    if (resultCheck.status == EDLIB_STATUS_OK) {
-        //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
-    }
-    edlibFreeAlignResult(resultCheck);
-
     cout << "Input string length: " << xLen << endl;
-    cout << "Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
 
-    if ((result - resultCheck.editDistance) == 0) {
-        cout << "***** PASSED" << endl;
-    } else {
-        cout << "********** FAILED  " << endl;
+    if (xLen != 0 && yLen != 0) {
+        EdlibAlignResult resultCheck = edlibAlign(X_char, xLen, Y_char, yLen, edlibDefaultAlignConfig());
+        if (resultCheck.status == EDLIB_STATUS_OK) {
+            //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
+        }
+        edlibFreeAlignResult(resultCheck);
+
+        cout << "Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
+        if ((result - resultCheck.editDistance) == 0) {
+            cout << "***** PASSED" << endl;
+        } else {
+            cout << "********** FAILED  " << endl;
+        }
     }
     return 0;
 }
