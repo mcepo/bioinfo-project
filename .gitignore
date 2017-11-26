@@ -6,5 +6,5 @@
 /*.o
 /*.txt
 /edlib/*.o
-/bioinfo-project.pnproj
-/bioinfo-project.pnps
+/*.pnproj
+/*.pnps

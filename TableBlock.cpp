@@ -20,7 +20,7 @@
 //}
 
 TableBlock::TableBlock(unsigned char t, vector<char> &b, vector<char> &c,
-                       vector<char> &x, vector<char> &y, unsigned long a,
+                       string x, string y, unsigned long a,
                        unsigned char numCol){
 
     // TODO: bounds, ranges and sizes check...
@@ -80,8 +80,6 @@ void TableBlock::calculate() {
 
     for(unsigned char row = 1; row <= T; row++){
         for(unsigned char col = 1; col <= COL; col++){
-            char current_X = X.at((unsigned long) (col - 1));
-            char current_Y = Y.at((unsigned long) (row - 1));
 
             long top, left, diagonal, diagonalValue, cell;
 
@@ -89,7 +87,7 @@ void TableBlock::calculate() {
             top  = DATA(table, COL + 1, row - 1, col    );
             left = DATA(table, COL + 1, row, col - 1    );
 
-            if(current_X == current_Y){
+            if(X[col - 1] == Y[row - 1]){
                 diagonalValue = diagonal;
             }
             else{
@@ -144,7 +142,7 @@ void TableBlock::print() {
     cout << "TB" << "| x  ";
 
     for(unsigned int col = 0; col < COL; col++){
-        cout << X.at(col) << "  ";
+        cout << X[col] << "  ";
     }
 
     cout << endl << "−−+";
@@ -157,7 +155,7 @@ void TableBlock::print() {
             cout << endl << "x | ";
         }
         else{
-            cout << endl << Y.at(row - 1) << " | ";
+            cout << endl << Y[row - 1] << " | ";
         }
         for(unsigned int col = 0; col <= COL; col++) {
             cout << DATA(table, COL + 1, row, col) << "  ";
