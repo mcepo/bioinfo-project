@@ -44,8 +44,6 @@ public:
 
         return (
                  sXY == other.sXY
-//                  X == other.X
-//              &&  Y == other.Y
                 && sB == other.sB
                 && sC == other.sC);
     }

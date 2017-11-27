@@ -65,12 +65,6 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
     }
 
     string sXY(inputString.begin(), inputString.end());
-    //	cout << sX << sY << endl;
-    //	for (int i=0;i<sXY.length();i++) {
-    //		int element = (int) sXY[i];
-    //		cout << element;
-    //	}
-    //	cout << endl;
 
     this->sXY = sXY;
     this->sB = sB;
@@ -80,22 +74,19 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
 
     // convert from offset to real
     B.reserve(T);
-    char sum;
-    sum = (char) 0;
-    //cout << "(0) " << b.size() << endl;
+    char sum = (char) 0;
+
     for (unsigned char i = 0; i < T; i++) {
-        //cout << "(1) " << B.size() << endl;
-        B.push_back((long) (sum + b.at(i)));
-        //cout << "(2) " << B.size() << endl;
         sum += b.at(i);
+        B.push_back((long) (sum));
     }
 
     C.reserve(T);
     sum = (char) 0;
 
     for (unsigned char i = 0; i < T; i++) {
-        C.push_back((long) (sum + c.at(i)));
         sum += c.at(i);
+        C.push_back((long) (sum));
     }
 
     X = (x);
@@ -110,19 +101,11 @@ void TableBlock::calculate() {
         table.push_back(0);
     }
 
-    table.at(0) = 0;
-
-    // fill a first row
+    // fill a first column and row
     for (unsigned char i = 1; i <= T; i++) {
         DATA(table, T + 1, 0, i) = (long) B.at((unsigned long) (i - 1));
-    }
-
-    // fill a first column
-    for (unsigned char i = 1; i <= T; i++) {
         DATA(table, T + 1, i, 0) = (long) C.at((unsigned long) (i - 1));
     }
-
-    //this->print();
 
     long top, left, diagonal, diagonalValue, cell;
 
@@ -164,7 +147,6 @@ void TableBlock::calculate() {
         lastRow.push_back((char) (r - first));
         first = r;
     }
-
 
     isCalculated = true;
 }

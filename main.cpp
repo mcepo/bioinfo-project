@@ -34,7 +34,7 @@ int calculated = 0;
 int found = 0;
 
 TableBlock getTableBlock(vector<char> &b, vector<char> &c,
-        string x, string y) {
+        string const& x, string const& y) {
 
     TableBlock blk(b, c, x, y);
 
@@ -99,18 +99,26 @@ int main(int argc, char** argv) {
 
     // the magic
 
-    //int row = 0;
+    // first row calculation
     vector<char> currentC, currentB;
     currentB.reserve((unsigned long) blockSize);
     currentC.reserve((unsigned long) blockSize);
 
     for (int i = 0; i < blockSize; i++) {
         currentB.push_back(+1); // ok
+        currentC.push_back(+1); // ok
     }
 
-    for (int row = 0; row < numRowsToCalculate; row++) {
+    for (int col = 0; col < numBlocksPerRow; col++) {
 
-        //    cout << "------------------------" << endl;
+        TableBlock blk = getTableBlock(currentB, currentC, &X[blockSize * col], &Y[0]);
+        blocks.push_back(blk);
+        currentC = blocks.at((unsigned long) col).lastColumn;
+    }
+
+    // rest of the matrix
+
+    for (int row = 1; row < numRowsToCalculate; row++) {
 
         currentC.clear();
         for (int i = 0; i < blockSize; i++) { // do dynamicaly
@@ -119,26 +127,9 @@ int main(int argc, char** argv) {
 
         for (int col = 0; col < numBlocksPerRow; col++) {
 
-            if (row != 0) {
-                currentB.clear();
-                currentB = blocks.at((unsigned int) col).horizontalF(false);
-            }
-
-            TableBlock blk = getTableBlock(currentB, currentC, &X[blockSize * col], &Y[blockSize * row]);
-            if (row == 0) {
-                blocks.push_back(blk);
-            } else {
-                blocks.at((unsigned int) col) = blk;
-            }
-
-            //            cout << "################" << endl;
-
-            //            cout << "r: " << row << " c: " << col << endl;
-            //            blocks.at((unsigned long) col).print();
-            //            cout << "V: ";
-            currentC = blocks.at((unsigned long) col).verticalF(false);
-            //            cout << "H: ";
-            blocks.at((unsigned long) col).horizontalF(false);
+            currentB = blocks.at((unsigned int) col).lastRow;
+            blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[blockSize * col], &Y[blockSize * row]);
+            currentC = blocks.at((unsigned long) col).lastColumn;
         }
     }
 
