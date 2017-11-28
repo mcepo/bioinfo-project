@@ -53,6 +53,7 @@ TableBlock getTableBlock(vector<char> &b, vector<char> &c,
 
 int main(int argc, char** argv) {
 
+    clock_t start = clock();
     string inputFilename, X, Y;
 
     int blockSize = BLOCK_SIZE;
@@ -146,28 +147,30 @@ int main(int argc, char** argv) {
     const char * X_char = X.c_str();
     const char * Y_char = Y.c_str();
 
+    double execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
+
     cout << "Input string length: " << xLen << endl;
     cout << "Total number of blocks in matrix: " << (numBlocksPerRow * numRowsToCalculate) << endl;
     cout << "Calculated (stored) blocks: " << calculated << endl;
     cout << "Found blocks: " << found << endl;
-    cout << "RESULT: " << result;
+    cout << "RESULT: " << result << " generated in: " << execTime << "sec" << endl;
 
     // EDLIB controle
 
     if (xLen != 0 && yLen != 0) {
+        start = clock();
         EdlibAlignResult resultCheck = edlibAlign(X_char, xLen, Y_char, yLen, edlibDefaultAlignConfig());
         if (resultCheck.status == EDLIB_STATUS_OK) {
             //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
         }
         edlibFreeAlignResult(resultCheck);
-
+        execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
         if ((result - resultCheck.editDistance) == 0) {
-            cout << " ***** PASSED";
+            cout << " *** PASSED ***  check in " << execTime << "sec" << endl;
         } else {
-            cout << " ********** FAILED  " << endl;
-            cout << " Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)";
+            cout << " *** FAILED  *** check in " << execTime << "sec" << endl;
+            cout << " Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
         }
     }
-    cout << endl;
     return 0;
 }
