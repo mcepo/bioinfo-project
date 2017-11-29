@@ -14,36 +14,35 @@
 
 using namespace std;
 
-class TableBlock {
-public:
-    bool isCalculated = false;
+struct Block {
+    vector<char> B, C, XY, lastRow, lastColumn;
 
-    unsigned char T; //dimension of block (txt). Not more than 255
-
-    vector<char> B, C, XY, table;
-    string X, Y;
-
-    vector<char> lastColumn;
-    vector<char> lastRow;
-
-    TableBlock( vector<char> &b, vector<char> &c,
-            string x, string y); // offset encoded version
-
-    void calculate();
-    void emptyTemp();
-
-    vector<char> verticalF(bool print = true); // including lowermost element
-    vector<char> horizontalF(bool print = true); // including rightmost element
-
-    void print();
-
-    bool operator==(const TableBlock &other) const {
+    bool operator==(const Block &other) const {
 
         return (
-                 XY == other.XY
+                XY == other.XY
                 && B == other.B
                 && C == other.C);
     }
+
+};
+
+class TableBlock {
+public:
+
+    unsigned char T; //dimension of block (txt). Not more than 255
+
+    vector<char> table;
+    string X, Y;
+
+    TableBlock( string x, string y, int blockSize); // offset encoded version
+    TableBlock(); 
+
+    void calculateBlock(Block &blk);
+    
+    vector<char> getXY(string x, string y);
+    
+    void print();
 };
 
 #endif //BIO_INF_TABLE_BLOCK_H

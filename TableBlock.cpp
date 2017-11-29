@@ -19,13 +19,30 @@
 //
 //}
 
-TableBlock::TableBlock(vector<char> &b, vector<char> &c,
-        string x, string y) {
+TableBlock::TableBlock() {}
 
-    T = BLOCK_SIZE;
+TableBlock::TableBlock(string x, string y, int blockSize) {
+
+    T = blockSize;
+    // TODO: bounds, ranges and sizes check...
+    
+    X = (x);
+    Y = (y);
+    
+    table.reserve((unsigned long) (T + 1) * (T + 1));
+
+    for (int i = 0; i < (T + 1) * (T + 1); i++) {
+        table.push_back(0);
+    }
+}
+
+vector<char> TableBlock::getXY(string x, string y) {
 
     unordered_map<char, char> mapLetters;
     unsigned char number = 1;
+
+    vector<char> XY;
+    XY.reserve(T*2);
 
     for (string::size_type i = 0; i < T && i < x.size(); ++i) {
 
@@ -58,42 +75,21 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
             XY.push_back(foundLetter->second);
         }
     }
-	
-    // TODO: bounds, ranges and sizes check...
-
-    // convert from offset to real
-    B.reserve(T);
-    char sum = (char) 0;
-
-    for (unsigned char i = 0; i < T; i++) {
-        sum += b.at(i);
-        B.push_back((char) (sum));
-    }
-
-    C.reserve(T);
-    sum = (char) 0;
-
-    for (unsigned char i = 0; i < T; i++) {
-        sum += c.at(i);
-        C.push_back((char) (sum));
-    }
-
-    X = (x);
-    Y = (y);
+    return XY;
 }
 
-void TableBlock::calculate() {
-
-    table.reserve((unsigned long) (T + 1) * (T + 1));
-
-    for (int i = 0; i < (T + 1) * (T + 1); i++) {
-        table.push_back(0);
-    }
-
-    // fill a first column and row
+void TableBlock::calculateBlock(Block &blk) {
+    
+    char sumB = (char) 0;
+    char sumC = (char) 0;
+    
+    // convert offset to real and fill the first column and row
     for (unsigned char i = 1; i <= T; i++) {
-        DATA(table, T + 1, 0, i) = (char) B.at((unsigned long) (i - 1));
-        DATA(table, T + 1, i, 0) = (char) C.at((unsigned long) (i - 1));
+        sumB+=blk.B.at((unsigned long) (i - 1));
+        DATA(table, T + 1, 0, i) = (char) sumB;
+        
+        sumC+=blk.C.at((unsigned long) (i - 1));
+        DATA(table, T + 1, i, 0) = (char) sumC;
     }
 
     long top, left, diagonal, diagonalValue, cell;
@@ -105,7 +101,7 @@ void TableBlock::calculate() {
             top = DATA(table, T + 1, row - 1, col);
             left = DATA(table, T + 1, row, col - 1);
 
-            if (X[col - 1] == Y[row - 1]) {
+            if (blk.XY[col - 1] == blk.XY[T + row - 1]) {
                 diagonalValue = diagonal;
             } else {
                 diagonalValue = diagonal + 1;
@@ -117,39 +113,29 @@ void TableBlock::calculate() {
 
     // last column calculation
 
-    lastColumn.reserve(T);
+    blk.lastColumn.reserve(T);
 
     long first = DATA(table, T, 0, T);
+    long r;
     for (int i = 0; i < T; i++) {
-        long r = DATA(table, T + 1, i + 1, T);
-        lastColumn.push_back((char) (r - first));
+        r = DATA(table, T + 1, i + 1, T);
+        blk.lastColumn.push_back((char) (r - first));
         first = r;
     }
 
     // last row calculation
 
-    lastRow.reserve(T);
+    blk.lastRow.reserve(T);
 
     first = DATA(table, T + 1, T, 0);
     for (int i = 0; i < T; i++) {
-        long r = DATA(table, T + 1, T, i + 1);
-        lastRow.push_back((char) (r - first));
+        r = DATA(table, T + 1, T, i + 1);
+        blk.lastRow.push_back((char) (r - first));
         first = r;
     }
-
-    isCalculated = true;
-}
-
-void TableBlock::emptyTemp() {
-    B = vector<char>();
-    C = vector<char>();
-    table = vector<char>();
 }
 
 void TableBlock::print() {
-    if (!isCalculated) {
-        return;
-    }
 
     cout << "TB" << "| x  ";
 
@@ -173,26 +159,4 @@ void TableBlock::print() {
         }
     }
     cout << endl;
-}
-
-vector<char> TableBlock::verticalF(bool print) {
-
-    if (print) {
-        for (vector<char>::const_iterator i = lastColumn.begin(); i != lastColumn.end(); ++i)
-            cout << int(*i) << ' ';
-        cout << endl;
-    }
-
-    return lastColumn;
-}
-
-vector<char> TableBlock::horizontalF(bool print) {
-
-    if (print) {
-        for (vector<char>::const_iterator i = lastRow.begin(); i != lastRow.end(); ++i)
-            std::cout << int(*i) << ' ';
-        cout << endl;
-    }
-
-    return lastRow;
 }

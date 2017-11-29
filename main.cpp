@@ -10,26 +10,24 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
-//using boost::hash_combine
-namespace std
-{
+namespace std {
     template<typename T>
     struct hash<vector<T>>
     {
-        std::size_t operator()( const vector<T>& in) const
-        {
+
+        std::size_t operator()(const vector<T>& in) const {
             size_t size = in.size();
             size_t seed = 0;
             for (size_t i = 0; i < size; i++)
-				    seed ^= std::hash<T>()(in[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= std::hash<T>()(in[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
             return seed;
         }
     };
 
     template <>
-    struct hash<TableBlock> {
+    struct hash<Block> {
 
-        std::size_t operator()(const TableBlock& k) const {
+        std::size_t operator()(const Block& k) const {
 
             size_t res = 17;
 
@@ -41,21 +39,21 @@ namespace std
     };
 }
 
-unordered_map<TableBlock, TableBlock> generatedBlocks;
+unordered_map<Block, Block> generatedBlocks;
 
-int calculated = 0;
 int found = 0;
 
-TableBlock getTableBlock(vector<char> &b, vector<char> &c,
+TableBlock tblBlk;
+
+Block getTableBlock(vector<char> &b, vector<char> &c,
         string const& x, string const& y) {
 
-    TableBlock blk(b, c, x, y);
+    Block blk = {b, c, tblBlk.getXY(x, y)};
 
     auto foundBlock = generatedBlocks.find(blk);
 
     if (foundBlock == generatedBlocks.end()) {
-        calculated++;
-        blk.calculate();
+        tblBlk.calculateBlock(blk);
         generatedBlocks.insert({blk, blk});
     } else {
         blk = foundBlock->second;
@@ -70,7 +68,7 @@ int main(int argc, char** argv) {
     string inputFilename, X, Y;
 
     int blockSize = BLOCK_SIZE;
-
+    
     if (argc != 2) {
         inputFilename = DEFAULT_FILENAME;
     } else {
@@ -101,6 +99,8 @@ int main(int argc, char** argv) {
             Y += '*';
         }
     }
+    
+    tblBlk = TableBlock(X, Y, blockSize);
 
     int xLen = X.size();
     int yLen = Y.size();
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     int numBlocksPerRow = xLen / blockSize;
     int numRowsToCalculate = yLen / blockSize;
 
-    vector<TableBlock> blocks;
+    vector<Block> blocks;
     blocks.reserve((unsigned long) numBlocksPerRow);
 
     // the magic
@@ -125,8 +125,7 @@ int main(int argc, char** argv) {
 
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        TableBlock blk = getTableBlock(currentB, currentC, &X[blockSize * col], &Y[0]);
-        blocks.push_back(blk);
+        blocks.push_back(getTableBlock(currentB, currentC, &X[blockSize * col], &Y[0]));
         currentC = blocks.at((unsigned long) col).lastColumn;
     }
 
@@ -150,8 +149,8 @@ int main(int argc, char** argv) {
     unsigned long result = 0L;
 
     for (auto &block : blocks) {
-        for (unsigned long j = 0; j < block.horizontalF(false).size(); j++) {
-            result += block.horizontalF(false).at(j);
+        for (unsigned long j = 0; j < block.lastRow.size(); j++) {
+            result += block.lastRow.at(j);
         }
     }
 
@@ -164,7 +163,7 @@ int main(int argc, char** argv) {
 
     cout << "Input string length: " << xLen << endl;
     cout << "Total number of blocks in matrix: " << (numBlocksPerRow * numRowsToCalculate) << endl;
-    cout << "Calculated (stored) blocks: " << calculated << endl;
+    cout << "Calculated (stored) blocks: " << generatedBlocks.size() << endl;
     cout << "Found blocks: " << found << endl;
     cout << "RESULT: " << result << " generated in: " << execTime << "sec" << endl;
 
@@ -182,7 +181,7 @@ int main(int argc, char** argv) {
             cout << " *** PASSED ***  check in " << execTime << "sec" << endl;
         } else {
             cout << " *** FAILED  *** check in " << execTime << "sec" << endl;
-            cout << " Result diff: " << (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
+            cout << " Result diff: " << (long) (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
         }
     }
     return 0;
