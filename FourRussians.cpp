@@ -2,10 +2,10 @@
 // Created by loki on 11/4/17.
 //
 
-#include "TableBlock.h"
+#include "FourRussians.h"
 
 
-//TableBlock::TableBlock(unsigned char t, unsigned long a, vector<unsigned long> b, vector<unsigned long> c,
+//FourRussians::FourRussians(unsigned char t, unsigned long a, vector<unsigned long> b, vector<unsigned long> c,
 //                       vector<char> x, vector<char> y){
 //
 //    // deprecated
@@ -19,16 +19,43 @@
 //
 //}
 
-TableBlock::TableBlock() {}
+FourRussians::FourRussians() {
+}
 
-TableBlock::TableBlock(string x, string y, int blockSize) {
+FourRussians::FourRussians(string x, string y, int blockSize) {
 
     T = blockSize;
     // TODO: bounds, ranges and sizes check...
-    
+
     X = (x);
     Y = (y);
+
+    found = 0;
     
+    // appending "empty" characters to end of string so that blocks
+    // can be fixed size
+    int modX = X.size() % blockSize;
+    if (modX != 0) {
+        int appendLengthX = blockSize - modX;
+        for (int i = 0; i < appendLengthX; i++) {
+            X += '*';
+        }
+    }
+    int modY = Y.size() % blockSize;
+    if (modY != 0) {
+        int appendLengthY = blockSize - modY;
+        for (int i = 0; i < appendLengthY; i++) {
+            Y += '*';
+        }
+    }
+    
+    xLen = X.size();
+    yLen = Y.size();
+
+    numBlocksPerRow = xLen / blockSize;
+    numRowsToCalculate = yLen / blockSize;
+
+    blocks.reserve((unsigned long) numBlocksPerRow);
     table.reserve((unsigned long) (T + 1) * (T + 1));
 
     for (int i = 0; i < (T + 1) * (T + 1); i++) {
@@ -36,13 +63,77 @@ TableBlock::TableBlock(string x, string y, int blockSize) {
     }
 }
 
-vector<char> TableBlock::getXY(string x, string y) {
+unsigned long FourRussians::calculate(){
+
+    vector<char> currentC, currentB;
+    currentB.reserve((unsigned long) T);
+    currentC.reserve((unsigned long) T);
+
+    for (int i = 0; i < T; i++) {
+        currentB.push_back(+1); // ok
+        currentC.push_back(+1); // ok
+    }
+    
+    // first row calculation
+    for (int col = 0; col < numBlocksPerRow; col++) {
+
+        blocks.push_back(getTableBlock(currentB, currentC, &X[T * col], &Y[0]));
+        currentC = blocks.at((unsigned long) col).lastColumn;
+    }
+
+    // rest of the matrix
+
+    for (int row = 1; row < numRowsToCalculate; row++) {
+
+        currentC.clear();
+        for (int i = 0; i < T; i++) { // do dynamicaly
+            currentC.push_back(+1); // ok
+        }
+
+        for (int col = 0; col < numBlocksPerRow; col++) {
+
+            currentB = blocks.at((unsigned int) col).lastRow;
+            blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * row]);
+            currentC = blocks.at((unsigned long) col).lastColumn;
+        }
+    }
+    
+    unsigned long result = 0L;
+
+    for (auto &block : blocks) {
+        for (unsigned long j = 0; j < block.lastRow.size(); j++) {
+            result += block.lastRow.at(j);
+        }
+    }
+
+    result += yLen;
+    return result;
+}
+
+Block FourRussians::getTableBlock(vector<char> &b, vector<char> &c,
+        string const& x, string const& y) {
+
+    Block blk = {b, c, getXY(x, y)};
+
+    auto foundBlock = generatedBlocks.find(blk);
+
+    if (foundBlock == generatedBlocks.end()) {
+        calculateBlock(blk);
+        generatedBlocks.insert({blk, blk});
+    } else {
+        blk = foundBlock->second;
+        found++;
+    }
+    return blk;
+}
+
+vector<char> FourRussians::getXY(string x, string y) {
 
     unordered_map<char, char> mapLetters;
     unsigned char number = 1;
 
     vector<char> XY;
-    XY.reserve(T*2);
+    XY.reserve(T * 2);
 
     for (string::size_type i = 0; i < T && i < x.size(); ++i) {
 
@@ -78,17 +169,17 @@ vector<char> TableBlock::getXY(string x, string y) {
     return XY;
 }
 
-void TableBlock::calculateBlock(Block &blk) {
-    
+void FourRussians::calculateBlock(Block &blk) {
+
     char sumB = (char) 0;
     char sumC = (char) 0;
-    
+
     // convert offset to real and fill the first column and row
     for (unsigned char i = 1; i <= T; i++) {
-        sumB+=blk.B.at((unsigned long) (i - 1));
+        sumB += blk.B.at((unsigned long) (i - 1));
         DATA(table, T + 1, 0, i) = (char) sumB;
-        
-        sumC+=blk.C.at((unsigned long) (i - 1));
+
+        sumC += blk.C.at((unsigned long) (i - 1));
         DATA(table, T + 1, i, 0) = (char) sumC;
     }
 
@@ -135,7 +226,7 @@ void TableBlock::calculateBlock(Block &blk) {
     }
 }
 
-void TableBlock::print() {
+void FourRussians::print() {
 
     cout << "TB" << "| x  ";
 

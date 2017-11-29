@@ -6,5 +6,5 @@ all: main generator
 generator: generator.o
 	$(CC)  -o generator generator.o
 
-main: main.o edlib/edlib.o TableBlock.o
-	$(CC)  -o main main.o edlib/edlib.o TableBlock.o
+main: main.o edlib/edlib.o FourRussians.o
+	$(CC)  -o main main.o edlib/edlib.o FourRussians.o
