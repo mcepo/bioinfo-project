@@ -24,7 +24,7 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
 
     T = BLOCK_SIZE;
 
-    unordered_map<char, unsigned char> mapLetters;
+    unordered_map<char, char> mapLetters;
     unsigned char number = 1;
 
     for (string::size_type i = 0; i < T && i < x.size(); ++i) {
@@ -67,7 +67,7 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
 
     for (unsigned char i = 0; i < T; i++) {
         sum += b.at(i);
-        B.push_back((long) (sum));
+        B.push_back((char) (sum));
     }
 
     C.reserve(T);
@@ -75,7 +75,7 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
 
     for (unsigned char i = 0; i < T; i++) {
         sum += c.at(i);
-        C.push_back((long) (sum));
+        C.push_back((char) (sum));
     }
 
     X = (x);
@@ -92,8 +92,8 @@ void TableBlock::calculate() {
 
     // fill a first column and row
     for (unsigned char i = 1; i <= T; i++) {
-        DATA(table, T + 1, 0, i) = (long) B.at((unsigned long) (i - 1));
-        DATA(table, T + 1, i, 0) = (long) C.at((unsigned long) (i - 1));
+        DATA(table, T + 1, 0, i) = (char) B.at((unsigned long) (i - 1));
+        DATA(table, T + 1, i, 0) = (char) C.at((unsigned long) (i - 1));
     }
 
     long top, left, diagonal, diagonalValue, cell;
@@ -141,9 +141,9 @@ void TableBlock::calculate() {
 }
 
 void TableBlock::emptyTemp() {
-    B = vector<long>();
-    C = vector<long>();
-    table = vector<long>();
+    B = vector<char>();
+    C = vector<char>();
+    table = vector<char>();
 }
 
 void TableBlock::print() {

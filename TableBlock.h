@@ -20,7 +20,7 @@ public:
 
     unsigned char T; //dimension of block (txt). Not more than 255
 
-    vector<long> B, C, XY, table;
+    vector<char> B, C, XY, table;
     string X, Y;
 
     vector<char> lastColumn;

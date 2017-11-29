@@ -33,9 +33,9 @@ namespace std
 
             size_t res = 17;
 
-            res = res * 31 + hash<vector<long>>()(k.XY);
-            res = res * 31 + hash<vector<long>>()(k.B);
-            res = res * 31 + hash<vector<long>>()(k.C);
+            res = res * 31 + hash<vector<char>>()(k.XY);
+            res = res * 31 + hash<vector<char>>()(k.B);
+            res = res * 31 + hash<vector<char>>()(k.C);
             return res;
         }
     };
