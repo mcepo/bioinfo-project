@@ -24,11 +24,6 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
 
     T = BLOCK_SIZE;
 
-    string sB(b.begin(), b.end());
-    string sC(c.begin(), c.end());
-
-    vector<int> inputString;
-
     unordered_map<char, unsigned char> mapLetters;
     unsigned char number = 1;
 
@@ -39,12 +34,12 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
         if (foundLetter == mapLetters.end()) {
             // nisam ga pronašao
             mapLetters.insert({x[i], number});
-            inputString.push_back(number);
+            XY.push_back(number);
             number++;
 
         } else {
             // pronašao sam ga
-            inputString.push_back(foundLetter->second);
+            XY.push_back(foundLetter->second);
         }
     }
 
@@ -55,21 +50,15 @@ TableBlock::TableBlock(vector<char> &b, vector<char> &c,
         if (foundLetter == mapLetters.end()) {
             // nisam ga pronašao
             mapLetters.insert({y[i], number});
-            inputString.push_back(number);
+            XY.push_back(number);
             number++;
 
         } else {
             // pronašao sam ga
-            inputString.push_back(foundLetter->second);
+            XY.push_back(foundLetter->second);
         }
     }
-
-    string sXY(inputString.begin(), inputString.end());
-
-    this->sXY = sXY;
-    this->sB = sB;
-    this->sC = sC;
-
+	
     // TODO: bounds, ranges and sizes check...
 
     // convert from offset to real

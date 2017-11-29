@@ -19,15 +19,12 @@ public:
     bool isCalculated = false;
 
     unsigned char T; //dimension of block (txt). Not more than 255
-    vector<long> B, C, table;
+
+    vector<long> B, C, XY, table;
     string X, Y;
 
     vector<char> lastColumn;
     vector<char> lastRow;
-
-    // temporary patch, remove after merge
-    string sB, sC;
-    string sXY;
 
     TableBlock( vector<char> &b, vector<char> &c,
             string x, string y); // offset encoded version
@@ -43,9 +40,9 @@ public:
     bool operator==(const TableBlock &other) const {
 
         return (
-                 sXY == other.sXY
-                && sB == other.sB
-                && sC == other.sC);
+                 XY == other.XY
+                && B == other.B
+                && C == other.C);
     }
 };
 

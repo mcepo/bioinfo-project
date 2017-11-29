@@ -3,13 +3,28 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <time.h>
 
 #include "TableBlock.h"
 #include "edlib/edlib.h"
 
 #define DEFAULT_FILENAME "input.txt"
 
-namespace std {
+//using boost::hash_combine
+namespace std
+{
+    template<typename T>
+    struct hash<vector<T>>
+    {
+        std::size_t operator()( const vector<T>& in) const
+        {
+            size_t size = in.size();
+            size_t seed = 0;
+            for (size_t i = 0; i < size; i++)
+				    seed ^= std::hash<T>()(in[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            return seed;
+        }
+    };
 
     template <>
     struct hash<TableBlock> {
@@ -18,11 +33,9 @@ namespace std {
 
             size_t res = 17;
 
-            //  res = res * 31 + hash<string>()(k.sX);
-            //  res = res * 31 + hash<string>()(k.sY);
-            res = res * 31 + hash<string>()(k.sXY);
-            res = res * 31 + hash<string>()(k.sB);
-            res = res * 31 + hash<string>()(k.sC);
+            res = res * 31 + hash<vector<long>>()(k.XY);
+            res = res * 31 + hash<vector<long>>()(k.B);
+            res = res * 31 + hash<vector<long>>()(k.C);
             return res;
         }
     };
