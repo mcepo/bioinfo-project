@@ -8,3 +8,6 @@ generator: generator.o
 
 main: main.o edlib/edlib.o FourRussians.o
 	$(CC)  -o main main.o edlib/edlib.o FourRussians.o
+	
+clean:
+	rm *.o main generator

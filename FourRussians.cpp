@@ -65,6 +65,9 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
 unsigned long FourRussians::calculate(){
 
+    // TODO implementirati kao pointere na vector ??
+    // mislim da se ovako svaki put vrijednost kopira
+    // što je nepotrebno
     vector<char> currentC, currentB;
     currentB.reserve((unsigned long) T);
     currentC.reserve((unsigned long) T);
@@ -185,6 +188,9 @@ void FourRussians::calculateBlock(Block &blk) {
 
     long top, left, diagonal, diagonalValue, cell;
 
+    // TODO: probati implementirati da petlja ide samo do predzadnjeg redka i
+    //      i predzadnjeg stupca, zatim zadnji stupac i redak posebno izračunati
+    //      i odmah ga ubaciti u lastRow i lastColumn bloka
     for (unsigned char row = 1; row <= T; row++) {
         for (unsigned char col = 1; col <= T; col++) {
 
@@ -226,6 +232,9 @@ void FourRussians::calculateBlock(Block &blk) {
     }
 }
 
+// TODO: ova metoda se trenutno ne koristi, možda implementirati da radi 
+// za predani block
+// 
 void FourRussians::print() {
 
     cout << "TB" << "| x  ";

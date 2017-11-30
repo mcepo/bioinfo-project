@@ -14,6 +14,11 @@
 
 using namespace std;
 
+// TODO: preseliti u posebnu datoteku
+// TODO: spojiti B, C, XY u jedan vector?? s tim bi uštedjeli na prostoru
+//       1 byte-a po Bloku i smanjili broj naredbi potrebnih za hashiranje
+// TODO: spojiti i lastRow i lastColumn u jedan vector?? s tim bi uštedjeli
+//       na prostoru 1 byte po bloku
 struct Block {
     vector<char> B, C, XY, lastRow, lastColumn;
 
@@ -24,9 +29,10 @@ struct Block {
                 && B == other.B
                 && C == other.C);
     }
-
 };
 
+// TODO: preseliti u posebnu datoteku
+// TODO: koliko je kvalitetno ovo rješenje ?
 namespace std {
     template<typename T>
     struct hash<vector<T>>
@@ -69,7 +75,8 @@ public:
     unordered_map<Block, Block> generatedBlocks;
 
     int found;
-
+// TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
+    // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
     vector<Block> blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version

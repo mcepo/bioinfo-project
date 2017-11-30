@@ -36,6 +36,9 @@ fi
 echo "Staring test: string length range $min_length - $max_length step $step"
 echo ""
 
+make clean
+make
+
 # loop given range 
 for (( x=$min_length; x<=$max_length; x+=$step ))
 do

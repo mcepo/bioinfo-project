@@ -9,6 +9,11 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
+// TODO: gdje je moguće implementirati prijenost varijabli i povratnih
+//      vrijednosti iz metoda referencom ili pointerom
+
+// TODO: organizirati datoteke u foldere
+
 int main(int argc, char** argv) {
 
     clock_t start = clock();
