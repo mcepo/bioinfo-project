@@ -8,3 +8,5 @@
 /edlib/*.o
 /bioinfo-project.pnproj
 /bioinfo-project.pnps
+generator
+main

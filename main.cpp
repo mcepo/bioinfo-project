@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <time.h>
 
 #include "TableBlock.h"
 #include "edlib/edlib.h"
@@ -9,6 +10,8 @@
 #define DEFAULT_FILENAME "input.txt"
 
 int main(int argc, char** argv) {
+
+    clock_t start = clock();
 
     string inputFilename, X, Y;
 
@@ -217,6 +220,8 @@ int main(int argc, char** argv) {
     const char * X_char = X.c_str();
     const char * Y_char = Y.c_str();
 
+    double execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
+
     EdlibAlignResult resultCheck = edlibAlign(X_char, X.size(), Y_char, Y.size(), edlibDefaultAlignConfig());
     if (resultCheck.status == EDLIB_STATUS_OK) {
   //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
@@ -231,5 +236,8 @@ int main(int argc, char** argv) {
 	} else {
 		cout << "********** FAILED  " << endl;
 	}
+
+    cout << "Calculation in: "<< execTime << endl;
+
 	return 0;
 }
