@@ -31,7 +31,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     Y = (y);
 
     found = 0;
-    
+
     // appending "empty" characters to end of string so that blocks
     // can be fixed size
     int modX = X.size() % blockSize;
@@ -48,7 +48,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
             Y += '*';
         }
     }
-    
+
     xLen = X.size();
     yLen = Y.size();
 
@@ -63,7 +63,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     }
 }
 
-unsigned long FourRussians::calculate(){
+unsigned long FourRussians::calculate() {
 
     // TODO implementirati kao pointere na vector ??
     // mislim da se ovako svaki put vrijednost kopira
@@ -76,7 +76,7 @@ unsigned long FourRussians::calculate(){
         currentB.push_back(+1); // ok
         currentC.push_back(+1); // ok
     }
-    
+
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
@@ -88,19 +88,9 @@ unsigned long FourRussians::calculate(){
 
     for (int row = 1; row < numRowsToCalculate; row++) {
 
-        currentC.clear();
-        for (int i = 0; i < T; i++) { // do dynamicaly
-            currentC.push_back(+1); // ok
-        }
-
-        for (int col = 0; col < numBlocksPerRow; col++) {
-
-            currentB = blocks.at((unsigned int) col).lastRow;
-            blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * row]);
-            currentC = blocks.at((unsigned long) col).lastColumn;
-        }
+        calculateRow(row);
     }
-    
+
     unsigned long result = 0L;
 
     for (auto &block : blocks) {
@@ -111,6 +101,24 @@ unsigned long FourRussians::calculate(){
 
     result += yLen;
     return result;
+}
+
+void FourRussians::calculateRow(int index) {
+
+    vector<char> currentC, currentB;
+    currentB.reserve((unsigned long) T);
+    currentC.reserve((unsigned long) T);
+
+    for (int i = 0; i < T; i++) { // do dynamicaly
+        currentC.push_back(+1); // ok
+    }
+
+    for (int col = 0; col < numBlocksPerRow; col++) {
+
+        currentB = blocks.at((unsigned int) col).lastRow;
+        blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
+        currentC = blocks.at((unsigned long) col).lastColumn;
+    }
 }
 
 Block FourRussians::getTableBlock(vector<char> &b, vector<char> &c,
@@ -235,6 +243,7 @@ void FourRussians::calculateBlock(Block &blk) {
 // TODO: ova metoda se trenutno ne koristi, možda implementirati da radi 
 // za predani block
 // 
+
 void FourRussians::print() {
 
     cout << "TB" << "| x  ";
