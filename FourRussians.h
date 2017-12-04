@@ -83,11 +83,9 @@ public:
     // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
     vector<Block> blocks;
 
-    ThreadPool *pool;
-
-    condition_variable cv;
+//    condition_variable cv;
     vector<int> rowBlockIndex;
-    mutex m_mutex;
+//    mutex m_mutex;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
