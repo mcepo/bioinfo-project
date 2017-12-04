@@ -57,10 +57,18 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     blocks.reserve((unsigned long) numBlocksPerRow);
     table.reserve((unsigned long) (T + 1) * (T + 1));
+    rowBlockIndex.reserve((unsigned long) numRowsToCalculate);
 
+    
+    for (int i = 0; i < numRowsToCalculate; i++) {
+        rowBlockIndex.push_back(0);
+    }
+    
     for (int i = 0; i < (T + 1) * (T + 1); i++) {
         table.push_back(0);
     }
+
+    pool = new ThreadPool(thread::hardware_concurrency());
 }
 
 unsigned long FourRussians::calculate(){
@@ -87,7 +95,11 @@ unsigned long FourRussians::calculate(){
     // rest of the matrix
 
     for (int row = 1; row < numRowsToCalculate; row++) {
-        calculateRow(row);
+        
+        rowBlockIndex[row] = 0;
+        pool->enqueue([&, row] {
+                FourRussians::calculateRow(row);
+        }); 
     }
     
     unsigned long result = 0L;
@@ -117,13 +129,22 @@ void FourRussians::calculateRow(int index) {
             currentC.push_back(+1); // ok
         }
 
-        for (int col = 0; col < numBlocksPerRow; col++) {
+        for (int col = 0; col < numBlocksPerRow; col++, rowBlockIndex[index]++) {
+
+            {
+                unique_lock<mutex> lock(m_mutex);
+                while(index > 0
+                        && (rowBlockIndex[index -1] <= rowBlockIndex[index])) {
+                        cv.wait(lock);
+                }
+            }
 
             currentB = blocks.at((unsigned int) col).lastRow;
             blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
             currentC = blocks.at((unsigned long) col).lastColumn;
-
+        cv.notify_all();
         }
+
 }
 
 Block FourRussians::getTableBlock(vector<char> &b, vector<char> &c,

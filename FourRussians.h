@@ -10,6 +10,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "ThreadPool.h"
+
 #define BLOCK_SIZE 3
 
 using namespace std;
@@ -62,6 +64,8 @@ namespace std {
     };
 }
 
+
+
 class FourRussians {
 public:
 
@@ -78,6 +82,12 @@ public:
 // TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
     // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
     vector<Block> blocks;
+
+    ThreadPool *pool;
+
+    condition_variable cv;
+    vector<int> rowBlockIndex;
+    mutex m_mutex;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
