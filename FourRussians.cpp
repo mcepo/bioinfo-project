@@ -87,18 +87,7 @@ unsigned long FourRussians::calculate(){
     // rest of the matrix
 
     for (int row = 1; row < numRowsToCalculate; row++) {
-
-        currentC.clear();
-        for (int i = 0; i < T; i++) { // do dynamicaly
-            currentC.push_back(+1); // ok
-        }
-
-        for (int col = 0; col < numBlocksPerRow; col++) {
-
-            currentB = blocks.at((unsigned int) col).lastRow;
-            blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * row]);
-            currentC = blocks.at((unsigned long) col).lastColumn;
-        }
+        calculateRow(row);
     }
     
     unsigned long result = 0L;
@@ -111,6 +100,30 @@ unsigned long FourRussians::calculate(){
 
     result += yLen;
     return result;
+}
+
+void FourRussians::calculateRow(int index) {
+
+
+    // TODO implementirati kao pointere na vector ??
+    // mislim da se ovako svaki put vrijednost kopira
+    // što je nepotrebno
+    vector<char> currentC, currentB;
+    currentB.reserve((unsigned long) T);
+    currentC.reserve((unsigned long) T);
+
+        currentC.clear();
+        for (int i = 0; i < T; i++) { // do dynamicaly
+            currentC.push_back(+1); // ok
+        }
+
+        for (int col = 0; col < numBlocksPerRow; col++) {
+
+            currentB = blocks.at((unsigned int) col).lastRow;
+            blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
+            currentC = blocks.at((unsigned long) col).lastColumn;
+
+        }
 }
 
 Block FourRussians::getTableBlock(vector<char> &b, vector<char> &c,

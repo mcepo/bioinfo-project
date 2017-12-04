@@ -86,6 +86,7 @@ public:
     Block getTableBlock(vector<char> &b, vector<char> &c,
             string const& x, string const& y);
     void calculateBlock(Block &blk);
+    void calculateRow(int index);
     vector<char> getXY(string x, string y);
 
     void print();
