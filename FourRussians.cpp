@@ -58,6 +58,12 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     blocks.reserve((unsigned long) numBlocksPerRow);
     table.reserve((unsigned long) (T + 1) * (T + 1));
 
+    constBC.reserve((unsigned long) T);
+
+    for (int i = 0; i < T; i++) {
+        constBC.push_back(+1);
+    }
+
     for (int i = 0; i < (T + 1) * (T + 1); i++) {
         table.push_back(0);
     }
@@ -68,20 +74,16 @@ unsigned long FourRussians::calculate() {
     // TODO implementirati kao pointere na vector ??
     // mislim da se ovako svaki put vrijednost kopira
     // što je nepotrebno
-    vector<char> currentC, currentB;
-    currentB.reserve((unsigned long) T);
-    currentC.reserve((unsigned long) T);
+    vector<char> *currentC, *currentB;
 
-    for (int i = 0; i < T; i++) {
-        currentB.push_back(+1); // ok
-        currentC.push_back(+1); // ok
-    }
+    currentC = &constBC;
+    currentB = &constBC;
 
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
         blocks.push_back(getTableBlock(currentB, currentC, &X[T * col], &Y[0]));
-        currentC = blocks.at((unsigned long) col).lastColumn;
+        currentC = &(blocks.at((unsigned long) col).lastColumn);
     }
 
     // rest of the matrix
@@ -105,26 +107,22 @@ unsigned long FourRussians::calculate() {
 
 void FourRussians::calculateRow(int index) {
 
-    vector<char> currentC, currentB;
-    currentB.reserve((unsigned long) T);
-    currentC.reserve((unsigned long) T);
+    vector<char> *currentC, *currentB;
 
-    for (int i = 0; i < T; i++) { // do dynamicaly
-        currentC.push_back(+1); // ok
-    }
+    currentC = &constBC;
 
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        currentB = blocks.at((unsigned int) col).lastRow;
+        currentB = &(blocks.at((unsigned int) col).lastRow);
         blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
-        currentC = blocks.at((unsigned long) col).lastColumn;
+        currentC = &(blocks.at((unsigned long) col).lastColumn);
     }
 }
 
-Block FourRussians::getTableBlock(vector<char> &b, vector<char> &c,
+Block FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
         string const& x, string const& y) {
 
-    Block blk = {b, c, getXY(x, y)};
+    Block blk = {*b, *c, getXY(x, y)};
 
     auto foundBlock = generatedBlocks.find(blk);
 

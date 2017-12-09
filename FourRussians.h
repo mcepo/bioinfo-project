@@ -68,6 +68,9 @@ public:
     unsigned char T; //dimension of block (txt). Not more than 255
 
     vector<char> table;
+    
+    vector<char> constBC;
+    
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
@@ -83,7 +86,7 @@ public:
     FourRussians();
 
     unsigned long calculate();
-    Block getTableBlock(vector<char> &b, vector<char> &c,
+    Block getTableBlock(vector<char> *b, vector<char> *c,
             string const& x, string const& y);
     void calculateBlock(Block &blk);
     void calculateRow(int index);
