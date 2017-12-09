@@ -68,7 +68,6 @@ public:
     unsigned char T; //dimension of block (txt). Not more than 255
 
     vector<char> table;
-    
     vector<char> constBC;
     
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
@@ -80,13 +79,13 @@ public:
     int found;
 // TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
     // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
-    vector<Block> blocks;
+    vector<Block*> blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
 
     unsigned long calculate();
-    Block getTableBlock(vector<char> *b, vector<char> *c,
+    Block* getTableBlock(vector<char> *b, vector<char> *c,
             string const& x, string const& y);
     void calculateBlock(Block &blk);
     void calculateRow(int index);

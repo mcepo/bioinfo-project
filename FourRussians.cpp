@@ -83,7 +83,7 @@ unsigned long FourRussians::calculate() {
     for (int col = 0; col < numBlocksPerRow; col++) {
 
         blocks.push_back(getTableBlock(currentB, currentC, &X[T * col], &Y[0]));
-        currentC = &(blocks.at((unsigned long) col).lastColumn);
+        currentC = &(blocks.at((unsigned long) col)->lastColumn);
     }
 
     // rest of the matrix
@@ -96,8 +96,8 @@ unsigned long FourRussians::calculate() {
     unsigned long result = 0L;
 
     for (auto &block : blocks) {
-        for (unsigned long j = 0; j < block.lastRow.size(); j++) {
-            result += block.lastRow.at(j);
+        for (unsigned long j = 0; j < block->lastRow.size(); j++) {
+            result += block->lastRow.at(j);
         }
     }
 
@@ -113,13 +113,13 @@ void FourRussians::calculateRow(int index) {
 
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        currentB = &(blocks.at((unsigned int) col).lastRow);
+        currentB = &(blocks.at((unsigned int) col)->lastRow);
         blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
-        currentC = &(blocks.at((unsigned long) col).lastColumn);
+        currentC = &(blocks.at((unsigned long) col)->lastColumn);
     }
 }
 
-Block FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
+Block* FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
         string const& x, string const& y) {
 
     Block blk = {*b, *c, getXY(x, y)};
@@ -129,11 +129,11 @@ Block FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
     if (foundBlock == generatedBlocks.end()) {
         calculateBlock(blk);
         generatedBlocks.insert({blk, blk});
+        return &(generatedBlocks.find(blk)->second);
     } else {
-        blk = foundBlock->second;
         found++;
+        return &(foundBlock->second);
     }
-    return blk;
 }
 
 vector<char> FourRussians::getXY(string x, string y) {
