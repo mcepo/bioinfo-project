@@ -93,7 +93,7 @@ public:
     void calculateBlock(Block &blk);
     void calculateRow(int index);
 
-    vector<char> getXY(string x, string y);
+    vector<char> getXY(string const& x, string const& y);
 
     void print();
 };

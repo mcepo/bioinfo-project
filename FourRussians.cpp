@@ -136,7 +136,7 @@ Block* FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
     }
 }
 
-vector<char> FourRussians::getXY(string x, string y) {
+vector<char> FourRussians::getXY( string const& x, string const& y) {
 
     char valT = 0, valG = 0, valC = 0, valA = 0, valEmpty = 0;
 
