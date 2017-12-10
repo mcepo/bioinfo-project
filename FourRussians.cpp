@@ -138,7 +138,8 @@ Block* FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
 
 vector<char> FourRussians::getXY(string x, string y) {
 
-    unordered_map<char, char> mapLetters;
+    char valT = 0, valG = 0, valC = 0, valA = 0, valEmpty = 0;
+
     unsigned char number = 1;
 
     vector<char> XY;
@@ -146,33 +147,83 @@ vector<char> FourRussians::getXY(string x, string y) {
 
     for (string::size_type i = 0; i < T && i < x.size(); ++i) {
 
-        auto foundLetter = mapLetters.find(x[i]);
-
-        if (foundLetter == mapLetters.end()) {
-            // nisam ga pronašao
-            mapLetters.insert({x[i], number});
-            XY.push_back(number);
-            number++;
-
-        } else {
-            // pronašao sam ga
-            XY.push_back(foundLetter->second);
+        switch (x[i]) {
+            case 'A':
+                if (valA == 0) {
+                    valA = number;
+                    number++;
+                }
+                XY.push_back(valA);
+                break;
+            case 'T':
+                if (valT == 0) {
+                    valT = number;
+                    number++;
+                }
+                XY.push_back(valT);
+                break;
+            case 'G':
+                if (valG == 0) {
+                    valG = number;
+                    number++;
+                }
+                XY.push_back(valG);
+                break;
+            case 'C':
+                if (valC == 0) {
+                    valC = number;
+                    number++;
+                }
+                XY.push_back(valC);
+                break;
+            case '*':
+                if (valEmpty == 0) {
+                    valEmpty = number;
+                    number++;
+                }
+                XY.push_back(valEmpty);
+                break;
         }
     }
 
     for (string::size_type i = 0; i < T && i < y.size(); ++i) {
 
-        auto foundLetter = mapLetters.find(y[i]);
-
-        if (foundLetter == mapLetters.end()) {
-            // nisam ga pronašao
-            mapLetters.insert({y[i], number});
-            XY.push_back(number);
-            number++;
-
-        } else {
-            // pronašao sam ga
-            XY.push_back(foundLetter->second);
+        switch (y[i]) {
+            case 'A':
+                if (valA == 0) {
+                    valA = number;
+                    number++;
+                }
+                XY.push_back(valA);
+                break;
+            case 'T':
+                if (valT == 0) {
+                    valT = number;
+                    number++;
+                }
+                XY.push_back(valT);
+                break;
+            case 'G':
+                if (valG == 0) {
+                    valG = number;
+                    number++;
+                }
+                XY.push_back(valG);
+                break;
+            case 'C':
+                if (valC == 0) {
+                    valC = number;
+                    number++;
+                }
+                XY.push_back(valC);
+                break;
+            case '*':
+                if (valEmpty == 0) {
+                    valEmpty = number;
+                    number++;
+                }
+                XY.push_back(valEmpty);
+                break;
         }
     }
     return XY;
@@ -192,8 +243,6 @@ void FourRussians::calculateBlock(Block &blk) {
         DATA(table, T + 1, i, 0) = (char) sumC;
     }
 
-    long top, left, diagonal, diagonalValue, cell;
-
     // TODO: probati implementirati da petlja ide samo do predzadnjeg redka i
     //      i predzadnjeg stupca, zatim zadnji stupac i redak posebno izračunati
     //      i odmah ga ubaciti u lastRow i lastColumn bloka
@@ -201,16 +250,13 @@ void FourRussians::calculateBlock(Block &blk) {
         for (unsigned char col = 1; col <= T; col++) {
 
             diagonal = DATA(table, T + 1, row - 1, col - 1);
-            top = DATA(table, T + 1, row - 1, col);
-            left = DATA(table, T + 1, row, col - 1);
+            top = DATA(table, T + 1, row - 1, col) + 1;
+            left = DATA(table, T + 1, row, col - 1) + 1;
 
-            if (blk.XY[col - 1] == blk.XY[T + row - 1]) {
-                diagonalValue = diagonal;
-            } else {
-                diagonalValue = diagonal + 1;
+            if (blk.XY[col - 1] != blk.XY[T + row - 1]) {
+                diagonal += 1;
             }
-            cell = min(min(diagonalValue, left + 1), top + 1);
-            DATA(table, T + 1, row, col) = cell;
+            DATA(table, T + 1, row, col) = min(min(diagonal, left), top);
         }
     }
 

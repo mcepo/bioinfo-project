@@ -19,6 +19,7 @@ using namespace std;
 //       1 byte-a po Bloku i smanjili broj naredbi potrebnih za hashiranje
 // TODO: spojiti i lastRow i lastColumn u jedan vector?? s tim bi uštedjeli
 //       na prostoru 1 byte po bloku
+
 struct Block {
     vector<char> B, C, XY, lastRow, lastColumn;
 
@@ -69,7 +70,9 @@ public:
 
     vector<char> table;
     vector<char> constBC;
-    
+
+    long top, left, diagonal;
+
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
@@ -77,7 +80,7 @@ public:
     unordered_map<Block, Block> generatedBlocks;
 
     int found;
-// TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
+    // TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
     // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
     vector<Block*> blocks;
 
@@ -89,7 +92,7 @@ public:
             string const& x, string const& y);
     void calculateBlock(Block &blk);
     void calculateRow(int index);
-    
+
     vector<char> getXY(string x, string y);
 
     void print();
