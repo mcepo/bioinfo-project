@@ -15,10 +15,6 @@
 using namespace std;
 
 // TODO: preseliti u posebnu datoteku
-// TODO: spojiti B, C, XY u jedan vector?? s tim bi uštedjeli na prostoru
-//       1 byte-a po Bloku i smanjili broj naredbi potrebnih za hashiranje
-// TODO: spojiti i lastRow i lastColumn u jedan vector?? s tim bi uštedjeli
-//       na prostoru 1 byte po bloku
 
 struct Block {
     vector<char> B, C, XY, lastRow, lastColumn;
@@ -72,6 +68,8 @@ public:
     vector<char> constBC;
 
     long top, left, diagonal;
+    
+    unsigned char modX, modY;
 
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
@@ -86,13 +84,17 @@ public:
 
     unsigned long calculate();
     Block* getTableBlock(vector<char> *b, vector<char> *c,
-            string const& x, string const& y);
-    void calculateBlock(Block &blk);
-    void calculateRow(int index);
+            string const& x, string const& y, 
+            unsigned char xLength, unsigned char yLength);
+    
+    void calculateBlock(Block &blk,
+            unsigned char xLength, unsigned char yLength);
+    void calculateRow(int index, unsigned char yLength);
 
-    vector<char> getXY(string const& x, string const& y);
+    vector<char> getXY(string const& x, string const& y,
+            unsigned char xLength, unsigned char yLength);
 
-    void print();
+    void print(Block &blk, unsigned char xLength, unsigned char yLength);
 };
 
 #endif //BIO_INF_FOUR_RUSSIANS_H

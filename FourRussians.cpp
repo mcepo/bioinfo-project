@@ -5,20 +5,6 @@
 #include "FourRussians.h"
 
 
-//FourRussians::FourRussians(unsigned char t, unsigned long a, vector<unsigned long> b, vector<unsigned long> c,
-//                       vector<char> x, vector<char> y){
-//
-//    // deprecated
-//
-//    T = t;
-//    A = a;
-//    B = move(b);
-//    C = move(c);
-//    X = move(x);
-//    Y = move(y);
-//
-//}
-
 FourRussians::FourRussians() {
 }
 
@@ -32,22 +18,8 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     found = 0;
 
-    // appending "empty" characters to end of string so that blocks
-    // can be fixed size
-    int modX = X.size() % blockSize;
-    if (modX != 0) {
-        int appendLengthX = blockSize - modX;
-        for (int i = 0; i < appendLengthX; i++) {
-            X += '*';
-        }
-    }
-    int modY = Y.size() % blockSize;
-    if (modY != 0) {
-        int appendLengthY = blockSize - modY;
-        for (int i = 0; i < appendLengthY; i++) {
-            Y += '*';
-        }
-    }
+    modX = X.size() % blockSize;
+    modY = Y.size() % blockSize;
 
     xLen = X.size();
     yLen = Y.size();
@@ -55,7 +27,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     numBlocksPerRow = xLen / blockSize;
     numRowsToCalculate = yLen / blockSize;
 
-    blocks.reserve((unsigned long) numBlocksPerRow);
+    blocks.reserve((unsigned long) numBlocksPerRow + 1);
     table.reserve((unsigned long) (T + 1) * (T + 1));
 
     constBC.reserve((unsigned long) T);
@@ -77,24 +49,25 @@ unsigned long FourRussians::calculate() {
     currentB = &constBC;
 
     // first row calculation
-    for (int col = 0; col < (numBlocksPerRow - 1); col++) {
+    for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks.push_back(getTableBlock(currentB, currentC, &X[T * col], &Y[0]));
+        blocks.push_back(getTableBlock(currentB, currentC, &X[T * col], &Y[0], T, T));
         currentC = &(blocks.at((unsigned long) col)->lastColumn);
     }
-
-    // last column in first row
-    blocks.push_back(getTableBlock(currentB, currentC, &X[T * (numBlocksPerRow - 1)], &Y[0]));
+        // last column in first row if any
+    if (modX != 0) {
+        blocks.push_back(getTableBlock(currentB, currentC, &X[T * numBlocksPerRow], &Y[0], modX, T));
+    }
 
     // rest of the matrix
-
-    for (int row = 1; row < (numRowsToCalculate - 1); row++) {
-
-        calculateRow(row);
+    for (int row = 1; row < numRowsToCalculate; row++) {
+        calculateRow(row, T);
     }
-    
-    // last row calculation
-    calculateRow((numRowsToCalculate - 1));
+
+    // last row calculation if any
+    if (modY != 0) {
+        calculateRow(numRowsToCalculate, modY);
+    }
 
     unsigned long result = 0L;
 
@@ -108,33 +81,35 @@ unsigned long FourRussians::calculate() {
     return result;
 }
 
-void FourRussians::calculateRow(int index) {
+void FourRussians::calculateRow(int index, unsigned char yLength) {
 
     vector<char> *currentC, *currentB;
-
     currentC = &constBC;
 
-    for (int col = 0; col < (numBlocksPerRow - 1); col++) {
+    for (int col = 0; col < numBlocksPerRow; col++) {
 
         currentB = &(blocks.at((unsigned int) col)->lastRow);
-        blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index]);
+        blocks.at((unsigned int) col) = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index], T, yLength);
         currentC = &(blocks.at((unsigned long) col)->lastColumn);
     }
 
-    // last column in row
-    currentB = &(blocks.at((unsigned int) (numBlocksPerRow - 1))->lastRow);
-    blocks.at((unsigned int) (numBlocksPerRow - 1)) = getTableBlock(currentB, currentC, &X[T * (numBlocksPerRow - 1)], &Y[T * index]);
+    // last column in row if any
+    if (modX != 0) {
+        currentB = &(blocks.at((unsigned int) numBlocksPerRow)->lastRow);
+        blocks.at((unsigned int) numBlocksPerRow) = getTableBlock(currentB, currentC, &X[T * numBlocksPerRow], &Y[T * index], modX, yLength);
+    }
 }
 
 Block* FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
-        string const& x, string const& y) {
+        string const& x, string const& y,
+        unsigned char xLength, unsigned char yLength) {
 
-    Block blk = {*b, *c, getXY(x, y)};
+    Block blk = {*b, *c, getXY(x, y, xLength, yLength)};
 
     auto foundBlock = generatedBlocks.find(blk);
 
     if (foundBlock == generatedBlocks.end()) {
-        calculateBlock(blk);
+        calculateBlock(blk, xLength, yLength);
         generatedBlocks.insert({blk, blk});
         return &(generatedBlocks.find(blk)->second);
     } else {
@@ -143,16 +118,16 @@ Block* FourRussians::getTableBlock(vector<char> *b, vector<char> *c,
     }
 }
 
-vector<char> FourRussians::getXY(string const& x, string const& y) {
+vector<char> FourRussians::getXY(string const& x, string const& y,
+        unsigned char xLength, unsigned char yLength) {
 
     char valT = 0, valG = 0, valC = 0, valA = 0, valEmpty = 0;
-
     unsigned char number = 1;
 
     vector<char> XY;
     XY.reserve(T * 2);
 
-    for (string::size_type i = 0; i < T && i < x.size(); ++i) {
+    for (string::size_type i = 0; i < xLength; ++i) {
 
         switch (x[i]) {
             case 'A':
@@ -193,7 +168,7 @@ vector<char> FourRussians::getXY(string const& x, string const& y) {
         }
     }
 
-    for (string::size_type i = 0; i < T && i < y.size(); ++i) {
+    for (string::size_type i = 0; i < yLength; ++i) {
 
         switch (y[i]) {
             case 'A':
@@ -236,86 +211,86 @@ vector<char> FourRussians::getXY(string const& x, string const& y) {
     return XY;
 }
 
-void FourRussians::calculateBlock(Block &blk) {
+void FourRussians::calculateBlock(Block &blk,
+        unsigned char xLength, unsigned char yLength) {
 
     char sumB = (char) 0;
     char sumC = (char) 0;
 
-    // convert offset to real and fill the first column and row
-    for (unsigned char i = 1; i <= T; i++) {
+    // convert offset to real and fill the first row
+    for (unsigned char i = 1; i <= xLength; i++) {
+
         sumB += blk.B.at((unsigned long) (i - 1));
-        DATA(table, T + 1, 0, i) = (char) sumB;
+        DATA(table, xLength + 1, 0, i) = (char) sumB;
+    }
+    // convert offset to real and fill the first column
+    for (unsigned char i = 1; i <= yLength; i++) {
 
         sumC += blk.C.at((unsigned long) (i - 1));
-        DATA(table, T + 1, i, 0) = (char) sumC;
+        DATA(table, xLength + 1, i, 0) = (char) sumC;
     }
 
     // TODO: probati implementirati da petlja ide samo do predzadnjeg redka i
     //      i predzadnjeg stupca, zatim zadnji stupac i redak posebno izračunati
     //      i odmah ga ubaciti u lastRow i lastColumn bloka
-    for (unsigned char row = 1; row <= T; row++) {
-        for (unsigned char col = 1; col <= T; col++) {
+    for (unsigned char row = 1; row <= yLength; row++) {
+        for (unsigned char col = 1; col <= xLength; col++) {
 
-            diagonal = DATA(table, T + 1, row - 1, col - 1);
-            top = DATA(table, T + 1, row - 1, col) + 1;
-            left = DATA(table, T + 1, row, col - 1) + 1;
+            diagonal = DATA(table, xLength + 1, row - 1, col - 1);
+            top = DATA(table, xLength + 1, row - 1, col) + 1;
+            left = DATA(table, xLength + 1, row, col - 1) + 1;
 
-            if (blk.XY[col - 1] != blk.XY[T + row - 1]) {
+            if (blk.XY[col - 1] != blk.XY[xLength + row - 1]) {
                 diagonal += 1;
             }
-            DATA(table, T + 1, row, col) = min(min(diagonal, left), top);
+            DATA(table, xLength + 1, row, col) = min(min(diagonal, left), top);
         }
     }
 
     // last column calculation
+    blk.lastColumn.reserve(yLength);
 
-    blk.lastColumn.reserve(T);
-
-    long first = DATA(table, T, 0, T);
+    long first = DATA(table, xLength, 0, xLength);
     long r;
-    for (int i = 0; i < T; i++) {
-        r = DATA(table, T + 1, i + 1, T);
+    for (int i = 0; i < yLength; i++) {
+        r = DATA(table, xLength + 1, i + 1, xLength);
         blk.lastColumn.push_back((char) (r - first));
         first = r;
     }
 
     // last row calculation
+    blk.lastRow.reserve(xLength);
 
-    blk.lastRow.reserve(T);
-
-    first = DATA(table, T + 1, T, 0);
-    for (int i = 0; i < T; i++) {
-        r = DATA(table, T + 1, T, i + 1);
+    first = DATA(table, xLength + 1, yLength, 0);
+    for (int i = 0; i < xLength; i++) {
+        r = DATA(table, xLength + 1, yLength, i + 1);
         blk.lastRow.push_back((char) (r - first));
         first = r;
     }
+ //   print(blk, xLength, yLength);
 }
 
-// TODO: ova metoda se trenutno ne koristi, možda implementirati da radi 
-// za predani block
-// 
-
-void FourRussians::print() {
+void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLength) {
 
     cout << "TB" << "| x  ";
 
-    for (unsigned int col = 0; col < T; col++) {
-        cout << X[col] << "  ";
+    for (unsigned int col = 0; col < xLength; col++) {
+        cout << (int) blk.XY[col] << "  ";
     }
 
     cout << endl << "--+";
-    for (unsigned int col = 0; col <= T; col++) {
+    for (unsigned int col = 0; col <= xLength; col++) {
         cout << "---";
     }
 
-    for (unsigned int row = 0; row <= T; row++) {
+    for (unsigned int row = 0; row <= yLength; row++) {
         if (row == 0) {
             cout << endl << "x | ";
         } else {
-            cout << endl << Y[row - 1] << " | ";
+            cout << endl << (int) blk.XY[xLength + row - 1] << " | ";
         }
-        for (unsigned int col = 0; col <= T; col++) {
-            cout << DATA(table, T + 1, row, col) << "  ";
+        for (unsigned int col = 0; col <= xLength; col++) {
+            cout << (int) DATA(table, xLength + 1, row, col) << "  ";
         }
     }
     cout << endl;
