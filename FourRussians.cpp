@@ -71,9 +71,6 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
 unsigned long FourRussians::calculate() {
 
-    // TODO implementirati kao pointere na vector ??
-    // mislim da se ovako svaki put vrijednost kopira
-    // što je nepotrebno
     vector<char> *currentC, *currentB;
 
     currentC = &constBC;

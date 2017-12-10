@@ -76,12 +76,9 @@ public:
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
-
     unordered_map<Block, Block> generatedBlocks;
 
     int found;
-    // TODO: ovo može biti vektor referenci na objekte koji se nalaze u 
-    // generatedBlocks strukturi, ne moramo kopirati ovdje cijeli blok
     vector<Block*> blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
