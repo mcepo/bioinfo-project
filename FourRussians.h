@@ -3,7 +3,7 @@
 //
 #ifndef BIO_INF_FOUR_RUSSIANS_H
 #define BIO_INF_FOUR_RUSSIANS_H
-#define DATA(vectorTable, n_col, row, column) vectorTable.at((column) + (n_col)*(row))
+#define DATA(vectorTable, n_col, row, column) vectorTable[(column) + (n_col)*(row)]
 
 #include <vector>
 #include <algorithm>
@@ -64,7 +64,7 @@ public:
 
     unsigned char T; //dimension of block (txt). Not more than 255
 
-    vector<char> table;
+    char* table;
     vector<char> constBC;
 
     long top, left, diagonal;
@@ -77,13 +77,13 @@ public:
     unordered_map<Block, Block> generatedBlocks;
 
     int found;
-    vector<Block*> blocks;
+    Block* blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
 
     unsigned long calculate();
-    Block* getTableBlock(vector<char> *b, vector<char> *c,
+    Block& getTableBlock(vector<char> *b, vector<char> *c,
             string const& x, string const& y, 
             unsigned char xLength, unsigned char yLength);
     

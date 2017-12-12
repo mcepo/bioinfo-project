@@ -1,5 +1,5 @@
 CC=g++ 
-CFLAGS=-I -Wall -no-pie -pg
+CFLAGS=-I -Wall
 
 all: main generator
 
