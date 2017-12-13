@@ -257,6 +257,87 @@ void FourRussians::calculateBlock(Block &blk) {
     //   print(blk, xLength, yLength);
 }
 
+unsigned int acgt_to_index(const char acgt){
+    if(acgt == 'A') return 0;
+    if(acgt == 'C') return 1;
+    if(acgt == 'G') return 2;
+    if(acgt == 'T') return 3;
+}
+
+uint8_t compact(vector<char>* element, unsigned char T){ // for t == 3! // be extra carefull, as this will overflow for t > 4
+    uint8_t result = 0;
+    uint8_t decimal = 1;
+
+    for(auto i = (unsigned long) T; i > 0; i--){
+        auto e = (uint8_t) (element->at(i - 1) + (char)1); // normalize it from {-1, 0, 1} to {0, 1, 2}
+        result += (e * decimal);
+        decimal *= 3;
+    }
+
+    return result;
+}
+
+void unpack(uint8_t dense, vector<char>* out, unsigned char T){ // this will also overflow for T > 4...
+
+    auto decimal = uint8_t (pow(3, T - 1) + ((double) 0.5)); //TODO: write this more efficiently (for loop?)
+    for(unsigned long i = 0; i < T; i++){
+        auto r = dense / decimal;
+        dense -= r * decimal;
+        auto result = (((char)r) - ((char)1));
+        out->at(i) = result;
+        decimal /= 3;
+    }
+}
+
+char index_to_acgt(unsigned int index){
+    if(index == 0) return 'A';
+    if(index == 1) return 'C';
+    if(index == 2) return 'G';
+    if(index == 3) return 'T';
+    return -1;
+}
+
+unsigned long numCombinations(unsigned char T){
+    return (unsigned long) lround(pow(3, 2*T)*pow(4, 2*T));
+}
+
+unsigned int bc_to_index(char bc){
+    return (unsigned int) (bc + 1);
+}
+
+unsigned long lookUpIndex(unsigned char T, const char *x, const char *y, vector<char>* b, vector<char>* c){
+    unsigned long d = 1U;
+
+    unsigned long result = 0U;
+
+    for(auto i = T - 1; i >= 0; i--){
+        result += acgt_to_index(y[i]) * d;
+        d *= 4;
+    }
+
+    for(auto i = T - 1; i >= 0; i--){
+        result += acgt_to_index(x[i]) * d;
+        d *= 4;
+    }
+
+    for(unsigned int i = 0; i < (2*T); i++) result *= 3; // fast pow() function!
+
+    d = 1U;
+
+    for(auto i = T - 1; i >= 0; i--){
+        result += bc_to_index(c->at((unsigned long)i)) * d;
+        d *= 3;
+    }
+
+    for(auto i = T - 1; i >= 0; i--){
+        result += bc_to_index(b->at((unsigned long)i)) * d;
+        d *= 3;
+    }
+
+    return result;
+
+}
+
 void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLength) {
 
     cout << "TB" << "| x  ";
@@ -282,3 +363,4 @@ void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLengt
     }
     cout << endl;
 }
+
