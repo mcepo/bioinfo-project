@@ -23,33 +23,27 @@ struct Block {
 
     bool operator==(const Block &other) const {
 
-        if (other.xLength != xLength && other.yLength != yLength) {
+        if (other.xLength != xLength || other.yLength != yLength) {
             return false;
         }
 
         int sum = xLength + yLength;
-//        cout << sum << endl;
-//
-//        cout << (int) other.XY[1] << endl;
 
-        for (int i = 0; i < sum; i++) {
-//            cout << (int) XY[i];
-//            if (XY[i] == other.XY[i]) {
-//                return false;
-//            }
+        // not comparing first character because its always the same -> 0 :)
+        for (int i = 1; i < sum; i++) {
+            if (XY[i] != other.XY[i]) {
+                return false;
+            }
         }
-//        cout << endl;
-//        cout << sum << endl;
         for (int i = 0; i < xLength; i++) {
-//            if (B[i] == other.B[i]) {
-//                return false;
-//            }
+            if (B[i] != other.B[i]) {
+                return false;
+            }
         }
-//        cout << sum << endl;
         for (int i = 0; i < yLength; i++) {
-//            if (C[i] == other.C[i]) {
-//                return false;
-//            }
+            if (C[i] != other.C[i]) {
+                return false;
+            }
         }
         return true;
     }
@@ -58,18 +52,6 @@ struct Block {
 // TODO: preseliti u posebnu datoteku
 // TODO: koliko je kvalitetno ovo rješenje ?
 namespace std {
-    template<typename T>
-    struct hash<vector<T>>
-    {
-
-        std::size_t operator()(const vector<T>& in) const {
-            size_t size = in.size();
-            size_t seed = 0;
-            for (size_t i = 0; i < size; i++)
-                seed ^= std::hash<T>()(in[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            return seed;
-        }
-    };
 
     template <>
     struct hash<Block> {
@@ -94,7 +76,6 @@ namespace std {
                 seed ^= std::hash<char>()(k.C[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
             }
             res = res * 31 + seed;
-//            cout << res << endl;
             return res;
         }
     };

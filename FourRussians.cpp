@@ -14,11 +14,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     X = (x);
     Y = (y);
-
-//    cout << X << endl;
-//    cout << Y << endl;
-
-
+    
     found = 0;
 
     modX = X.size() % blockSize;
@@ -104,15 +100,22 @@ void FourRussians::calculateRow(int index, unsigned char yLength) {
 Block& FourRussians::getTableBlock(char *b, char *c,
         string const& x, string const& y,
         unsigned char xLength, unsigned char yLength) {
+    
     Block blk = {b, c, getXY(x, y, xLength, yLength), xLength, yLength};
+    
     auto foundBlock = generatedBlocks.find(blk);
+    
     if (foundBlock == generatedBlocks.end()) {
+    
         calculateBlock(blk);
         generatedBlocks.insert({blk, blk});
         return generatedBlocks.find(blk)->second;
+    
     } else {
+    
         found++;
         return foundBlock->second;
+    
     }
 }
 
@@ -127,7 +130,6 @@ char* FourRussians::getXY(string const& x, string const& y,
 
     for (string::size_type i = 0; i < xLength; ++i, ++j) {
 
-//        cout << x[i];
         switch (x[i]) {
             case 'A':
                 if (valA == 0) {
@@ -162,8 +164,6 @@ char* FourRussians::getXY(string const& x, string const& y,
 
     for (string::size_type i = 0; i < yLength; ++i, ++j) {
 
-//        cout << y[i];
-
         switch (y[i]) {
             case 'A':
                 if (valA == 0) {
@@ -195,11 +195,6 @@ char* FourRussians::getXY(string const& x, string const& y,
                 break;
         }
     }
-//    cout << endl;
-//    for (int i = 0; i < j; i++) {
-//        cout << (int) XY[i];
-//    }
-//    cout << endl;
 
     return XY;
 }
