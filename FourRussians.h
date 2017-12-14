@@ -17,7 +17,6 @@ using namespace std;
 // TODO: preseliti u posebnu datoteku
 
 struct Block {
-    char xLength;
     char *lastRow, *lastColumn;
 };
 
@@ -39,6 +38,7 @@ public:
     Block** generatedBlocksArray;
 
     int found;
+    int calculated;
     Block** blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version

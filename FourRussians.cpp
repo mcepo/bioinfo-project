@@ -16,6 +16,7 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     Y = (y);
 
     found = 0;
+    calculated = 0;
 
     modX = X.size() % blockSize;
     modY = Y.size() % blockSize;
@@ -69,9 +70,15 @@ unsigned long FourRussians::calculate() {
 
     unsigned long result = 0L;
 
-    for (int i = 0; i <= numBlocksPerRow; i++) {
-        for (unsigned long j = 0; j < blocks[i]->xLength; j++) {
+    for (int i = 0; i < numBlocksPerRow; i++) {
+        for (unsigned long j = 0; j < T; j++) {
             result += blocks[i]->lastRow[j];
+        }
+    }
+
+    if (modX != 0) {
+        for (unsigned long j = 0; j < modX; j++) {
+            result += blocks[numBlocksPerRow]->lastRow[j];
         }
     }
 
@@ -107,15 +114,16 @@ Block* FourRussians::getTableBlock(char *b, char *c,
 
     if (generatedBlocksArray[index] == 0) {
         generatedBlocksArray[index] = calculateBlock(b, c, x, y, xLength, yLength);
+        calculated++;
     } else {
-        found ++;
+        found++;
     }
     return generatedBlocksArray[index];
 }
 
 Block* FourRussians::calculateBlock(char *b, char *c,
-            string const& x, string const& y,
-            unsigned char xLength, unsigned char yLength) {
+        string const& x, string const& y,
+        unsigned char xLength, unsigned char yLength) {
 
     char sumB = (char) 0;
     char sumC = (char) 0;
@@ -151,7 +159,7 @@ Block* FourRussians::calculateBlock(char *b, char *c,
     }
 
     Block *blk = new Block;
-    
+
     // last column calculation
     blk->lastColumn = new char[yLength];
 
@@ -172,8 +180,6 @@ Block* FourRussians::calculateBlock(char *b, char *c,
         blk->lastRow[i] = r - first;
         first = r;
     }
-    blk->xLength = xLength;
-    
     return blk;
     //   print(blk, xLength, yLength);
 }
@@ -261,27 +267,27 @@ unsigned long FourRussians::lookUpIndex(unsigned char xIndex, unsigned char yInd
 
 void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLength) {
 
-//    cout << "TB" << "| x  ";
-//
-//    for (unsigned int col = 0; col < xLength; col++) {
-//        cout << (int) blk.XY[col] << "  ";
-//    }
-//
-//    cout << endl << "--+";
-//    for (unsigned int col = 0; col <= xLength; col++) {
-//        cout << "---";
-//    }
-//
-//    for (unsigned int row = 0; row <= yLength; row++) {
-//        if (row == 0) {
-//            cout << endl << "x | ";
-//        } else {
-//            cout << endl << (int) blk.XY[xLength + row - 1] << " | ";
-//        }
-//        for (unsigned int col = 0; col <= xLength; col++) {
-//            cout << (int) DATA(table, xLength + 1, row, col) << "  ";
-//        }
-//    }
-//    cout << endl;
+    //    cout << "TB" << "| x  ";
+    //
+    //    for (unsigned int col = 0; col < xLength; col++) {
+    //        cout << (int) blk.XY[col] << "  ";
+    //    }
+    //
+    //    cout << endl << "--+";
+    //    for (unsigned int col = 0; col <= xLength; col++) {
+    //        cout << "---";
+    //    }
+    //
+    //    for (unsigned int row = 0; row <= yLength; row++) {
+    //        if (row == 0) {
+    //            cout << endl << "x | ";
+    //        } else {
+    //            cout << endl << (int) blk.XY[xLength + row - 1] << " | ";
+    //        }
+    //        for (unsigned int col = 0; col <= xLength; col++) {
+    //            cout << (int) DATA(table, xLength + 1, row, col) << "  ";
+    //        }
+    //    }
+    //    cout << endl;
 }
 

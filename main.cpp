@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 
     cout << "Input string length: " << fr.xLen << endl;
     cout << "Total number of blocks in matrix: " << (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
-//    cout << "Calculated (stored) blocks: " << fr.generatedBlocks.size() << endl;
+    cout << "Calculated (stored) blocks: " << fr.calculated << endl;
     cout << "Found blocks: " << fr.found << endl;
     cout << "RESULT: " << result << " generated in: " << execTime << "sec" << endl;
 
