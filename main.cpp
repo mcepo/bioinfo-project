@@ -4,6 +4,9 @@
 #include <string>
 #include <time.h>
 
+#include "sys/types.h"
+#include "sys/sysinfo.h"
+
 #include "FourRussians.h"
 #include "edlib/edlib.h"
 
@@ -16,11 +19,13 @@
 
 int main(int argc, char** argv) {
 
+    struct sysinfo memInfo;
+
     clock_t start = clock();
     string inputFilename, X, Y;
 
     int blockSize = BLOCK_SIZE;
-    
+
     if (argc != 2) {
         inputFilename = DEFAULT_FILENAME;
     } else {
@@ -36,9 +41,23 @@ int main(int argc, char** argv) {
         cout << "Unable to open file";
         return -1;
     }
+    
+        sysinfo(&memInfo);
+    long long memBefore = memInfo.totalram - memInfo.freeram;
+    memBefore += memInfo.totalswap - memInfo.freeswap;
+    memBefore *= memInfo.mem_unit;
 
     FourRussians fr = FourRussians(X, Y, blockSize);
     unsigned long result = fr.calculate();
+    
+        sysinfo(&memInfo);
+    long long memAfter = memInfo.totalram - memInfo.freeram;
+    memAfter += memInfo.totalswap - memInfo.freeswap;
+    memAfter *= memInfo.mem_unit;
+    
+    double memUsage = (((double)((memAfter - memBefore)/1024)/1024));
+
+    cout << "Memory used: " << memUsage << "MB"<< endl;
 
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();

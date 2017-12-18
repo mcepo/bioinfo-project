@@ -29,7 +29,13 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     blocks = new Block*[ numBlocksPerRow + 1];
     generatedBlocksArray = new Block*[numCombinations(T)];
-
+    
+    cout << "Total number of blocks: " << numCombinations(T) << endl;
+    
+    double mem = (numCombinations(T) * (2*T))/1024/1024;
+    
+    cout << "Expected memory usage: " << mem << "MB" << endl;
+    
     table = new char[ (T + 1) * (T + 1)];
     table[0] = 0;
 
