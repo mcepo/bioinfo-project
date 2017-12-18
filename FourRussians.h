@@ -14,12 +14,6 @@
 
 using namespace std;
 
-// TODO: preseliti u posebnu datoteku
-
-struct Block {
-    char *lastRow, *lastColumn;
-};
-
 class FourRussians {
 public:
 
@@ -35,21 +29,21 @@ public:
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
     
-    Block** generatedBlocksArray;
+    char** generatedBlocks;
 
     int found;
     int calculated;
-    Block** blocks;
+    char** blocks;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
 
     unsigned long calculate();
-    Block* getTableBlock(char *b, char *c,
+    char* getTableBlock(char *b, char *c,
             string const& x, string const& y,
             unsigned char xLength, unsigned char yLength);
 
-    Block* calculateBlock(char *b, char *c,
+    char* calculateBlock(char *b, char *c,
             string const& x, string const& y,
             unsigned char xLength, unsigned char yLength);
     void calculateRow(int index, unsigned char yLength);
@@ -59,9 +53,8 @@ public:
     unsigned int acgt_to_index(const char acgt);
     unsigned int bc_to_index(char bc);
     unsigned long lookUpIndex(unsigned char xIndex, unsigned char yIndex, string const& x, string const& y, char *b, char *c);
-
-
-    void print(Block &blk, unsigned char xLength, unsigned char yLength);
+    
+//    void print(Block &blk, unsigned char xLength, unsigned char yLength);
 };
 
 #endif //BIO_INF_FOUR_RUSSIANS_H

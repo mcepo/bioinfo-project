@@ -27,15 +27,17 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     numBlocksPerRow = xLen / blockSize;
     numRowsToCalculate = yLen / blockSize;
 
-    blocks = new Block*[ numBlocksPerRow + 1];
-    generatedBlocksArray = new Block*[numCombinations(T)];
-    
-    cout << "Total number of blocks: " << numCombinations(T) << endl;
-    
-    double mem = (numCombinations(T) * (2*T))/1024/1024;
-    
+    unsigned long numComb = numCombinations(T);
+
+    blocks = new char*[ numBlocksPerRow + 1];
+    generatedBlocks = new char*[numComb];
+
+    cout << "Total number of blocks: " << numComb << endl;
+
+    double mem = (numComb * (2 * T)) / 1024 / 1024;
+
     cout << "Expected memory usage: " << mem << "MB" << endl;
-    
+
     table = new char[ (T + 1) * (T + 1)];
     table[0] = 0;
 
@@ -48,20 +50,20 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
 unsigned long FourRussians::calculate() {
 
-    char *currentC, *currentB;
+    char *currentC;
 
     currentC = constBC;
-    currentB = constBC;
 
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
-        blocks[col] = getTableBlock(currentB, currentC, &X[T * col], &Y[0], T, T);
-        currentC = blocks[col]->lastColumn;
+        blocks[col] = getTableBlock(constBC, currentC, &X[T * col], &Y[0], T, T);
+        //lastColumn
+        currentC = &blocks[col][0];
     }
 
     // last column in first row if any
     if (modX != 0) {
-        blocks[numBlocksPerRow] = getTableBlock(currentB, currentC, &X[T * numBlocksPerRow], &Y[0], modX, T);
+        blocks[numBlocksPerRow] = getTableBlock(constBC, currentC, &X[T * numBlocksPerRow], &Y[0], modX, T);
     }
 
     // rest of the matrix
@@ -78,13 +80,13 @@ unsigned long FourRussians::calculate() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (unsigned long j = 0; j < T; j++) {
-            result += blocks[i]->lastRow[j];
+            result += blocks[i][T + j];
         }
     }
 
     if (modX != 0) {
         for (unsigned long j = 0; j < modX; j++) {
-            result += blocks[numBlocksPerRow]->lastRow[j];
+            result += blocks[numBlocksPerRow][T + j];
         }
     }
 
@@ -100,51 +102,49 @@ void FourRussians::calculateRow(int index, unsigned char yLength) {
 
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        currentB = blocks[col]->lastRow;
+        //lastRow
+        currentB = &blocks[col][T];
         blocks[col] = getTableBlock(currentB, currentC, &X[T * col], &Y[T * index], T, yLength);
-        currentC = blocks[col]->lastColumn;
+        //lastColumn
+        currentC = &blocks[col][0];
     }
 
     // last column in row if any
     if (modX != 0) {
-        currentB = blocks[numBlocksPerRow]->lastRow;
+        //lastRow
+        currentB = &blocks[numBlocksPerRow][T];
         blocks[numBlocksPerRow] = getTableBlock(currentB, currentC, &X[T * numBlocksPerRow], &Y[T * index], modX, yLength);
     }
 }
 
-Block* FourRussians::getTableBlock(char *b, char *c,
+char* FourRussians::getTableBlock(char *b, char *c,
         string const& x, string const& y,
         unsigned char xLength, unsigned char yLength) {
 
     unsigned long index = lookUpIndex(xLength, yLength, x, y, b, c);
 
-    if (generatedBlocksArray[index] == 0) {
-        generatedBlocksArray[index] = calculateBlock(b, c, x, y, xLength, yLength);
+    if (generatedBlocks[index] == 0) {
+        generatedBlocks[index] = calculateBlock(b, c, x, y, xLength, yLength);
         calculated++;
     } else {
         found++;
     }
-    return generatedBlocksArray[index];
+    return generatedBlocks[index];
 }
 
-Block* FourRussians::calculateBlock(char *b, char *c,
+char* FourRussians::calculateBlock(char *b, char *c,
         string const& x, string const& y,
         unsigned char xLength, unsigned char yLength) {
-
-    char sumB = (char) 0;
-    char sumC = (char) 0;
 
     // convert offset to real and fill the first row
     for (unsigned char i = 1; i <= xLength; i++) {
 
-        sumB += b[i - 1];
-        DATA(table, xLength + 1, 0, i) = (char) sumB;
+        DATA(table, xLength + 1, 0, i) = DATA(table, xLength + 1, 0, i - 1) + b[i - 1];
     }
     // convert offset to real and fill the first column
     for (unsigned char i = 1; i <= yLength; i++) {
 
-        sumC += c[i - 1];
-        DATA(table, xLength + 1, i, 0) = (char) sumC;
+        DATA(table, xLength + 1, i, 0) = DATA(table, xLength + 1, i - 1, 0) + c[i - 1];
     }
 
     // TODO: probati implementirati da petlja ide samo do predzadnjeg redka i
@@ -164,30 +164,26 @@ Block* FourRussians::calculateBlock(char *b, char *c,
         }
     }
 
-    Block *blk = new Block;
+    char *F = new char[yLength + xLength];
 
     // last column calculation
-    blk->lastColumn = new char[yLength];
-
     long first = DATA(table, xLength, 0, xLength);
     long r;
     for (int i = 0; i < yLength; i++) {
         r = DATA(table, xLength + 1, i + 1, xLength);
-        blk->lastColumn[i] = r - first;
+        F[i] = r - first;
         first = r;
     }
 
     // last row calculation
-    blk->lastRow = new char[xLength];
 
     first = DATA(table, xLength + 1, yLength, 0);
     for (int i = 0; i < xLength; i++) {
         r = DATA(table, xLength + 1, yLength, i + 1);
-        blk->lastRow[i] = r - first;
+        F[i + yLength] = r - first;
         first = r;
     }
-    return blk;
-    //   print(blk, xLength, yLength);
+    return F;
 }
 
 unsigned int FourRussians::acgt_to_index(const char acgt) {
@@ -245,13 +241,77 @@ unsigned long FourRussians::lookUpIndex(unsigned char xIndex, unsigned char yInd
 
     unsigned long result = 0U;
 
+    char valT = 7, valG = 7, valC = 7, valA = 7;
+    char current;
+    unsigned char number = 0;
+
     for (auto i = yIndex - 1; i >= 0; i--) {
-        result += acgt_to_index(y[i]) * d;
+
+        switch (y[i]) {
+            case 'A':
+                if (valA == 7) {
+                    valA = number;
+                    number++;
+                }
+                result += valA * d;
+                break;
+            case 'T':
+                if (valT == 7) {
+                    valT = number;
+                    number++;
+                }
+                result += valT * d;
+                break;
+            case 'G':
+                if (valG == 7) {
+                    valG = number;
+                    number++;
+                }
+                result += valG * d;
+                break;
+            case 'C':
+                if (valC == 7) {
+                    valC = number;
+                    number++;
+                }
+                result += valC * d;
+                break;
+        }
         d *= 4;
     }
 
     for (auto i = xIndex - 1; i >= 0; i--) {
-        result += acgt_to_index(x[i]) * d;
+
+        switch (x[i]) {
+            case 'A':
+                if (valA == 7) {
+                    valA = number;
+                    number++;
+                }
+                result += valA * d;
+                break;
+            case 'T':
+                if (valT == 7) {
+                    valT = number;
+                    number++;
+                }
+                result += valT * d;
+                break;
+            case 'G':
+                if (valG == 7) {
+                    valG = number;
+                    number++;
+                }
+                result += valG * d;
+                break;
+            case 'C':
+                if (valC == 7) {
+                    valC = number;
+                    number++;
+                }
+                result += valC * d;
+                break;
+        }
         d *= 4;
     }
 
@@ -271,29 +331,29 @@ unsigned long FourRussians::lookUpIndex(unsigned char xIndex, unsigned char yInd
     return result;
 }
 
-void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLength) {
+//void FourRussians::print(Block &blk, unsigned char xLength, unsigned char yLength) {
 
-    //    cout << "TB" << "| x  ";
-    //
-    //    for (unsigned int col = 0; col < xLength; col++) {
-    //        cout << (int) blk.XY[col] << "  ";
-    //    }
-    //
-    //    cout << endl << "--+";
-    //    for (unsigned int col = 0; col <= xLength; col++) {
-    //        cout << "---";
-    //    }
-    //
-    //    for (unsigned int row = 0; row <= yLength; row++) {
-    //        if (row == 0) {
-    //            cout << endl << "x | ";
-    //        } else {
-    //            cout << endl << (int) blk.XY[xLength + row - 1] << " | ";
-    //        }
-    //        for (unsigned int col = 0; col <= xLength; col++) {
-    //            cout << (int) DATA(table, xLength + 1, row, col) << "  ";
-    //        }
-    //    }
-    //    cout << endl;
-}
+//    cout << "TB" << "| x  ";
+//
+//    for (unsigned int col = 0; col < xLength; col++) {
+//        cout << (int) blk.XY[col] << "  ";
+//    }
+//
+//    cout << endl << "--+";
+//    for (unsigned int col = 0; col <= xLength; col++) {
+//        cout << "---";
+//    }
+//
+//    for (unsigned int row = 0; row <= yLength; row++) {
+//        if (row == 0) {
+//            cout << endl << "x | ";
+//        } else {
+//            cout << endl << (int) blk.XY[xLength + row - 1] << " | ";
+//        }
+//        for (unsigned int col = 0; col <= xLength; col++) {
+//            cout << (int) DATA(table, xLength + 1, row, col) << "  ";
+//        }
+//    }
+//    cout << endl;
+//}
 
