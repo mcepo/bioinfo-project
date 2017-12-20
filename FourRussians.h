@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cmath>
 
-#define BLOCK_SIZE 3
+#define BLOCK_SIZE 4
 
 using namespace std;
 
@@ -23,8 +23,6 @@ public:
     char *constBC;
 
     long top, left, diagonal;
-
-    unsigned char modX, modY;
 
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
@@ -40,19 +38,17 @@ public:
 
     unsigned long calculate();
     char* getTableBlock(char *b, char *c,
-            string const& x, string const& y,
-            unsigned char xLength, unsigned char yLength);
+            string const& x, string const& y);
 
     char* calculateBlock(char *b, char *c,
-            string const& x, string const& y,
-            unsigned char xLength, unsigned char yLength);
-    void calculateRow(int index, unsigned char yLength);
+            string const& x, string const& y);
+    void calculateRow(int index);
     
     unsigned long numCombinations(unsigned char T);
     char index_to_acgt(unsigned int index);
     unsigned int acgt_to_index(const char acgt);
     unsigned int bc_to_index(char bc);
-    unsigned long lookUpIndex(unsigned char xIndex, unsigned char yIndex, string const& x, string const& y, char *b, char *c);
+    unsigned long lookUpIndex( string const& x, string const& y, char *b, char *c);
     
 //    void print(Block &blk, unsigned char xLength, unsigned char yLength);
 };
