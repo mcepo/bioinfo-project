@@ -10,12 +10,12 @@ FourRussians::FourRussians() {
 FourRussians::FourRussians(string x, string y, int blockSize) {
 
     T = blockSize;
-    Tp = T + 1;
-    // TODO: bounds, ranges and sizes check...
 
     X = (x);
     Y = (y);
 
+// initialize counters to count number of stored blocks 
+// and number of found blocks
     found = 0;
     calculated = 0;
 
@@ -31,7 +31,9 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     unsigned long numComb = numCombinations(T);
 
+// initialize array for last row
     blocks = new uint16_t[numBlocksPerRow];
+// initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
 
     cout << "Max number of blocks: " << numComb << endl;
@@ -40,6 +42,10 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     cout << "Expected memory usage: " << mem << "MB" << endl;
 
+    
+// initialize 2d array that will be used in method
+// calculateBlocks for calculating the block
+// always the same 
     table = new int8_t*[(T + 1)];
     for (int i = 0; i < (T + 1); i++) {
         table[i] = new int8_t[(T + 1)];
@@ -54,8 +60,12 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
 }
 
-void FourRussians::generateXYHashes() {
+//  method for generating hashes of input strings
+// designed to reduce the search area, thus producing less blocks
+// and getting more hits on stored blocks further in the algorithm
 
+void FourRussians::generateXYHashes() {
+    
     xHash = new uint8_t*[numRowsToCalculate];
     yHash = new uint8_t[numRowsToCalculate];
 
@@ -174,6 +184,8 @@ unsigned long FourRussians::calculate() {
         calculateRow(row);
     }
 
+    
+    // calculate the result by adding the lastRow of block in last row
     unsigned long result = yLen;
 
     for (int i = 0; i < numBlocksPerRow; i++) {
@@ -201,19 +213,27 @@ void FourRussians::calculateRow(int row) {
 uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
+    // get index of searched block
     uint32_t index = mergeHash(xHash, yHash, b, c);
 
+    // if block doesn't exist 
     if (genBlocks[index] == 0) {
+        // calculate it
         genBlocks[index] = calculateBlock(xHash, yHash, b, c);
         calculated++;
     } else {
         found++;
     }
+    
+    // return the searched block 
     return genBlocks[index];
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
+    // merge b,c,x,y hashes into a single hash
+    // very importand that yHash is in the up most values of
+    // hash so that the hash is as lowest value possible
     return ((yHash << 24) + (xHash << 16) + (b << 8) + c);
 }
 
@@ -228,6 +248,7 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         table[i][0] = (table[i-1][0] + ((c >> (2 * (T - i))) & 3)) - 1;
     }
 
+    // calculate the block
     for (unsigned char row = 1; row <= T; row++) {
         for (unsigned char col = 1; col <= T; col++) {
 
