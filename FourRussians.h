@@ -3,12 +3,13 @@
 //
 #ifndef BIO_INF_FOUR_RUSSIANS_H
 #define BIO_INF_FOUR_RUSSIANS_H
-#define DATA(vectorTable, n_col, row, column) vectorTable[(column) + (n_col)*(row)]
 
 #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <cmath>
+
+#include "ThreadPool.h"
 
 #define BLOCK_SIZE 4
 
@@ -19,7 +20,9 @@ public:
     // Tp === T + 1
     unsigned char T, Tp; //dimension of block (txt). Not more than 255
 
-    int8_t *table;
+    // pomočna struktura koja se koristi u metodi calculateBlock
+    // za izračun bloka
+    int8_t **table;
 
     uint8_t firstRC;
 
@@ -28,10 +31,8 @@ public:
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
-    char** generatedBlocks;
-
     int found;
-    int calculated;
+    int calculated; 
     uint16_t* blocks;
     uint16_t* genBlocks;
 

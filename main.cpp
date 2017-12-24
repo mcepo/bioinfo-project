@@ -41,23 +41,23 @@ int main(int argc, char** argv) {
         cout << "Unable to open file";
         return -1;
     }
-    
-        sysinfo(&memInfo);
+
+    sysinfo(&memInfo);
     long long memBefore = memInfo.totalram - memInfo.freeram;
     memBefore += memInfo.totalswap - memInfo.freeswap;
     memBefore *= memInfo.mem_unit;
 
     FourRussians fr = FourRussians(X, Y, blockSize);
     unsigned long result = fr.calculate();
-    
-        sysinfo(&memInfo);
+
+    sysinfo(&memInfo);
     long long memAfter = memInfo.totalram - memInfo.freeram;
     memAfter += memInfo.totalswap - memInfo.freeswap;
     memAfter *= memInfo.mem_unit;
-    
-    double memUsage = (((double)((memAfter - memBefore)/1024)/1024));
 
-    cout << "Memory used: " << memUsage << "MB"<< endl;
+    double memUsage = (((double) ((memAfter - memBefore) / 1024) / 1024));
+
+    cout << "Memory used: " << memUsage << "MB" << endl;
 
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
     if (fr.xLen != 0 && fr.yLen != 0) {
         start = clock();
-        EdlibAlignResult resultCheck = edlibAlign(X_char, fr.xLen , Y_char, fr.yLen , edlibDefaultAlignConfig());
+        EdlibAlignResult resultCheck = edlibAlign(X_char, fr.xLen, Y_char, fr.yLen, edlibDefaultAlignConfig());
         if (resultCheck.status == EDLIB_STATUS_OK) {
             //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
         }

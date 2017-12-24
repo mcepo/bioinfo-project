@@ -40,8 +40,11 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
     cout << "Expected memory usage: " << mem << "MB" << endl;
 
-        table = new int8_t[ (T + 1) * (T + 1)];
-        table[0] = 0;
+    table = new int8_t*[(T + 1)];
+    for (int i = 0; i < (T + 1); i++) {
+        table[i] = new int8_t[(T + 1)];
+    }
+    table[0][0] = 0;
 
     // assigning 10101010 value to firstRC
     // što je jednako kao da u svako polje stavim +1
@@ -168,7 +171,7 @@ unsigned long FourRussians::calculate() {
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
-            calculateRow(row);
+        calculateRow(row);
     }
 
     unsigned long result = yLen;
@@ -220,9 +223,9 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     // convert offset to real and fill the first row and column
     for (unsigned char i = 1; i <= T; i++) {
         // B row
-        DATA(table, Tp, 0, i) = (DATA(table, Tp, 0, i - 1) + ((b >> (2 * (T - i))) & 3)) - 1;
+        table[0][i] = (table[0][i-1] + ((b >> (2 * (T - i))) & 3)) - 1;
         // C column
-        DATA(table, Tp, i, 0) = (DATA(table, Tp, i - 1, 0) + ((c >> (2 * (T - i))) & 3)) - 1;
+        table[i][0] = (table[i-1][0] + ((c >> (2 * (T - i))) & 3)) - 1;
     }
 
     for (unsigned char row = 1; row <= T; row++) {
@@ -230,31 +233,31 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
 
             //ovdje radim pretpostavku da ukoliko su isti znakovi mogu prepisati sa
             // dijagonale, koliko sam testirao mislim da to prolazi
-
             if (((xHash >> (2 * (T - col))) & 3) != ((yHash >> (2 * (T - row))) & 3)) {
-                diagonal = DATA(table, Tp, row - 1, col - 1);
-                top = DATA(table, Tp, row - 1, col);
-                left = DATA(table, Tp, row, col - 1);
-                DATA(table, Tp, row, col) = min(min(diagonal, left), top) + 1;
+                diagonal = table[row - 1][ col - 1];
+                top = table[row - 1][ col];
+                left = table[row][ col - 1];
+                table[row][col] = min(min(diagonal, left), top) + 1;
             } else {
-                DATA(table, Tp, row, col) = DATA(table, Tp, row - 1, col - 1);
+                table[row][col] = table[row - 1][ col - 1];
             }
         }
     }
     //      c + b
     // lastColumn + lastRow
     uint16_t f = 0;
-
+    
+    // dodao sam +1 u offsete kako bi rješio problem sa -1 
+    // i prebacivanjem istoga
+    
     // last column
-    f = (DATA(table, Tp, 1, T) - DATA(table, T, 0, T)) + 1;
-    for (int i = 1; i < T; i++) {
-        f = (f << 2) + ((DATA(table, Tp, i + 1, T) - DATA(table, Tp, i, T)) + 1);
+    for (int i = 0; i < T; i++) {
+        f = (f << 2) + ((table[i+1][T] - table[i][T]) + 1);
     }
 
     // last row
-    f = (f << 2) + ((DATA(table, Tp, T, 1) - DATA(table, Tp, T, 0)) + 1);
-    for (int i = 1; i < T; i++) {
-        f = (f << 2) + ((DATA(table, Tp, T, i + 1) - DATA(table, Tp, T, i)) + 1);
+    for (int i = 0; i < T; i++) {
+        f = (f << 2) + ((table[T][i+1] - table[T][i]) + 1);
     }
 
     //  print (xHash, yHash, b ,c );
@@ -272,35 +275,36 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
 
 //TODO: ovdje nekako pametnije napraviti da se izračuna max broj
 // blokova
+
 unsigned long FourRussians::numCombinations(unsigned char T) {
     return (unsigned long) (3 * 3 * pow(4, 5) * pow(4, 8));
 }
 
 void FourRussians::print(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
-    
-        cout << "TB" << "| x  ";
-    
-        // print x
-        for (unsigned int col = 0; col < T; col++) {
-            cout << ((xHash >> (2 * (T - col - 1))) & 3) << "  ";
+
+    cout << "TB" << "| x  ";
+
+    // print x
+    for (unsigned int col = 0; col < T; col++) {
+        cout << ((xHash >> (2 * (T - col - 1))) & 3) << "  ";
+    }
+
+    cout << endl << "--+";
+    for (unsigned int col = 0; col <= T; col++) {
+        cout << "---";
+    }
+
+    for (unsigned int row = 0; row <= T; row++) {
+        if (row == 0) {
+            cout << endl << "x | ";
+        } else {
+            cout << endl << ((yHash >> (2 * (T - row))) & 3) << " | ";
         }
-    
-        cout << endl << "--+";
         for (unsigned int col = 0; col <= T; col++) {
-            cout << "---";
+            cout << (int) table[row][col] << "  ";
         }
-    
-        for (unsigned int row = 0; row <= T; row++) {
-            if (row == 0) {
-                cout << endl << "x | ";
-            } else {
-                cout << endl << ((yHash >> (2 * (T - row))) & 3) << " | ";
-            }
-            for (unsigned int col = 0; col <= T; col++) {
-                cout << (int) DATA(table, T + 1, row, col) << "  ";
-            }
-        }
+    }
     cout << endl;
     cout << endl;
 }
