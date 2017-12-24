@@ -16,41 +16,45 @@ using namespace std;
 
 class FourRussians {
 public:
+    // Tp === T + 1
+    unsigned char T, Tp; //dimension of block (txt). Not more than 255
 
-    unsigned char T; //dimension of block (txt). Not more than 255
+    int8_t *table;
 
-    char *table;
-    char *constBC;
+    uint8_t firstRC;
 
     long top, left, diagonal;
 
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
-    
+
     char** generatedBlocks;
 
     int found;
     int calculated;
-    char** blocks;
+    uint16_t* blocks;
+    uint16_t* genBlocks;
+
+    uint8_t **xHash;
+    uint8_t *yHash;
 
     FourRussians(string x, string y, int blockSize); // offset encoded version
     FourRussians();
 
-    unsigned long calculate();
-    char* getTableBlock(char *b, char *c,
-            string const& x, string const& y);
-
-    char* calculateBlock(char *b, char *c,
-            string const& x, string const& y);
-    void calculateRow(int index);
-    
     unsigned long numCombinations(unsigned char T);
-    char index_to_acgt(unsigned int index);
-    unsigned int acgt_to_index(const char acgt);
-    unsigned int bc_to_index(char bc);
-    unsigned long lookUpIndex( string const& x, string const& y, char *b, char *c);
-    
-//    void print(Block &blk, unsigned char xLength, unsigned char yLength);
+    void generateXYHashes();
+    unsigned long calculate();
+    void calculateRow(int index);
+    uint16_t calculateBlock(uint8_t xHash, uint8_t yHash,
+            uint8_t b, uint8_t c);
+    uint16_t getTableBlock(uint8_t xHash, uint8_t yHash,
+            uint8_t b, uint8_t c);
+    uint32_t mergeHash(uint8_t xHash, uint8_t yHash,
+            uint8_t b, uint8_t c);
+
+    //  unsigned int acgt_to_index(const char acgt);
+
+    void print(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c);
 };
 
 #endif //BIO_INF_FOUR_RUSSIANS_H
