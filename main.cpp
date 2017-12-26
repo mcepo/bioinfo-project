@@ -12,21 +12,16 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
-// TODO: gdje je moguće implementirati prijenost varijabli i povratnih
-//      vrijednosti iz metoda referencom ili pointerom
-
-// TODO: organizirati datoteke u foldere
-
 int main(int argc, char** argv) {
 
     struct sysinfo memInfo;
     int blockSize = BLOCK_SIZE;
 
-// start stopwatch
+    // start stopwatch
     clock_t start = clock();
 
-    
-// read strings from input file
+
+    // read strings from input file
     string inputFilename, X, Y;
 
     if (argc != 2) {
@@ -45,19 +40,19 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    
-// start memory calculator
+
+    // start memory calculator
     sysinfo(&memInfo);
     long long memBefore = memInfo.totalram - memInfo.freeram;
     memBefore += memInfo.totalswap - memInfo.freeswap;
     memBefore *= memInfo.mem_unit;
 
-// initialize the algorithm
+    // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
-// calculate edit distance
+    // calculate edit distance
     unsigned long result = fr.calculate();
 
-// get memory consumptions
+    // get memory consumptions
     sysinfo(&memInfo);
     long long memAfter = memInfo.totalram - memInfo.freeram;
     memAfter += memInfo.totalswap - memInfo.freeswap;
@@ -65,21 +60,20 @@ int main(int argc, char** argv) {
 
     double memUsage = (((double) ((memAfter - memBefore) / 1024) / 1024));
 
-    cout << "Memory used: " << memUsage << "MB" << endl;
-
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
 
     double execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
 
-// echo some statistics
+    // echo some statistics
     cout << "Input string length: " << fr.xLen << endl;
-    cout << "Total number of blocks in matrix: " << (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
+    cout << "Total number of blocks in matrix: " << (unsigned long) (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
     cout << "Calculated (stored) blocks: " << fr.calculated << endl;
     cout << "Found blocks: " << fr.found << endl;
+    cout << "Memory used: " << memUsage << "MB" << endl;
     cout << "RESULT: " << result << " generated in: " << execTime << "sec" << endl;
 
-// EDLIB controle
+    // EDLIB controle
 
     if (fr.xLen != 0 && fr.yLen != 0) {
         start = clock();

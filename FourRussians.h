@@ -34,22 +34,21 @@ public:
 
 // used for statistic number of calculated blocks vs number of found blocks
     int found;
-    int calculated; 
+    int calculated;
 // storage of last row when calculating
     uint16_t* blocks;
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
-    
 // calculated hash values for x & y string
-    uint8_t **xHash;
+    uint8_t *xHash;
     uint8_t *yHash;
 
-    FourRussians(string x, string y, int blockSize); // offset encoded version
+    FourRussians(string const &x, string const &y, int blockSize); // offset encoded version
     FourRussians();
 
 // returns the max number of calculated blocks
-    unsigned long numCombinations(unsigned char T);
+    unsigned long numCombinations();
 // generates hashes for strings x & y
     void generateXYHashes();
 // start calculating edit distance
@@ -74,7 +73,7 @@ public:
     uint32_t mergeHash(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
 
-    //  unsigned int acgt_to_index(const char acgt);
+    uint8_t acgt_to_index(const char acgt);
 
     void print(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c);
 };

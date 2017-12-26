@@ -7,7 +7,7 @@
 FourRussians::FourRussians() {
 }
 
-FourRussians::FourRussians(string x, string y, int blockSize) {
+FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
 
     T = blockSize;
 
@@ -25,23 +25,16 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
     numBlocksPerRow = xLen / blockSize;
     numRowsToCalculate = yLen / blockSize;
 
-    cout << "Generating xy hashes ... ";
+    cout << "Generating xy hashes... ";
     generateXYHashes();
     cout << "GENERATED" << endl;
 
-    unsigned long numComb = numCombinations(T);
+    unsigned long numComb = numCombinations();
 
 // initialize array for last row
     blocks = new uint16_t[numBlocksPerRow];
 // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
-
-    cout << "Max number of blocks: " << numComb << endl;
-
-    double mem = (numComb * (2 * T)) / 1024 / 1024;
-
-    cout << "Expected memory usage: " << mem << "MB" << endl;
-
     
 // initialize 2d array that will be used in method
 // calculateBlocks for calculating the block
@@ -60,113 +53,23 @@ FourRussians::FourRussians(string x, string y, int blockSize) {
 
 }
 
-//  method for generating hashes of input strings
-// designed to reduce the search area, thus producing less blocks
-// and getting more hits on stored blocks further in the algorithm
-
 void FourRussians::generateXYHashes() {
-    
-    xHash = new uint8_t*[numRowsToCalculate];
+
+    xHash = new uint8_t[numBlocksPerRow];
     yHash = new uint8_t[numRowsToCalculate];
 
-    uint8_t valT, valG, valC, valA;
-    uint8_t number;
-
-    for (int row = 0; row < numRowsToCalculate; row++) {
-
-        valT = 7, valG = 7, valC = 7, valA = 7;
-        number = 0;
-
+    for (int i = 0; i < numBlocksPerRow; i++) {
         for (int j = 0; j < T; j++) {
-
-            switch (Y[row * T + j]) {
-                case 'A':
-                    if (valA == 7) {
-                        valA = number;
-                        number++;
-                    }
-                    yHash[row] = (yHash[row] << 2) + valA;
-                    break;
-                case 'T':
-                    if (valT == 7) {
-                        valT = number;
-                        number++;
-                    }
-                    yHash[row] = (yHash[row] << 2) + valT;
-                    break;
-                case 'G':
-                    if (valG == 7) {
-                        valG = number;
-                        number++;
-                    }
-                    yHash[row] = (yHash[row] << 2) + valG;
-                    break;
-                case 'C':
-                    if (valC == 7) {
-                        valC = number;
-                        number++;
-                    }
-                    yHash[row] = (yHash[row] << 2) + valC;
-                    break;
-            }
+            xHash[i] = (xHash[i] << 2) + acgt_to_index(X[i * T + j]);
         }
+    }
 
-        xHash[row] = new uint8_t[numBlocksPerRow];
-        for (int col = 0; col < numBlocksPerRow; col++) {
-            for (int j = 0; j < T; j++) {
-
-                switch (X[col * T + j]) {
-                    case 'A':
-                        if (valA == 7) {
-                            valA = number;
-                            number++;
-                        }
-                        xHash[row][col] = (xHash[row][col] << 2) + valA;
-                        break;
-                    case 'T':
-                        if (valT == 7) {
-                            valT = number;
-                            number++;
-                        }
-                        xHash[row][col] = (xHash[row][col] << 2) + valT;
-                        break;
-                    case 'G':
-                        if (valG == 7) {
-                            valG = number;
-                            number++;
-                        }
-                        xHash[row][col] = (xHash[row][col] << 2) + valG;
-                        break;
-                    case 'C':
-                        if (valC == 7) {
-                            valC = number;
-                            number++;
-                        }
-                        xHash[row][col] = (xHash[row][col] << 2) + valC;
-                        break;
-                }
-            }
+    for (int i = 0; i < numRowsToCalculate; i++) {
+        for (int j = 0; j < T; j++) {
+            yHash[i] = (yHash[i] << 2) + acgt_to_index(Y[i * T + j]);
         }
     }
 }
-
-//void FourRussians::generateXYHashes() {
-//
-//    xHash = new uint8_t[numBlocksPerRow];
-//    yHash = new uint8_t[numRowsToCalculate];
-//
-//    for (int i = 0; i < numBlocksPerRow; i++) {
-//        for (int j = 0; j < T; j++) {
-//            xHash[i] = (xHash[i] << 2) + acgt_to_index(X[i * T + j]);
-//        }
-//    }
-//
-//    for (int i = 0; i < numRowsToCalculate; i++) {
-//        for (int j = 0; j < T; j++) {
-//            yHash[i] = (yHash[i] << 2) + acgt_to_index(Y[i * T + j]);
-//        }
-//    }
-//}
 
 unsigned long FourRussians::calculate() {
 
@@ -175,7 +78,7 @@ unsigned long FourRussians::calculate() {
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks[col] = getTableBlock(xHash[0][col], yHash[0], firstRC, curC);
+        blocks[col] = getTableBlock(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
         curC = (blocks[col] >> 8);
     }
@@ -185,7 +88,7 @@ unsigned long FourRussians::calculate() {
     }
 
     
-    // calculate the result by adding the lastRow of block in last row
+    // calculate the result by adding the lastRow of blocks in last row
     unsigned long result = yLen;
 
     for (int i = 0; i < numBlocksPerRow; i++) {
@@ -204,7 +107,7 @@ void FourRussians::calculateRow(int row) {
 
         //lastRow
         curB = blocks[col];
-        blocks[col] = getTableBlock(xHash[row][col], yHash[row], curB, curC);
+        blocks[col] = getTableBlock(xHash[col], yHash[row], curB, curC);
         //lastColumn
         curC = (blocks[col] >> 8);
     }
@@ -286,19 +189,17 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     return f;
 }
 
-//unsigned int FourRussians::acgt_to_index(const char acgt) {
-//    if (acgt == 'A') return 0;
-//    if (acgt == 'C') return 1;
-//    if (acgt == 'G') return 2;
-//    if (acgt == 'T') return 3;
-//}
-
+uint8_t FourRussians::acgt_to_index(const char acgt) {
+    if (acgt == 'A') return 0;
+    if (acgt == 'C') return 1;
+    if (acgt == 'G') return 2;
+    if (acgt == 'T') return 3;
+}
 
 //TODO: ovdje nekako pametnije napraviti da se izračuna max broj
 // blokova
-
-unsigned long FourRussians::numCombinations(unsigned char T) {
-    return (unsigned long) (3 * 3 * pow(4, 5) * pow(4, 8));
+unsigned long FourRussians::numCombinations() {
+    return (unsigned long)pow(T,16);
 }
 
 void FourRussians::print(uint8_t xHash, uint8_t yHash,
