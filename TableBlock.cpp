@@ -671,6 +671,8 @@ vector<uint8_t >* loadCache(const char *inPath, unsigned char T){
     //auto cache = new vector<char>;
 
     const size_t count = numCombinations(T);
+    //cout << count;
+    //cin.ignore();
     auto cache = new vector<uint8_t>(count, (uint8_t) 42);
 
 
@@ -685,6 +687,15 @@ vector<uint8_t >* loadCache(const char *inPath, unsigned char T){
 
     return cache;
 
+}
+
+uint8_t* loadCacheToArray4(const char *inPath){
+    ifstream inFIle(inPath, std::ofstream::in);
+
+    auto output = new uint8_t[T4_CACHE_SIZE];
+    inFIle.read(reinterpret_cast<char*>(output), T4_CACHE_SIZE);
+    inFIle.close();
+    return output;
 }
 
 void combinationGenerator(unsigned char T, const char *outPathH, const char *outPathV){

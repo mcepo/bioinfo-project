@@ -12,6 +12,7 @@
 #define DUMP_PATH "/tmp/bioinfo/dump.bin"
 
 #define MAX_SPACE 509607936
+#define T4_CACHE_SIZE 429981696
 
 #include <vector>
 #include <algorithm>
@@ -50,6 +51,7 @@ class blockOutput{
 unsigned long combineBC(char bIndex, char cIndex);
 unsigned long combineXY(unsigned long xIndex, unsigned long yIndex);
 unsigned long lookUpIndex4(unsigned long xy, unsigned long bc);
+uint8_t* loadCacheToArray4(const char *inPath);
 void unpack4push(uint8_t dense, vector<char>* out, unsigned char T);
 void unpack4(uint8_t dense, vector<char>* out, unsigned char T);
 char index_to_acgt(unsigned int index);

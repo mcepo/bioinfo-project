@@ -5,14 +5,16 @@
 #include "TableBlock.h"
 #include "edlib.h"
 
-
+#define BLOCK_SIZE 4
 #define DUMP_PATH "/tmp/bioinfo/dump.bin"
 #define DEFAULT_BC_INDEX_4 6560UL
 #define DEFAULT_B_OR_C 80UL
-
-#define DEFAULT_FILENAME "/home/loki/CLionProjects/input.txt" // SIZE = 40000
+#define ROW_DUMP_PATH "/home/loki/dumpRow.bin"
+#define COL_DUMP_PATH "/home/loki/dumpCol.bin"
+//#define DEFAULT_FILENAME "/home/loki/CLionProjects/input.txt" // SIZE = 40000
 //#define DEFAULT_FILENAME "/home/loki/CLionProjects/input_baseline.txt" // SIZE = 100000
 //#define DEFAULT_FILENAME "/home/loki/CLionProjects/inputSimple.txt" // SIZE = 8
+#define DEFAULT_FILENAME "/home/loki/CLionProjects/new_input.txt" // SIZE = 10 ** 6
 
 
 int main(int argc, char** argv) {
@@ -21,19 +23,10 @@ int main(int argc, char** argv) {
     /////////////// input //////////////////
     ////////////////////////////////////////
 
-    unsigned char blockSize = 4; //TODO: beware, as this is hardcoded to be 4. It WON'T work with anything else
+    //unsigned char blockSize = 4; //TODO: beware, as this is hardcoded to be 4. It WON'T work with anything else
 
     //input strings
     string inputFilename, X, Y;
-
-    vector<char>* defaultRowCol;
-    vector<char> rc;
-    rc.reserve(blockSize);
-    for(unsigned int i = 0; i < blockSize; i++){
-        rc.push_back((char) +1);
-    }
-    defaultRowCol = &rc;
-
 
     // user input parsing
     if (argc != 2) {
@@ -63,31 +56,43 @@ int main(int argc, char** argv) {
     unsigned long yLen = Y.size();
 
     // load cache
-    vector<uint8_t>* lastRowCache;
-    vector<uint8_t>* lastColCache;
-    lastRowCache = loadCache("/home/loki/dumpRow.bin", blockSize);
-    lastColCache = loadCache("/home/loki/dumpCol.bin", blockSize);
+    //vector<uint8_t>* lastRowCache;
+    //vector<uint8_t>* lastColCache;
+    //lastRowCache = loadCache(ROW_DUMP_PATH, blockSize);
+    //lastColCache = loadCache(COL_DUMP_PATH, blockSize);
 
-    unsigned long numLettersToAddX = xLen % blockSize; // just substract from result
-    unsigned long numLettersToAddY = yLen % blockSize; // remaining to calculate the old-fashioned way. For now..
-    unsigned long numBlocksPerRow  = xLen / blockSize;
-    unsigned long numBlocksPerCol  = yLen / blockSize;
+    // a faster cache
+    uint8_t* lastRowCacheFast;
+    uint8_t* lastColCacheFast;
+    lastRowCacheFast = loadCacheToArray4(ROW_DUMP_PATH);
+    lastColCacheFast = loadCacheToArray4(COL_DUMP_PATH);
 
-    vector<char> hRow, vRow;
-    hRow.reserve(numBlocksPerCol);
-    vRow.reserve(numBlocksPerCol);
+    // check if elements are the same..
+//    for(unsigned long i = 1000; i < 1100; i++){
+//        cout << lastRowCache->at(i) << "  vs  " << lastRowCacheFast[i] << endl;
+//        cout << lastColCache->at(i) << "  vs  " << lastColCacheFast[i] << endl;
+//        cout << endl;
+//    }
+//    cin.ignore();
 
-    //vector<blockOutput*> blockRow;
-    //blockRow.reserve(numBlocksPerCol);
+    unsigned long numLettersToAddX = xLen % BLOCK_SIZE; // just substract from result
+    unsigned long numLettersToAddY = yLen % BLOCK_SIZE; // remaining to calculate the old-fashioned way. For now..
+    unsigned long numBlocksPerRow  = xLen / BLOCK_SIZE;
+    unsigned long numBlocksPerCol  = yLen / BLOCK_SIZE;
 
-    //vector<unsigned long> indexRow;
-    //indexRow.reserve(numBlocksPerCol);
+//    vector<char> hRow, vRow;
+//    hRow.reserve(numBlocksPerCol);
+//    vRow.reserve(numBlocksPerCol);
 
-    vector<unsigned long> xIndexes, yIndexes;
-    xIndexes.reserve(xLen / blockSize);
-    yIndexes.reserve(yLen / blockSize);
+    auto hRowFaster = new char[numBlocksPerCol];
+    auto vRowFaster = new char[numBlocksPerCol];
 
-    //vector<char> B, C;
+    //vector<unsigned long> xIndexes, yIndexes;
+    //xIndexes.reserve(xLen / BLOCK_SIZE);
+    //yIndexes.reserve(yLen / BLOCK_SIZE);
+
+    auto xIndexesFaster = new unsigned long[xLen / BLOCK_SIZE];
+    auto yIndexesFaster = new unsigned long[yLen / BLOCK_SIZE];
 
     const char *Xs;
     const char *Ys;
@@ -99,15 +104,15 @@ int main(int argc, char** argv) {
     ////// precomputing acgt indexes ///////
     ////////////////////////////////////////
 
-    //unsigned long defaultBC = combineBC(DEFAULT_BC_INDEX_4, DEFAULT_BC_INDEX_4);
 
-
-    for(unsigned int i = 0; i < (xLen/blockSize); i++){
-        xIndexes.push_back(acgtIndex4(&Xs[i*blockSize]) << 8);
+    for(unsigned int i = 0; i < (xLen/BLOCK_SIZE); i++){
+        //xIndexes.push_back(acgtIndex4(&Xs[i*BLOCK_SIZE]) << 8);
+        xIndexesFaster[i] = acgtIndex4(&Xs[i*BLOCK_SIZE]) << 8;
     }
 
-    for(unsigned int i = 0; i < (yLen/blockSize); i++){
-        yIndexes.push_back(acgtIndex4(&Ys[i*blockSize]));
+    for(unsigned int i = 0; i < (yLen/BLOCK_SIZE); i++){
+        //yIndexes.push_back(acgtIndex4(&Ys[i*BLOCK_SIZE]));
+        yIndexesFaster[i] = acgtIndex4(&Ys[i*BLOCK_SIZE]);
     }
 
 
@@ -117,78 +122,40 @@ int main(int argc, char** argv) {
 
 
     /// first block initialization
-    //unsigned long currentIndex = lookUpIndex(blockSize, Xs, Ys, defaultRowCol, defaultRowCol);
-    unsigned long fasterIndex = lookUpIndex4(combineXY(xIndexes.at(0), yIndexes.at(0)), DEFAULT_BC_INDEX_4);
-
-    //if(currentIndex != fasterIndex){
-    //    cout << "err";
-    //    cin.ignore();
-    //}
+    //unsigned long fasterIndex = lookUpIndex4(combineXY(xIndexes.at(0), yIndexes.at(0)), DEFAULT_BC_INDEX_4);
+    unsigned long fasterIndex = lookUpIndex4(combineXY(xIndexesFaster[0], yIndexesFaster[0]), DEFAULT_BC_INDEX_4);
 
     uint8_t currentLastRowDense;
     uint8_t currentLastColDense;
 
-    currentLastRowDense = lastRowCache->at(fasterIndex);//at(currentIndex);
-    currentLastColDense = lastColCache->at(fasterIndex);//at(currentIndex);
+    currentLastRowDense = lastRowCacheFast[fasterIndex];//lastRowCache->at(fasterIndex);
+    currentLastColDense = lastColCacheFast[fasterIndex];//->at(fasterIndex);
 
-    vRow.push_back(currentLastColDense);
-    hRow.push_back(currentLastRowDense);
-
-    //auto currentLastRow = new vector<char>;
-    //auto currentLastCol = new vector<char>;
-    //currentLastRow->reserve(blockSize);
-    //currentLastCol->reserve(blockSize);
-
-    //unpack4push(currentLastRowDense, currentLastRow, blockSize);
-    //unpack4push(currentLastColDense, currentLastCol, blockSize);
-
-    //auto currentResult = new blockOutput;
-
-    //currentResult->H = currentLastRow;
-    //currentResult->V = currentLastCol;
-
-
-    //blockRow.push_back(currentResult);
+    //vRow.push_back(currentLastColDense);
+    //hRow.push_back(currentLastRowDense);
+    vRowFaster[0] = currentLastColDense;
+    hRowFaster[0] = currentLastRowDense;
 
     /// initialization of the rest of row
     unsigned long row = 0;
     for(unsigned col = 1; col < numBlocksPerCol; col++){
 
-        //vector<char>* lastRes = (blockRow.at(col - 1)->V);
+//        fasterIndex = lookUpIndex4(combineXY(xIndexes.at(col), yIndexes.at(row)),
+//                                   //combineBC(vRow.at(col - 1), DEFAULT_B_OR_C));
+//                                   combineBC(vRowFaster[col - 1], DEFAULT_B_OR_C));
 
-        //vector<char> lastResultVertical = *lastRes;
-        //currentIndex = lookUpIndex(blockSize, &Xs[col * blockSize], Ys, defaultRowCol, lastRes);
-        fasterIndex = lookUpIndex4(combineXY(xIndexes.at(col), yIndexes.at(row)),
-                                   combineBC(vRow.at(col - 1), DEFAULT_B_OR_C));
+        fasterIndex = lookUpIndex4(combineXY(xIndexesFaster[col], yIndexesFaster[row]),
+                                   combineBC(vRowFaster[col - 1], DEFAULT_B_OR_C));
 
-        //auto firstPart = combineXY(xIndexes.at(col), yIndexes.at(row));
-        //auto secondPart = combineBC(vRow.at(col - 1), DEFAULT_B_OR_C);
 
-        //if(currentIndex != fasterIndex){
-        //    cout << "err";
-        //    cin.ignore();
-        //}
+                //TODO: what just happened?!
+        currentLastRowDense = lastColCacheFast[fasterIndex];//lastColCache->at(fasterIndex);
+        currentLastColDense = lastRowCacheFast[fasterIndex];//lastRowCache->at(fasterIndex);
 
-        //TODO: what just happened?!
-        currentLastRowDense = lastColCache->at(fasterIndex);//at(currentIndex);
-        currentLastColDense = lastRowCache->at(fasterIndex);//at(currentIndex);
-
-        vRow.push_back(currentLastColDense);
-        hRow.push_back(currentLastRowDense);
-
-        //auto currentLastRow2 = new vector<char>;
-        //auto currentLastCol2 = new vector<char>;
-        //currentLastRow2->reserve(blockSize);
-        //currentLastCol2->reserve(blockSize);
-
-        //unpack4push(currentLastRowDense, currentLastRow2, blockSize);
-        //unpack4push(currentLastColDense, currentLastCol2, blockSize);
-
-        //auto currentResult2 = new blockOutput;
-        //currentResult2->H = currentLastRow2;
-        //currentResult2->V = currentLastCol2;
-
-        //blockRow.push_back(currentResult2);
+//        vRow.push_back(currentLastColDense);
+//        hRow.push_back(currentLastRowDense);
+        vRowFaster[col] = currentLastColDense;
+        hRowFaster[col] = currentLastRowDense;
     }
 
 
@@ -197,63 +164,36 @@ int main(int argc, char** argv) {
 
         /// first column initialization
         unsigned long col = 0;
+//        fasterIndex = lookUpIndex4(combineXY(xIndexes.at(col), yIndexes.at(row)),
+//                                   //combineBC(DEFAULT_B_OR_C, hRow.at(col)));
+//                                   combineBC(DEFAULT_B_OR_C, hRowFaster[col]));
 
-        //vector<char>* lastResH = blockRow.at(col)->H;
-
-        //currentIndex = lookUpIndex(blockSize, &Xs[col * blockSize], &Ys[row * blockSize], lastResH, defaultRowCol);
-        fasterIndex = lookUpIndex4(combineXY(xIndexes.at(col), yIndexes.at(row)),
-                                   combineBC(DEFAULT_B_OR_C, hRow.at(col)));
-
-//        auto firstPart = combineXY(xIndexes.at(col), yIndexes.at(row));
-//        auto secondPart = combineBC(vRow.at(col - 1), DEFAULT_B_OR_C);
-
-
-        //if(currentIndex != fasterIndex){
-        //    cout << "err";
-        //    cin.ignore();
-        //}
+        fasterIndex = lookUpIndex4(combineXY(xIndexesFaster[col], yIndexesFaster[row]),
+                                   combineBC(DEFAULT_B_OR_C, hRowFaster[col]));
 
         // TODO: what?! again?
-        currentLastRowDense = lastColCache->at(fasterIndex);//at(currentIndex);
-        currentLastColDense = lastRowCache->at(fasterIndex);//at(currentIndex);
+        currentLastRowDense = lastColCacheFast[fasterIndex];//lastColCache->at(fasterIndex);
+        currentLastColDense = lastRowCacheFast[fasterIndex];//lastRowCache->at(fasterIndex);
 
-        hRow.at(col) = currentLastRowDense;
-        vRow.at(col) = currentLastColDense;
-
-        // now, use existing reserved memory:
-        //currentLastRow = lastResH;
-        //currentLastCol = blockRow.at(col)->V;
-
-        //unpack4(currentLastRowDense, currentLastRow, blockSize);
-        //unpack4(currentLastColDense, currentLastCol, blockSize);
+        //hRow.at(col) = currentLastRowDense;
+        //vRow.at(col) = currentLastColDense;
+        hRowFaster[col] = currentLastRowDense;
+        vRowFaster[col] = currentLastColDense;
 
         /// calculatig values for the rest of columns
         for(col = 1; col < numBlocksPerCol; col++){
-            //vector<char>* lastResH2 = blockRow.at(col)->H;
-            //vector<char>* lastResV2 = blockRow.at(col - 1)->V;
-
-
-            //currentIndex = lookUpIndex(blockSize, &Xs[col * blockSize], &Ys[row * blockSize], lastResH2, lastResV2);
-            fasterIndex = lookUpIndex4(combineXY(xIndexes.at(col), yIndexes.at(row)),
-                                       combineBC(vRow.at(col - 1), hRow.at(col)));
-
-            //if(currentIndex != fasterIndex){
-            //    cout << "err";
-            //    cin.ignore();
-            //}
+            fasterIndex = lookUpIndex4(combineXY(xIndexesFaster[col], yIndexesFaster[row]),
+                                       //combineBC(vRow.at(col - 1), hRow.at(col)));
+                                       combineBC(vRowFaster[col - 1], hRowFaster[col]));
 
             // TODO: damn, f*$#k this !?!
-            currentLastRowDense = lastColCache->at(fasterIndex);//at(currentIndex);
-            currentLastColDense = lastRowCache->at(fasterIndex);//at(currentIndex);
+            currentLastRowDense = lastColCacheFast[fasterIndex];//lastColCache->at(fasterIndex);
+            currentLastColDense = lastRowCacheFast[fasterIndex];//lastRowCache->at(fasterIndex);
 
-            hRow.at(col) = currentLastRowDense;
-            vRow.at(col) = currentLastColDense;
-
-            //currentLastRow = lastResH2;
-            //currentLastCol = blockRow.at(col)->V;
-
-            //unpack4(currentLastRowDense, currentLastRow, blockSize);
-            //unpack4(currentLastColDense, currentLastCol, blockSize);
+//            hRow.at(col) = currentLastRowDense;
+//            vRow.at(col) = currentLastColDense;
+            hRowFaster[col] = currentLastRowDense;
+            vRowFaster[col] = currentLastColDense;
             }
 
         }
@@ -264,17 +204,12 @@ int main(int argc, char** argv) {
     ////////// result calculation //////////
     ////////////////////////////////////////
 
-    //unsigned long result2 = yLen;
     unsigned long resultFaster = yLen;
-
-    //for(unsigned int i = 0; i < numBlocksPerRow; i++){
-    //    result2 += blockRow.at(i)->sum();
-    //}
-
     auto lastDPRow = new vector<char>(4);
 
     for(unsigned int i = 0; i < numBlocksPerRow; i++){
-        unpack4(hRow.at(i), lastDPRow, blockSize);
+//        unpack4(hRow.at(i), lastDPRow, BLOCK_SIZE);
+        unpack4(hRowFaster[i], lastDPRow, BLOCK_SIZE);
         for(auto j: *lastDPRow){
             resultFaster += j;
         }
@@ -302,7 +237,14 @@ int main(int argc, char** argv) {
     }
     edlibFreeAlignResult(resultCheck);
 
-    //cin.ignore();
+    cin.ignore();
+
+
+    /////////////////////////////////////////////
+    /////////////// free some memory ////////////
+    /////////////////////////////////////////////
+
+
 
     return 0;
 }

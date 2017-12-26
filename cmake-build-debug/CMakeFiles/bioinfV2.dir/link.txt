@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/bioinfV2.dir/main.cpp.o CMakeFiles/bioinfV2.dir/TableBlock.cpp.o CMakeFiles/bioinfV2.dir/edlib.cpp.o  -o bioinfV2 
