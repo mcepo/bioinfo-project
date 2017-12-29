@@ -30,7 +30,7 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     generateXYHashes();
     cout << "GENERATED" << endl;
 
-    uint64_t numComb = numCombinations();
+    numComb = numCombinations();
 
     // initialize array for last row
     blocks = new uint16_t[numBlocksPerRow];
@@ -50,8 +50,15 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     // što je jednako kao da u svako polje stavim +1
     // stavljam u biti 2 u svako polje jer offsete spremam uvečano za 1
     // znači 0, 1 ili 2 umjesto -1 0 +1
-    firstRC = 170;
+    firstRC = 0;
+    mask = 0;
+    for (int i = 0; i < T; i++) {
+        firstRC = (firstRC << 2) + 2;
+    }
 
+    for (int i = 0; i < T; i++) {
+        mask = (mask << 2) + 3;
+    }
 }
 
 void FourRussians::generateXYHashes() {
@@ -60,12 +67,14 @@ void FourRussians::generateXYHashes() {
     yHash = new uint8_t[numRowsToCalculate];
 
     for (int i = 0; i < numBlocksPerRow; i++) {
+        xHash[i] = 0;
         for (int j = 0; j < T; j++) {
             xHash[i] = (xHash[i] << 2) + acgt_to_index(X[i * T + j]);
         }
     }
 
     for (int i = 0; i < numRowsToCalculate; i++) {
+        yHash[i] = 0;
         for (int j = 0; j < T; j++) {
             yHash[i] = (yHash[i] << 2) + acgt_to_index(Y[i * T + j]);
         }
@@ -81,7 +90,7 @@ unsigned long FourRussians::calculate() {
 
         blocks[col] = getTableBlock(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
-        curC = (blocks[col] >> (T << 1));
+        curC = (blocks[col] >> (T << 1)) & mask;
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
@@ -106,10 +115,10 @@ void FourRussians::calculateRow(int row) {
     for (int col = 0; col < numBlocksPerRow; col++) {
 
         //lastRow
-        curB = blocks[col];
+        curB = blocks[col] & mask;
         blocks[col] = getTableBlock(xHash[col], yHash[row], curB, curC);
         //lastColumn
-        curC = (blocks[col] >> (T << 1));
+        curC = (blocks[col] >> (T << 1)) & mask;
     }
 }
 
@@ -187,10 +196,6 @@ uint8_t FourRussians::acgt_to_index(const char acgt) {
     if (acgt == 'T') return 3;
 }
 
-// TODO: nakon što smanjiš veličinu F strukture, ovo prilagoditi da 
-// vrača adekvatnu vrijednost s obzirom na maksimalnu veličinu
-// koju index može postići
-
 uint64_t FourRussians::numCombinations() {
 
     uint64_t result = 0U;
@@ -230,7 +235,6 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash,
             cout << (int) table[row][col] << "  ";
         }
     }
-    cout << endl;
     cout << endl;
 }
 

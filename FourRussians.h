@@ -13,7 +13,7 @@
 
 #include <bitset>
 
-#define BLOCK_SIZE 4
+#define BLOCK_SIZE 3
 
 using namespace std;
 
@@ -27,6 +27,8 @@ public:
 
     // storing value for c & b of blocks in firstRow and firstColumn
     uint8_t firstRC;
+    uint8_t mask;
+    uint64_t numComb;
     
     // used in method calculateBlock as temp variables
     long top, left, diagonal;
