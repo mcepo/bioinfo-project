@@ -32,10 +32,14 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
 
     numComb = numCombinations();
 
-    // initialize array for last row
-    blocks = new uint16_t[numBlocksPerRow];
     // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
+
+    blocks = new uint16_t*[numRowsToCalculate];
+
+    for (int row = 0; row < numRowsToCalculate; row++) {
+        blocks[row] = new uint16_t[numBlocksPerRow];
+    }
 
     // initialize 2d array that will be used in method
     // calculateBlocks for calculating the block
@@ -85,9 +89,9 @@ unsigned long FourRussians::calculate() {
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks[col] = getTableBlock(xHash[col], yHash[0], firstRC, curC);
+        blocks[0][col] = getTableBlock(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
-        curC = (blocks[col] >> (T << 1)) & mask;
+        curC = (blocks[0][col] >> (T << 1)) & mask;
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
@@ -99,7 +103,7 @@ unsigned long FourRussians::calculate() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (uint8_t j = 0; j < T; j++) {
-            result += (blocks[i] >> (j << 1) & 3) - 1;
+            result += (blocks[numRowsToCalculate-1][i] >> (j << 1) & 3) - 1;
         }
     }
     return result;
@@ -112,10 +116,10 @@ void FourRussians::calculateRow(int row) {
     for (int col = 0; col < numBlocksPerRow; col++) {
 
         //lastRow
-        curB = blocks[col] & mask;
-        blocks[col] = getTableBlock(xHash[col], yHash[row], curB, curC);
+        curB = blocks[row - 1][col] & mask;
+        blocks[row][col] = getTableBlock(xHash[col], yHash[row], curB, curC);
         //lastColumn
-        curC = (blocks[col] >> (T << 1)) & mask;
+        curC = (blocks[row][col] >> (T << 1)) & mask;
     }
 }
 

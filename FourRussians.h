@@ -33,8 +33,7 @@ public:
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
-// storage of last row when calculating
-    uint16_t* blocks;
+    uint16_t **blocks;
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
