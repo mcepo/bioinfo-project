@@ -29,6 +29,10 @@ REM set input parameters
 echo Staring test: string length range %min_length% - %max_length%  step %step%
 echo.
 
+REM TODO: testirati !
+del *.o main.exe generator.exe
+make
+
 REM loop throu given range 
 for /l %%x in (%min_length%, %step%, %max_length%) do (
 
