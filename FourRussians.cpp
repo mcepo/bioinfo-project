@@ -93,7 +93,7 @@ unsigned long FourRussians::calculate() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (unsigned long j = 0; j < T; j++) {
-            result += (blocks[i] >> (2 * j) & 3) - 1;
+            result += (blocks[i] >> (j << 1) & 3) - 1;
         }
     }
     return result;
@@ -130,7 +130,7 @@ uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
-    return ((b << (T * 6)) + (c << (T * 4)) + (yHash << (T * 2)) + xHash);
+    return ((b << ((T << 2) + (T << 1))) + (c << (T << 2)) + (yHash << (T << 1)) + xHash);
 }
 
 uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
@@ -139,16 +139,16 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     // convert offset to real and fill the first row and column
     for (unsigned char i = 1; i <= T; i++) {
         // B row
-        table[0][i] = (table[0][i - 1] + ((b >> (2 * (T - i))) & 3)) - 1;
+        table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
         // C column
-        table[i][0] = (table[i - 1][0] + ((c >> (2 * (T - i))) & 3)) - 1;
+        table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
     }
 
     // calculate the block
     for (unsigned char row = 1; row <= T; row++) {
         for (unsigned char col = 1; col <= T; col++) {
 
-            if (((xHash >> (2 * (T - col))) & 3) != ((yHash >> (2 * (T - row))) & 3)) {
+            if (((xHash >> ((T - col) << 1)) & 3) != ((yHash >> ((T - row) << 1)) & 3)) {
                 diagonal = table[row - 1][ col - 1];
                 top = table[row - 1][ col];
                 left = table[row][ col - 1];
@@ -190,6 +190,7 @@ uint8_t FourRussians::acgt_to_index(const char acgt) {
 // TODO: nakon što smanjiš veličinu F strukture, ovo prilagoditi da 
 // vrača adekvatnu vrijednost s obzirom na maksimalnu veličinu
 // koju index može postići
+
 unsigned long FourRussians::numCombinations() {
     return (unsigned long) pow(T, 16);
 }
