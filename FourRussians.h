@@ -33,7 +33,7 @@ public:
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
-    uint16_t **blocks;
+    uint32_t **blocks;
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
@@ -61,7 +61,7 @@ public:
 // method that checks if a block is already calculated and stored
 // or it should be calculated, if so calls calculateBlock to calculate the new
 // block and returns the calculated block
-    uint16_t getTableBlock(uint8_t xHash, uint8_t yHash,
+    uint32_t getIndex(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     
 // just merges hashes of b,c,x,y for a given block and returns a merged hash

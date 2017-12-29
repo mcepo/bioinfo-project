@@ -35,10 +35,10 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
 
-    blocks = new uint16_t*[numRowsToCalculate];
+    blocks = new uint32_t*[numRowsToCalculate];
 
     for (int row = 0; row < numRowsToCalculate; row++) {
-        blocks[row] = new uint16_t[numBlocksPerRow];
+        blocks[row] = new uint32_t[numBlocksPerRow];
     }
 
     // initialize 2d array that will be used in method
@@ -89,9 +89,9 @@ unsigned long FourRussians::calculate() {
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks[0][col] = getTableBlock(xHash[col], yHash[0], firstRC, curC);
+        blocks[0][col] = getIndex(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
-        curC = (blocks[0][col] >> (T << 1)) & mask;
+        curC = (genBlocks[blocks[0][col]] >> (T << 1)) & mask;
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
@@ -103,7 +103,7 @@ unsigned long FourRussians::calculate() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (uint8_t j = 0; j < T; j++) {
-            result += (blocks[numRowsToCalculate-1][i] >> (j << 1) & 3) - 1;
+            result += (genBlocks[blocks[numRowsToCalculate-1][i]] >> (j << 1) & 3) - 1;
         }
     }
     return result;
@@ -116,14 +116,14 @@ void FourRussians::calculateRow(int row) {
     for (int col = 0; col < numBlocksPerRow; col++) {
 
         //lastRow
-        curB = blocks[row - 1][col] & mask;
-        blocks[row][col] = getTableBlock(xHash[col], yHash[row], curB, curC);
+        curB = genBlocks[blocks[row - 1][col]] & mask;
+        blocks[row][col] = getIndex(xHash[col], yHash[row], curB, curC);
         //lastColumn
-        curC = (blocks[row][col] >> (T << 1)) & mask;
+        curC = (genBlocks[blocks[row][col]] >> (T << 1)) & mask;
     }
 }
 
-uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
+uint32_t FourRussians::getIndex(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
     // get index of searched block
@@ -135,7 +135,7 @@ uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
         genBlocks[index] = calculateBlock(xHash, yHash, b, c);
     }
     // return the searched block 
-    return genBlocks[index];
+    return index;
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
