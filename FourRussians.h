@@ -11,6 +11,8 @@
 
 #include "ThreadPool.h"
 
+#include <bitset>
+
 #define BLOCK_SIZE 4
 
 using namespace std;
@@ -25,7 +27,7 @@ public:
 
     // storing value for c & b of blocks in firstRow and firstColumn
     uint8_t firstRC;
-
+    
     // used in method calculateBlock as temp variables
     long top, left, diagonal;
 
@@ -45,7 +47,7 @@ public:
     FourRussians();
 
 // returns the max number of calculated blocks
-    unsigned long numCombinations();
+    uint64_t numCombinations();
 // generates hashes for strings x & y
     void generateXYHashes();
 // start calculating edit distance

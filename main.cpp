@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         getline(inputFile, X);
         getline(inputFile, Y);
     } else {
-        cout << "Unable to open file";
+        cout << "Unable to open file" << endl;
         return -1;
     }
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 
     // echo some statistics
     cout << "Input string length: " << fr.xLen << endl;
-    cout << "Total number of blocks in matrix: " << (unsigned long) (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
+   // cout << "Total number of blocks in matrix: " << (uint64_t) (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
 //    cout << "Calculated (stored) blocks: " << fr.calculated << endl;
 //    cout << "Found blocks: " << fr.found << endl;
     cout << "Memory used: " << memUsage << "MB" << endl;
