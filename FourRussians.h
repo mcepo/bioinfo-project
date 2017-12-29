@@ -32,9 +32,6 @@ public:
     int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
-// used for statistic number of calculated blocks vs number of found blocks
-    int found;
-    int calculated;
 // storage of last row when calculating
     uint16_t* blocks;
 // storage of all calculated blocks

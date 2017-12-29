@@ -11,19 +11,20 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
 
     T = blockSize;
 
-    X = (x);
-    Y = (y);
+    xLen = x.size();
+    yLen = y.size();
 
-// initialize counters to count number of stored blocks 
-// and number of found blocks
-    found = 0;
-    calculated = 0;
-
-    xLen = X.size();
-    yLen = Y.size();
-
-    numBlocksPerRow = xLen / blockSize;
-    numRowsToCalculate = yLen / blockSize;
+    if (xLen >= yLen) {
+        X = (x);
+        Y = (y);
+        numBlocksPerRow = xLen / blockSize;
+        numRowsToCalculate = yLen / blockSize;
+    } else {
+        X = (y);
+        Y = (x);
+        numBlocksPerRow = yLen / blockSize;
+        numRowsToCalculate = xLen / blockSize;
+    }
 
     cout << "Generating xy hashes... ";
     generateXYHashes();
@@ -31,14 +32,14 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
 
     unsigned long numComb = numCombinations();
 
-// initialize array for last row
+    // initialize array for last row
     blocks = new uint16_t[numBlocksPerRow];
-// initialize array for storing calculated blocks
+    // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
-    
-// initialize 2d array that will be used in method
-// calculateBlocks for calculating the block
-// always the same 
+
+    // initialize 2d array that will be used in method
+    // calculateBlocks for calculating the block
+    // always the same 
     table = new int8_t*[(T + 1)];
     for (int i = 0; i < (T + 1); i++) {
         table[i] = new int8_t[(T + 1)];
@@ -87,7 +88,6 @@ unsigned long FourRussians::calculate() {
         calculateRow(row);
     }
 
-    
     // calculate the result by adding the lastRow of blocks in last row
     unsigned long result = yLen;
 
@@ -117,27 +117,20 @@ uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
     // get index of searched block
-    uint32_t index = mergeHash(xHash, yHash, b, c);
+    uint64_t index = mergeHash(xHash, yHash, b, c);
 
     // if block doesn't exist 
     if (genBlocks[index] == 0) {
         // calculate it
         genBlocks[index] = calculateBlock(xHash, yHash, b, c);
-        calculated++;
-    } else {
-        found++;
     }
-    
     // return the searched block 
     return genBlocks[index];
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
-    // merge b,c,x,y hashes into a single hash
-    // very importand that yHash is in the up most values of
-    // hash so that the hash is as lowest value possible
-    return ((yHash << 24) + (xHash << 16) + (b << 8) + c);
+    return ((b << (T * 6)) + (c << (T * 4)) + (yHash << (T * 2)) + xHash);
 }
 
 uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
@@ -146,17 +139,15 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     // convert offset to real and fill the first row and column
     for (unsigned char i = 1; i <= T; i++) {
         // B row
-        table[0][i] = (table[0][i-1] + ((b >> (2 * (T - i))) & 3)) - 1;
+        table[0][i] = (table[0][i - 1] + ((b >> (2 * (T - i))) & 3)) - 1;
         // C column
-        table[i][0] = (table[i-1][0] + ((c >> (2 * (T - i))) & 3)) - 1;
+        table[i][0] = (table[i - 1][0] + ((c >> (2 * (T - i))) & 3)) - 1;
     }
 
     // calculate the block
     for (unsigned char row = 1; row <= T; row++) {
         for (unsigned char col = 1; col <= T; col++) {
 
-            //ovdje radim pretpostavku da ukoliko su isti znakovi mogu prepisati sa
-            // dijagonale, koliko sam testirao mislim da to prolazi
             if (((xHash >> (2 * (T - col))) & 3) != ((yHash >> (2 * (T - row))) & 3)) {
                 diagonal = table[row - 1][ col - 1];
                 top = table[row - 1][ col];
@@ -170,18 +161,18 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     //      c + b
     // lastColumn + lastRow
     uint16_t f = 0;
-    
+
     // dodao sam +1 u offsete kako bi rješio problem sa -1 
     // i prebacivanjem istoga
-    
+
     // last column
     for (int i = 0; i < T; i++) {
-        f = (f << 2) + ((table[i+1][T] - table[i][T]) + 1);
+        f = (f << 2) + ((table[i + 1][T] - table[i][T]) + 1);
     }
 
     // last row
     for (int i = 0; i < T; i++) {
-        f = (f << 2) + ((table[T][i+1] - table[T][i]) + 1);
+        f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
     }
 
     //  print (xHash, yHash, b ,c );
@@ -196,10 +187,11 @@ uint8_t FourRussians::acgt_to_index(const char acgt) {
     if (acgt == 'T') return 3;
 }
 
-//TODO: ovdje nekako pametnije napraviti da se izračuna max broj
-// blokova
+// TODO: nakon što smanjiš veličinu F strukture, ovo prilagoditi da 
+// vrača adekvatnu vrijednost s obzirom na maksimalnu veličinu
+// koju index može postići
 unsigned long FourRussians::numCombinations() {
-    return (unsigned long)pow(T,16);
+    return (unsigned long) pow(T, 16);
 }
 
 void FourRussians::print(uint8_t xHash, uint8_t yHash,
