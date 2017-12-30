@@ -31,9 +31,9 @@ public:
     uint64_t numComb;
     
     // used in method calculateBlock as temp variables
-    long top, left, diagonal;
+    int8_t top, left, diagonal;
 
-    int xLen, yLen, numBlocksPerRow, numRowsToCalculate;
+    uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
 // storage of last row when calculating

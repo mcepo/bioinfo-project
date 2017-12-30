@@ -21,12 +21,15 @@ int main(int argc, char** argv) {
     clock_t start = clock();
 
     // read strings from input file
-    string inputFilename, X, Y;
+    string inputFilename = DEFAULT_FILENAME;
+    string X, Y;
 
-    if (argc != 2) {
-        inputFilename = DEFAULT_FILENAME;
-    } else {
-        inputFilename = argv[1];
+    if (argc > 1) {
+        blockSize = stoi(argv[1]);
+    }
+    
+    if (argc > 2) {
+        inputFilename = argv[2];
     }
 
     ifstream inputFile(inputFilename);
@@ -65,6 +68,7 @@ int main(int argc, char** argv) {
     double execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
 
     // echo some statistics
+    cout << "Block size: " << blockSize << endl;
     cout << "Input string length: " << fr.xLen << endl;
    // cout << "Total number of blocks in matrix: " << (uint64_t) (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
 //    cout << "Calculated (stored) blocks: " << fr.calculated << endl;

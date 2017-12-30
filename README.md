@@ -23,8 +23,8 @@ Example run:
 Will generate a file input.txt with two strings of length 1000 each in its own line
 
 ### main
-After generating the strings, you can run the main file to get the edit distance between those two strings. Optionally main takes as an argument filename from which to read the lines (default input.txt)
+After generating the strings, you can run the main file to get the edit distance between those two strings. Optionally main takes as an argument block size and filename from which to read the lines (default 3 input.txt)
 
 ```
-./main input_file.txt
+./main block_size input_file.txt
 ```

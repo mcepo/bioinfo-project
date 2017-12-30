@@ -41,7 +41,7 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     // calculateBlocks for calculating the block
     // always the same 
     table = new int8_t*[(T + 1)];
-    for (int i = 0; i < (T + 1); i++) {
+    for (uint8_t i = 0; i < (T + 1); i++) {
         table[i] = new int8_t[(T + 1)];
     }
     table[0][0] = 0;
@@ -52,11 +52,8 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     // znači 0, 1 ili 2 umjesto -1 0 +1
     firstRC = 0;
     mask = 0;
-    for (int i = 0; i < T; i++) {
+    for (int8_t i = 0; i < T; i++) {
         firstRC = (firstRC << 2) + 2;
-    }
-
-    for (int i = 0; i < T; i++) {
         mask = (mask << 2) + 3;
     }
 }
@@ -68,14 +65,14 @@ void FourRussians::generateXYHashes() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         xHash[i] = 0;
-        for (int j = 0; j < T; j++) {
+        for (uint8_t j = 0; j < T; j++) {
             xHash[i] = (xHash[i] << 2) + acgt_to_index(X[i * T + j]);
         }
     }
 
     for (int i = 0; i < numRowsToCalculate; i++) {
         yHash[i] = 0;
-        for (int j = 0; j < T; j++) {
+        for (uint8_t j = 0; j < T; j++) {
             yHash[i] = (yHash[i] << 2) + acgt_to_index(Y[i * T + j]);
         }
     }
@@ -101,7 +98,7 @@ unsigned long FourRussians::calculate() {
     unsigned long result = yLen;
 
     for (int i = 0; i < numBlocksPerRow; i++) {
-        for (unsigned long j = 0; j < T; j++) {
+        for (uint8_t j = 0; j < T; j++) {
             result += (blocks[i] >> (j << 1) & 3) - 1;
         }
     }
@@ -126,7 +123,7 @@ uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
     // get index of searched block
-    uint64_t index = mergeHash(xHash, yHash, b, c);
+    uint32_t index = mergeHash(xHash, yHash, b, c);
 
     // if block doesn't exist 
     if (genBlocks[index] == 0) {
@@ -146,7 +143,7 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
     // convert offset to real and fill the first row and column
-    for (unsigned char i = 1; i <= T; i++) {
+    for (uint8_t i = 1; i <= T; i++) {
         // B row
         table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
         // C column
@@ -154,8 +151,8 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     }
 
     // calculate the block
-    for (unsigned char row = 1; row <= T; row++) {
-        for (unsigned char col = 1; col <= T; col++) {
+    for (uint8_t row = 1; row <= T; row++) {
+        for (uint8_t col = 1; col <= T; col++) {
 
             if (((xHash >> ((T - col) << 1)) & 3) != ((yHash >> ((T - row) << 1)) & 3)) {
                 diagonal = table[row - 1][ col - 1];
@@ -175,12 +172,12 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     // i prebacivanjem istoga
 
     // last column
-    for (int i = 0; i < T; i++) {
+    for (uint8_t i = 0; i < T; i++) {
         f = (f << 2) + ((table[i + 1][T] - table[i][T]) + 1);
     }
 
     // last row
-    for (int i = 0; i < T; i++) {
+    for (uint8_t i = 0; i < T; i++) {
         f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
     }
 
