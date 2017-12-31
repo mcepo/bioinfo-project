@@ -136,7 +136,12 @@ uint16_t FourRussians::getTableBlock(uint8_t xHash, uint8_t yHash,
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
-    return ((b << ((T << 2) + (T << 1))) + (c << (T << 2)) + (yHash << (T << 1)) + xHash);
+    return (
+            (b << ((T << 2) + (T << 1))) // shift b to the begining of index
+            + (c << (T << 2))   // shift c to be behind b 
+            + (yHash << (T << 1)) // shift xHash to be behind c
+            + xHash // xHash is at the end of index
+            );
 }
 
 uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
@@ -154,11 +159,13 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     for (uint8_t row = 1; row <= T; row++) {
         for (uint8_t col = 1; col <= T; col++) {
 
-            if (((xHash >> ((T - col) << 1)) & 3) != ((yHash >> ((T - row) << 1)) & 3)) {
-                diagonal = table[row - 1][ col - 1];
-                top = table[row - 1][ col];
-                left = table[row][ col - 1];
-                table[row][col] = min(min(diagonal, left), top) + 1;
+            if (((xHash >> ((T - col) << 1)) & 3) 
+                    != ((yHash >> ((T - row) << 1)) & 3)) {
+                table[row][col] = 
+                    min(
+                        min(table[row - 1][ col - 1], 
+                            table[row - 1][ col]
+                    ), table[row][ col - 1]) + 1;
             } else {
                 table[row][col] = table[row - 1][ col - 1];
             }

@@ -29,9 +29,6 @@ public:
     uint8_t firstRC;
     uint8_t mask;
     uint64_t numComb;
-    
-    // used in method calculateBlock as temp variables
-    int8_t top, left, diagonal;
 
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
