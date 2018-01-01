@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 #include "ThreadPool.h"
@@ -50,6 +51,8 @@ public:
     void generateXYHashes();
 // start calculating edit distance
     unsigned long calculate();
+    
+    void calculateEditScript();
     
 // calculate a single row of matrix
     void calculateRow(int index);

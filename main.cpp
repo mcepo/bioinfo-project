@@ -41,7 +41,8 @@ int main(int argc, char** argv) {
         cout << "Unable to open file" << endl;
         return -1;
     }
-
+    
+    inputFile.close();
 
     // start memory calculator
     sysinfo(&memInfo);
@@ -53,7 +54,9 @@ int main(int argc, char** argv) {
     FourRussians fr = FourRussians(X, Y, blockSize);
     // calculate edit distance
     unsigned long result = fr.calculate();
-
+    
+    fr.calculateEditScript();
+    
     // get memory consumptions
     sysinfo(&memInfo);
     long long memAfter = memInfo.totalram - memInfo.freeram;

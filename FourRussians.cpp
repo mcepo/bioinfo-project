@@ -103,7 +103,7 @@ unsigned long FourRussians::calculate() {
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (uint8_t j = 0; j < T; j++) {
-            result += (genBlocks[blocks[numRowsToCalculate-1][i]] >> (j << 1) & 3) - 1;
+            result += (genBlocks[blocks[numRowsToCalculate - 1][i]] >> (j << 1) & 3) - 1;
         }
     }
     return result;
@@ -142,10 +142,123 @@ uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_
 
     return (
             (b << ((T << 2) + (T << 1))) // shift b to the begining of index
-            + (c << (T << 2))   // shift c to be behind b 
+            + (c << (T << 2)) // shift c to be behind b 
             + (yHash << (T << 1)) // shift xHash to be behind c
             + xHash // xHash is at the end of index
             );
+}
+
+void FourRussians::calculateEditScript() {
+
+    int col = numBlocksPerRow - 1;
+    int row = numRowsToCalculate - 1;
+
+    string x = "";
+    string oper = "";
+    string y = "";
+
+    uint8_t xHash, yHash, b, c;
+    uint32_t index;
+
+    uint8_t tableRow = 0;
+    uint8_t tableCol = 0;
+
+    int8_t diagonal, top, left, item;
+
+    while (row > -1 && col > -1) {
+
+        if (tableRow == 0) tableRow = T;
+        if (tableCol == 0) tableCol = T;
+
+        index = blocks[row][col];
+
+        xHash = index & mask;
+        yHash = (index >> (T << 1)) & mask;
+        c = (index >> (T << 2)) & mask;
+        b = (index >> ((T << 2) + (T << 1))) & mask;
+
+        calculateBlock(xHash, yHash, b, c);
+
+        while (tableRow > 0 && tableCol > 0) {
+
+            diagonal = table[tableRow - 1][tableCol - 1];
+            left = table[tableRow][tableCol - 1];
+            top = table[tableRow - 1][tableCol];
+
+            if (diagonal <= left && diagonal <= top) {
+                x += X[col * T + tableCol - 1];
+                y += Y[row * T + tableRow - 1];
+
+                if (X[col * T + tableCol - 1] == Y[row * T + tableRow - 1]) {
+                    oper += "|";
+                } else {
+                    oper += ".";
+                }
+
+                tableRow--;
+                tableCol--;
+
+            } else if (left >= top) {
+                x += '-';
+                y += Y[row * T + tableRow - 1];
+                oper += " ";
+                tableRow--;
+            } else {
+                x += X[col * T + tableCol - 1];
+                y += '-';
+                oper += " ";
+                tableCol--;
+            }
+        }
+
+        if (tableRow == 0 && tableCol == 0) {
+            row--;
+            col--;
+        } else if (tableRow != 0) {
+            col--;
+        } else {
+            row--;
+        }
+    }
+
+    while (row > -1) {
+
+        for (int i = tableRow + 1; i < T; i++) {
+
+            y += Y[row * T + i];
+            x += '-';
+            oper += " ";
+        }
+        tableRow = 0;
+        row--;
+    }
+
+    while (col > -1) {
+
+        for (int i = tableCol + 1; i < T; i++) {
+            x += X[col * T + i];
+            y += '-';
+            oper += " ";
+        }
+        tableCol = 0;
+        col--;
+    }
+    
+    ofstream file("output.txt");
+
+    for (int i = x.size() - 1; i >= 0; i--) {
+        file << x[i];
+    }
+    file << endl;
+    for (int i = oper.size() - 1; i >= 0; i--) {
+        file << oper[i];
+    }
+    file << endl;
+    for (int i = y.size() - 1; i >= 0; i--) {
+        file << y[i];
+    }
+    file << endl;
+    file.close();
 }
 
 uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
@@ -163,13 +276,13 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     for (uint8_t row = 1; row <= T; row++) {
         for (uint8_t col = 1; col <= T; col++) {
 
-            if (((xHash >> ((T - col) << 1)) & 3) 
+            if (((xHash >> ((T - col) << 1)) & 3)
                     != ((yHash >> ((T - row) << 1)) & 3)) {
-                table[row][col] = 
-                    min(
-                        min(table[row - 1][ col - 1], 
-                            table[row - 1][ col]
-                    ), table[row][ col - 1]) + 1;
+                table[row][col] =
+                        min(
+                        min(table[row - 1][ col - 1],
+                        table[row - 1][ col]
+                        ), table[row][ col - 1]) + 1;
             } else {
                 table[row][col] = table[row - 1][ col - 1];
             }
@@ -192,8 +305,8 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
     }
 
-    //  print (xHash, yHash, b ,c );
-
+    //      print (xHash, yHash, b ,c );
+    //      cout << endl;
     return f;
 }
 
