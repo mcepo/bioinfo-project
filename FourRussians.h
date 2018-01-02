@@ -60,11 +60,11 @@ public:
     void calculateEditScript();
 
 // calculate a single block
-    uint16_t calculateBlock(uint8_t xHash, uint8_t yHash,
+    uint16_t calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     
 // generating all blocks for matrix
-    void generateBlocks( int index , uint8_t xHash, uint8_t yHash,
+    void generateBlocks( uint8_t index, uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c);
     
 // just merges hashes of b,c,x,y for a given block and returns a merged hash
@@ -75,7 +75,7 @@ public:
 
     uint8_t acgt_to_index(const char acgt);
 
-    void print(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c);
+    void print(uint8_t xHash, uint8_t yHash);
 };
 
 #endif //BIO_INF_FOUR_RUSSIANS_H

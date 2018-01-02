@@ -43,7 +43,7 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
 
     // initialize 2d array that will be used in method
     // calculateBlocks for calculating the block
-    // always the same 
+    // always the same
     table = new int8_t*[(T + 1)];
     for (uint8_t i = 0; i < (T + 1); i++) {
         table[i] = new int8_t[(T + 1)];
@@ -99,8 +99,8 @@ unsigned long FourRussians::calculateEditDistance() {
         for (int col = 0; col < numBlocksPerRow; col++) {
 
             blocks[row][col] = mergeHash(
-                    xHash[col], 
-                    yHash[row], 
+                    xHash[col],
+                    yHash[row],
                     genBlocks[blocks[row - 1][col]] & mask, // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
@@ -123,7 +123,7 @@ uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_
 
     return (
             (b << ((T << 2) + (T << 1))) // shift b to the begining of index
-            + (c << (T << 2)) // shift c to be behind b 
+            + (c << (T << 2)) // shift c to be behind b
             + (yHash << (T << 1)) // shift xHash to be behind c
             + xHash // xHash is at the end of index
             );
@@ -158,7 +158,7 @@ void FourRussians::calculateEditScript() {
         c = (index >> (T << 2)) & mask;
         b = (index >> ((T << 2) + (T << 1))) & mask;
 
-        calculateBlock(xHash, yHash, b, c);
+        calculateBlock(T, T, xHash, yHash, b, c);
 
         while (tableRow > 0 && tableCol > 0) {
 
@@ -242,20 +242,27 @@ void FourRussians::calculateEditScript() {
     file.close();
 }
 
-uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
+uint16_t FourRussians::calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
-    // convert offset to real and fill the first row and column
-    for (uint8_t i = 1; i <= T; i++) {
+ //   cout << (int) rowIndex << " " << (int)colIndex << endl;
+    
+    // convert offset to real and fill the first row
+    for (uint8_t i = rowIndex; i <= T; i++) {
         // B row
         table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
+    }
+    // convert offset to real and fill the first column
+    for (uint8_t i = colIndex; i <= T; i++) {
         // C column
         table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
     }
 
     // calculate the block
-    for (uint8_t row = 1; row <= T; row++) {
-        for (uint8_t col = 1; col <= T; col++) {
+    // TODO: zašto ovdje ne mogu krenuti od rowIndex, tj od sredine matrice
+
+    for (uint8_t row = rowIndex; row <= T; row++) {
+        for (uint8_t col = colIndex; col <= T; col++) {
 
             if (((xHash >> ((T - col) << 1)) & 3)
                     != ((yHash >> ((T - row) << 1)) & 3)) {
@@ -273,7 +280,7 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     // lastColumn + lastRow
     uint16_t f = 0;
 
-    // dodao sam +1 u offsete kako bi rješio problem sa -1 
+    // dodao sam +1 u offsete kako bi rješio problem sa -1
     // i prebacivanjem istoga
 
     // last column
@@ -285,7 +292,7 @@ uint16_t FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     for (uint8_t i = 0; i < T; i++) {
         f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
     }
-
+    
     //      print (xHash, yHash, b ,c );
     //      cout << endl;
     return f;
@@ -312,8 +319,7 @@ uint64_t FourRussians::numCombinations() {
     return result;
 }
 
-void FourRussians::print(uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c) {
+void FourRussians::print(uint8_t xHash, uint8_t yHash) {
 
     cout << "TB" << "| x  ";
 
@@ -340,8 +346,8 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash,
     cout << endl;
 }
 
-void FourRussians::generateBlocks(int index, uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c) {
+void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIndex,
+        uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
     uint8_t m = (~0) << ((index + 1) << 1);
 
@@ -354,10 +360,15 @@ void FourRussians::generateBlocks(int index, uint8_t xHash, uint8_t yHash,
                 for (uint8_t cValue = 0; cValue < 3; cValue++) {
                     c = (c & m) + (cValue << (index << 1));
                     if (index == 0) {
-                        genBlocks[mergeHash(xHash, yHash, b, c)] = calculateBlock(xHash, yHash, b, c);
+                        
+                        //     cout << (int) rowIndex << " " << (int) colIndex << " " << endl;
+                        genBlocks[mergeHash(xHash, yHash, b, c)] =
+                                calculateBlock(rowIndex, colIndex, xHash, yHash, b, c);
+                  
+                        // TODO: not working with this, don't know why
+                        //      colIndex = rowIndex = T;
                     } else {
-                        generateBlocks(index - 1, xHash, yHash, b, c);
-
+                        generateBlocks(index - 1, 1, 1, xHash, yHash, b, c);
                     }
                 }
             }

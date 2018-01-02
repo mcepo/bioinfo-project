@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     cout << "Block size: " << blockSize << endl;
     cout << "Input string length: " << fr.xLen << endl;
 
-    fr.generateBlocks((blockSize - 1), 0, 0, 0, 0);
+    fr.generateBlocks((blockSize - 1),1,1, 0, 0, 0, 0);
     
 // calculate edit distance
     cout << "Calculating edit distance ... ";
