@@ -58,19 +58,14 @@ public:
     
 // calculating edit script
     void calculateEditScript();
-    
-// calculate a single row of matrix
-    void calculateRow(int index);
 
 // calculate a single block
     uint16_t calculateBlock(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     
-// method that checks if a block is already calculated and stored
-// or it should be calculated, if so calls calculateBlock to calculate the new
-// block and returns the calculated block
-    uint32_t getIndex(uint8_t xHash, uint8_t yHash,
-            uint8_t b, uint8_t c);
+// generating all blocks for matrix
+    void generateBlocks( int index , uint8_t xHash, uint8_t yHash,
+        uint8_t b, uint8_t c);
     
 // just merges hashes of b,c,x,y for a given block and returns a merged hash
 // that is used as a index when searching and storing blocks    

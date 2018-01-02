@@ -89,13 +89,23 @@ unsigned long FourRussians::calculateEditDistance() {
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks[0][col] = getIndex(xHash[col], yHash[0], firstRC, curC);
+        blocks[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
         curC = (genBlocks[blocks[0][col]] >> (T << 1)) & mask;
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
-        calculateRow(row);
+        curC = firstRC;
+        for (int col = 0; col < numBlocksPerRow; col++) {
+
+            blocks[row][col] = mergeHash(
+                    xHash[col], 
+                    yHash[row], 
+                    genBlocks[blocks[row - 1][col]] & mask, // lastRow -> b
+                    curC); // lastColumn -> c
+            //lastColumn
+            curC = (genBlocks[blocks[row][col]] >> (T << 1)) & mask;
+        }
     }
 
     // calculate the result by adding the lastRow of blocks in last row
@@ -107,35 +117,6 @@ unsigned long FourRussians::calculateEditDistance() {
         }
     }
     return result;
-}
-
-void FourRussians::calculateRow(int row) {
-
-    uint8_t curC = firstRC, curB;
-
-    for (int col = 0; col < numBlocksPerRow; col++) {
-
-        //lastRow
-        curB = genBlocks[blocks[row - 1][col]] & mask;
-        blocks[row][col] = getIndex(xHash[col], yHash[row], curB, curC);
-        //lastColumn
-        curC = (genBlocks[blocks[row][col]] >> (T << 1)) & mask;
-    }
-}
-
-uint32_t FourRussians::getIndex(uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c) {
-
-    // get index of searched block
-    uint32_t index = mergeHash(xHash, yHash, b, c);
-
-    // if block doesn't exist 
-    if (genBlocks[index] == 0) {
-        // calculate it
-        genBlocks[index] = calculateBlock(xHash, yHash, b, c);
-    }
-    // return the searched block 
-    return index;
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
@@ -357,5 +338,30 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash,
         }
     }
     cout << endl;
+}
+
+void FourRussians::generateBlocks(int index, uint8_t xHash, uint8_t yHash,
+        uint8_t b, uint8_t c) {
+
+    uint8_t m = (~0) << ((index + 1) << 1);
+
+    for (uint8_t xValue = 0; xValue < 4; xValue++) {
+        xHash = (xHash & m) + (xValue << (index << 1));
+        for (uint8_t yValue = 0; yValue < 4; yValue++) {
+            yHash = (yHash & m) + (yValue << (index << 1));
+            for (uint8_t bValue = 0; bValue < 3; bValue++) {
+                b = (b & m) + (bValue << (index << 1));
+                for (uint8_t cValue = 0; cValue < 3; cValue++) {
+                    c = (c & m) + (cValue << (index << 1));
+                    if (index == 0) {
+                        genBlocks[mergeHash(xHash, yHash, b, c)] = calculateBlock(xHash, yHash, b, c);
+                    } else {
+                        generateBlocks(index - 1, xHash, yHash, b, c);
+
+                    }
+                }
+            }
+        }
+    }
 }
 
