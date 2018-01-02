@@ -30,7 +30,7 @@ public:
     uint8_t firstRC;
     uint8_t mask;
     uint64_t numComb;
-
+    
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
