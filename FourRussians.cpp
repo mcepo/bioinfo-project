@@ -82,7 +82,7 @@ void FourRussians::generateXYHashes() {
     }
 }
 
-unsigned long FourRussians::calculate() {
+unsigned long FourRussians::calculateEditDistance() {
 
     uint8_t curC = firstRC;
 
@@ -163,7 +163,7 @@ void FourRussians::calculateEditScript() {
     uint8_t tableRow = 0;
     uint8_t tableCol = 0;
 
-    int8_t diagonal, top, left, item;
+    int8_t diagonal, top, left;
 
     while (row > -1 && col > -1) {
 
@@ -243,7 +243,7 @@ void FourRussians::calculateEditScript() {
         tableCol = 0;
         col--;
     }
-    
+
     ofstream file("output.txt");
 
     for (int i = x.size() - 1; i >= 0; i--) {

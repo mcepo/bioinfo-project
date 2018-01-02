@@ -16,22 +16,23 @@ int main(int argc, char** argv) {
 
     struct sysinfo memInfo;
     int blockSize = BLOCK_SIZE;
+    double execTime;
 
     // start stopwatch
     clock_t start = clock();
 
-    // read strings from input file
+// read strings from input file
     string inputFilename = DEFAULT_FILENAME;
     string X, Y;
 
     if (argc > 1) {
         blockSize = stoi(argv[1]);
     }
-    
+
     if (argc > 2) {
         inputFilename = argv[2];
     }
-
+    
     ifstream inputFile(inputFilename);
 
     if (inputFile) {
@@ -41,43 +42,44 @@ int main(int argc, char** argv) {
         cout << "Unable to open file" << endl;
         return -1;
     }
-    
+
     inputFile.close();
 
-    // start memory calculator
+// start memory calculator
     sysinfo(&memInfo);
     long long memBefore = memInfo.totalram - memInfo.freeram;
     memBefore += memInfo.totalswap - memInfo.freeswap;
     memBefore *= memInfo.mem_unit;
 
-    // initialize the algorithm
+// initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
-    // calculate edit distance
-    unsigned long result = fr.calculate();
+    cout << "Block size: " << blockSize << endl;
+    cout << "Input string length: " << fr.xLen << endl;
+
+// calculate edit distance
+    cout << "Calculating edit distance ... ";
+    unsigned long result = fr.calculateEditDistance();
+    execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
+    cout << result << " in " << execTime << "sec" << endl;
     
+// calculate edit script  
+    start = clock();
+    cout << "Calculating edit script ... ";
     fr.calculateEditScript();
-    
-    // get memory consumptions
+    execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
+    cout << "DONE in " << execTime << "sec" << endl;
+
+// get memory consumptions
     sysinfo(&memInfo);
     long long memAfter = memInfo.totalram - memInfo.freeram;
     memAfter += memInfo.totalswap - memInfo.freeswap;
     memAfter *= memInfo.mem_unit;
-
     double memUsage = (((double) ((memAfter - memBefore) / 1024) / 1024));
-
+    cout << "Memory used: " << memUsage << "MB" << endl;
+    
+// check if result correct
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
-
-    double execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
-
-    // echo some statistics
-    cout << "Block size: " << blockSize << endl;
-    cout << "Input string length: " << fr.xLen << endl;
-   // cout << "Total number of blocks in matrix: " << (uint64_t) (fr.numBlocksPerRow * fr.numRowsToCalculate) << endl;
-//    cout << "Calculated (stored) blocks: " << fr.calculated << endl;
-//    cout << "Found blocks: " << fr.found << endl;
-    cout << "Memory used: " << memUsage << "MB" << endl;
-    cout << "RESULT: " << result << " generated in: " << execTime << "sec" << endl;
 
     // EDLIB controle
 

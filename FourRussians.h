@@ -22,11 +22,11 @@ class FourRussians {
 public:
     uint8_t T; //dimension of block (txt). Not more than 255
 
-    // structure used as storage when calculating lastRow and lastColumn
-    // in method calculateBlock
+// structure used as storage when calculating lastRow and lastColumn
+// in method calculateBlock
     int8_t **table;
 
-    // storing value for c & b of blocks in firstRow and firstColumn
+// storing value for c & b of blocks in firstRow and firstColumn
     uint8_t firstRC;
     uint8_t mask;
     uint64_t numComb;
@@ -34,30 +34,35 @@ public:
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
+// matrix
     uint32_t **blocks;
+    
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
 // calculated hash values for x & y string
     uint8_t *xHash;
     uint8_t *yHash;
-
+    
     FourRussians(string const &x, string const &y, int blockSize); // offset encoded version
     FourRussians();
 
 // returns the max number of calculated blocks
     uint64_t numCombinations();
+    
 // generates hashes for strings x & y
     void generateXYHashes();
-// start calculating edit distance
-    unsigned long calculate();
     
+// start calculating edit distance
+    unsigned long calculateEditDistance();
+    
+// calculating edit script
     void calculateEditScript();
     
 // calculate a single row of matrix
     void calculateRow(int index);
 
-// calcualte a single block
+// calculate a single block
     uint16_t calculateBlock(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     
