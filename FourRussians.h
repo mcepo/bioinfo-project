@@ -60,7 +60,7 @@ public:
     void calculateEditScript();
 
 // calculate a single block
-    uint16_t calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
+    void calculateBlock(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
             
 // calculate a single block

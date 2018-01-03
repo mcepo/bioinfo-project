@@ -26,9 +26,7 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
         numRowsToCalculate = xLen / blockSize;
     }
 
-    cout << "Generating xy hashes... ";
     generateXYHashes();
-    cout << "GENERATED" << endl;
 
     numComb = numCombinations();
 
@@ -114,7 +112,7 @@ unsigned long FourRussians::calculateEditDistance() {
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (uint8_t j = 0; j < T; j++) {
             result += (genBlocks[blocks[numRowsToCalculate - 1][i]] >> (j << 1) & 3) - 1;
-        }
+}
     }
     return result;
 }
@@ -158,7 +156,7 @@ void FourRussians::calculateEditScript() {
         c = (index >> (T << 2)) & mask;
         b = (index >> ((T << 2) + (T << 1))) & mask;
 
-        calculateBlock(1, 1, xHash, yHash, b, c);
+        calculateBlock(xHash, yHash, b, c);
 
         while (tableRow > 0 && tableCol > 0) {
 
@@ -242,23 +240,20 @@ void FourRussians::calculateEditScript() {
     file.close();
 }
 
-uint16_t FourRussians::calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
+void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
-    
-    // convert offset to real and fill the first row
-    for (uint8_t i = colIndex; i <= T; i++) {
+
+    // convert offset to real and fill the first row and column
+    for (uint8_t i = 1; i <= T; i++) {
         // B row
         table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
-    }
-    // convert offset to real and fill the first column
-    for (uint8_t i = rowIndex; i <= T; i++) {
         // C column
         table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
     }
 
     // calculate the block
-    for (uint8_t row = rowIndex; row <= T; row++) {
-        for (uint8_t col = colIndex; col <= T; col++) {
+    for (uint8_t row = 1; row <= T; row++) {
+        for (uint8_t col = 1; col <= T; col++) {
 
             if (((xHash >> ((T - col) << 1)) & 3)
                     != ((yHash >> ((T - row) << 1)) & 3)) {
@@ -272,33 +267,11 @@ uint16_t FourRussians::calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_
             }
         }
     }
-    //      c + b
-    // lastColumn + lastRow
-    uint16_t f = 0;
-
-    // dodao sam +1 u offsete kako bi rješio problem sa -1
-    // i prebacivanjem istoga
-
-    // last column
-    for (uint8_t i = 0; i < T; i++) {
-        f = (f << 2) + ((table[i + 1][T] - table[i][T]) + 1);
-    }
-
-    // last row
-    for (uint8_t i = 0; i < T; i++) {
-        f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
-    }
-    
-    //print (xHash, yHash );
-    //cout << endl;
-    return f;
 }
 
 uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
- //   cout << (int) rowIndex << " " << (int)colIndex << endl;
-    
     // convert offset to real and fill the first row
     for (uint8_t i = colIndex; i <= T; i++) {
         // B row
@@ -326,7 +299,7 @@ uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, ui
             }
         }
     }
-    
+
     // calculate rows lower
     for (uint8_t row = rowIndex; row <= T; row++) {
         for (uint8_t col = 1; col <= T; col++) {
@@ -343,7 +316,7 @@ uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, ui
             }
         }
     }
-    
+
     //      c + b
     // lastColumn + lastRow
     uint16_t f = 0;
@@ -360,7 +333,7 @@ uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, ui
     for (uint8_t i = 0; i < T; i++) {
         f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
     }
-    
+
     //print (xHash, yHash );
     //cout << endl;
     return f;
@@ -414,28 +387,29 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash) {
     cout << endl;
 }
 
+// TODO: mislim da je moguće ovo još više reducirati
+
 void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIndex,
         uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
     uint8_t m = (~0) << ((index + 1) << 1);
-
-    for (uint8_t xValue = 0; xValue < 4; xValue++) {
-        xHash = (xHash & m) + (xValue << (index << 1));
-        for (uint8_t bValue = 0; bValue < 3; bValue++) {
-            b = (b & m) + (bValue << (index << 1));
-            for (uint8_t yValue = 0; yValue < 4; yValue++) {
-                yHash = (yHash & m) + (yValue << (index << 1));
-                for (uint8_t cValue = 0; cValue < 3; cValue++) {
-                    c = (c & m) + (cValue << (index << 1));
+    for (uint8_t yValue = 0; yValue < 4; yValue++) {
+        yHash = (yHash & m) + (yValue << (index << 1));
+        for (uint8_t cValue = 0; cValue < 3; cValue++) {
+            c = (c & m) + (cValue << (index << 1));
+            for (uint8_t xValue = 0; xValue < 4; xValue++) {
+                xHash = (xHash & m) + (xValue << (index << 1));
+                for (uint8_t bValue = 0; bValue < 3; bValue++) {
+                    b = (b & m) + (bValue << (index << 1));
                     if (index == 0) {
-                        
+
                         genBlocks[mergeHash(xHash, yHash, b, c)] =
-                        calculateBlockFast(rowIndex, colIndex, xHash, yHash, b, c);
-                        colIndex = T + 1;
-                        rowIndex = T;
+                                calculateBlockFast(rowIndex, colIndex, xHash, yHash, b, c);
+                        colIndex = T;
+                        rowIndex = T + 1;
                     } else {
                         generateBlocks(index - 1, rowIndex, colIndex, xHash, yHash, b, c);
-                        colIndex = T;
+                        colIndex = T - index;
                         rowIndex = T - index;
                     }
                 }
