@@ -36,7 +36,7 @@ public:
 
 // matrix
     uint32_t **blocks;
-    
+
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
@@ -61,6 +61,10 @@ public:
 
 // calculate a single block
     uint16_t calculateBlock(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
+            uint8_t b, uint8_t c);
+            
+// calculate a single block
+    uint16_t calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     
 // generating all blocks for matrix
