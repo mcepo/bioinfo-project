@@ -35,7 +35,7 @@ public:
     string X, Y;
 
 // matrix
-    uint32_t **blocks;
+    uint32_t **matrix;
 
 // storage of all calculated blocks
     uint16_t* genBlocks;

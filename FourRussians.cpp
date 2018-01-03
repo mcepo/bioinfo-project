@@ -33,10 +33,10 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
 
-    blocks = new uint32_t*[numRowsToCalculate];
+    matrix = new uint32_t*[numRowsToCalculate];
 
     for (int row = 0; row < numRowsToCalculate; row++) {
-        blocks[row] = new uint32_t[numBlocksPerRow];
+        matrix[row] = new uint32_t[numBlocksPerRow];
     }
 
     // initialize 2d array that will be used in method
@@ -87,31 +87,31 @@ unsigned long FourRussians::calculateEditDistance() {
     // first row calculation
     for (int col = 0; col < numBlocksPerRow; col++) {
 
-        blocks[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
+        matrix[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
-        curC = (genBlocks[blocks[0][col]] >> (T << 1)) & mask;
+        curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
         curC = firstRC;
         for (int col = 0; col < numBlocksPerRow; col++) {
 
-            blocks[row][col] = mergeHash(
+            matrix[row][col] = mergeHash(
                     xHash[col],
                     yHash[row],
-                    genBlocks[blocks[row - 1][col]] & mask, // lastRow -> b
+                    genBlocks[matrix[row - 1][col]] & mask, // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
-            curC = (genBlocks[blocks[row][col]] >> (T << 1)) & mask;
+            curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
     }
 
-    // calculate the result by adding the lastRow of blocks in last row
+    // calculate the result by adding the lastRow of matrix in last row
     unsigned long result = yLen;
 
     for (int i = 0; i < numBlocksPerRow; i++) {
         for (uint8_t j = 0; j < T; j++) {
-            result += (genBlocks[blocks[numRowsToCalculate - 1][i]] >> (j << 1) & 3) - 1;
+            result += (genBlocks[matrix[numRowsToCalculate - 1][i]] >> (j << 1) & 3) - 1;
 }
     }
     return result;
@@ -149,7 +149,7 @@ void FourRussians::calculateEditScript() {
         if (tableRow == 0) tableRow = T;
         if (tableCol == 0) tableCol = T;
 
-        index = blocks[row][col];
+        index = matrix[row][col];
 
         xHash = index & mask;
         yHash = (index >> (T << 1)) & mask;
