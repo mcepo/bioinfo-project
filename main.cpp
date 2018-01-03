@@ -12,14 +12,32 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
-int main(int argc, char** argv) {
 
+// return amount of current memory consumed
+
+long long currentMemory() {
     struct sysinfo memInfo;
-    int blockSize = BLOCK_SIZE;
-    double execTime;
+    sysinfo(&memInfo);
+    return ((memInfo.totalram - memInfo.freeram)
+            + (memInfo.totalswap - memInfo.freeswap)
+            * memInfo.mem_unit);
+}
+
+// calculate memory difference
+
+double memoryDiff(long long memoryStart) {
+    return (((double) ((currentMemory() - memoryStart) / 1024) / 1024));
+}
+
+int main(int argc, char** argv) {
 
     // start stopwatch
     clock_t start = clock();
+    // start memory calculator
+    long long totalMemoryBefore = currentMemory();
+
+    int blockSize = BLOCK_SIZE;
+    double execTime;
 
     // read strings from input file
     string inputFilename = DEFAULT_FILENAME;
@@ -45,45 +63,57 @@ int main(int argc, char** argv) {
 
     inputFile.close();
 
-    // start memory calculator
-    sysinfo(&memInfo);
-    long long memBefore = memInfo.totalram - memInfo.freeram;
-    memBefore += memInfo.totalswap - memInfo.freeswap;
-    memBefore *= memInfo.mem_unit;
-
     // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
     cout << "Input string length: " << fr.xLen << endl;
-    cout << "Block size: " << (int)fr.T << endl;
+    cout << "Block size: " << (int) fr.T << endl;
+
+    cout << "\tAction\t\tRuntime\t\tMemory" << endl;
+
+    // precalculate blocks, measure time and memory during
+    clock_t timeBeforeBlockCalc = clock();
+    long long memoryBeforeBlockCalc = currentMemory();
 
     fr.generateBlocks((blockSize - 1), 1, 1, 0, 0, 0, 0);
 
-    // calculate edit distance
-    cout << "Calculating edit distance ... ";
+    execTime = (clock() - timeBeforeBlockCalc) / (double) CLOCKS_PER_SEC;
+    cout << "Generating blocks - \t" << execTime << " sec"
+            << "\t" << memoryDiff(memoryBeforeBlockCalc) << " MB" << endl;
+
+    // calculate edit distance, measure time and memory during
+    clock_t timeBeforeEditDist = clock();
+    long long memoryBeforeEditDist = currentMemory();
+
     unsigned long result = fr.calculateEditDistance();
-    execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
-    cout << result << " in " << execTime << "sec" << endl;
 
-    // calculate edit script  
-    start = clock();
-    cout << "Calculating edit script ... ";
+    execTime = (clock() - timeBeforeEditDist) / (double) CLOCKS_PER_SEC;
+    cout << "Calc edit distance - \t" << execTime << " sec"
+            << "\t" << memoryDiff(memoryBeforeEditDist) << " MB" << endl;
+
+    // calculate edit script, measure time and memory during
+    clock_t timeBeforeEditScript = clock();
+    long long memoryBeforeEditScript = currentMemory();
+
     fr.calculateEditScript();
+
+    execTime = (clock() - timeBeforeEditScript) / (double) CLOCKS_PER_SEC;
+    cout << "Calc edit script - \t" << execTime << " sec"
+            << "\t" << memoryDiff(memoryBeforeEditScript) << " MB" << endl;
+
+    // echo total runtime and memory
+
+    fr.calculateEditScript();
+
     execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
-    cout << "DONE in " << execTime << "sec" << endl;
+    cout << endl << "Total: \t\t\t" << execTime << "sec"
+            << "\t" << memoryDiff(totalMemoryBefore) << "MB" << endl;
 
-    // get memory consumptions
-    sysinfo(&memInfo);
-    long long memAfter = memInfo.totalram - memInfo.freeram;
-    memAfter += memInfo.totalswap - memInfo.freeswap;
-    memAfter *= memInfo.mem_unit;
-    double memUsage = (((double) ((memAfter - memBefore) / 1024) / 1024));
-    cout << "Memory used: " << memUsage << "MB" << endl;
+    cout << endl << "Result: " << result << endl;
 
-    // check if result correct
+    cout << endl << "Edlib control ";
+    // EDLIB controle
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
-
-    // EDLIB controle
 
     if (fr.xLen != 0 && fr.yLen != 0) {
         start = clock();
@@ -100,5 +130,6 @@ int main(int argc, char** argv) {
             cout << " Result diff: " << (long) (result - resultCheck.editDistance) << " (0 for valid execution)" << endl;
         }
     }
+    cout << endl;
     return 0;
 }
