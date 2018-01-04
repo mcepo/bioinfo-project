@@ -66,7 +66,8 @@ int main(int argc, char** argv) {
     // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
     cout << "Input string length: " << fr.xLen << endl;
-    cout << "Block size: " << (int) fr.T << endl;
+    cout << "Used block size: " << (int) fr.T << endl;
+    cout << "Optimal block size: " << (int) fr.optimalT << endl;
 
     cout << "\tAction\t\tRuntime\t\tMemory" << endl;
 

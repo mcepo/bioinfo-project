@@ -26,6 +26,7 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
         numRowsToCalculate = xLen / blockSize;
     }
 
+	optimalTcalc();
     generateXYHashes();
 
     numComb = numCombinations();
@@ -58,6 +59,12 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
         firstRC = (firstRC << 2) + 2;
         mask = (mask << 2) + 3;
     }
+}
+
+void FourRussians::optimalTcalc() {
+  int len = max(xLen, yLen);
+  double t = (log(len) / log(12)) / 2;
+	optimalT = ((int)t + 1);
 }
 
 void FourRussians::generateXYHashes() {

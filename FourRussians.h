@@ -21,6 +21,7 @@ using namespace std;
 class FourRussians {
 public:
     uint8_t T; //dimension of block (txt). Not more than 255
+    uint8_t optimalT;
 
 // structure used as storage when calculating lastRow and lastColumn
 // in method calculateBlock
@@ -52,6 +53,10 @@ public:
     
 // generates hashes for strings x & y
     void generateXYHashes();
+    
+// calculates optimal value for T for a given input strings
+// stores it in optimalT variable
+    void optimalTcalc();
     
 // start calculating matrix
     void calculateMatrix();
