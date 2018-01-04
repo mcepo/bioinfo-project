@@ -53,17 +53,19 @@ public:
 // generates hashes for strings x & y
     void generateXYHashes();
     
-// start calculating edit distance
-    unsigned long calculateEditDistance();
+// start calculating matrix
+    void calculateMatrix();
     
 // calculating edit script
-    void calculateEditScript();
+// returns edit distance
+// writes edit script into a file
+    uint32_t calculateEditDistanceAndScript();
 
-// calculate a single block
+// calculate a single block used when calculating edit script and distance
     void calculateBlock(uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
             
-// calculate a single block
+// calculate a single block used when precalculating blocks
     uint16_t calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
             uint8_t b, uint8_t c);
     

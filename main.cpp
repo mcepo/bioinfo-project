@@ -81,35 +81,32 @@ int main(int argc, char** argv) {
             << "\t" << memoryDiff(memoryBeforeBlockCalc) << " MB" << endl;
 
     // calculate edit distance, measure time and memory during
-    clock_t timeBeforeEditDist = clock();
-    long long memoryBeforeEditDist = currentMemory();
+    clock_t timeBeforeMatrix = clock();
+    long long memoryBeforeMatrix = currentMemory();
 
-    unsigned long result = fr.calculateEditDistance();
+    fr.calculateMatrix();
 
-    execTime = (clock() - timeBeforeEditDist) / (double) CLOCKS_PER_SEC;
-    cout << "Calc edit distance - \t" << execTime << " sec"
-            << "\t" << memoryDiff(memoryBeforeEditDist) << " MB" << endl;
+    execTime = (clock() - timeBeforeMatrix) / (double) CLOCKS_PER_SEC;
+    cout << "Calculating matrix - \t" << execTime << " sec"
+            << "\t" << memoryDiff(memoryBeforeMatrix) << " MB" << endl;
 
     // calculate edit script, measure time and memory during
     clock_t timeBeforeEditScript = clock();
     long long memoryBeforeEditScript = currentMemory();
 
-    fr.calculateEditScript();
+    unsigned long result = fr.calculateEditDistanceAndScript();
 
     execTime = (clock() - timeBeforeEditScript) / (double) CLOCKS_PER_SEC;
-    cout << "Calc edit script - \t" << execTime << " sec"
+    cout << "Edit script&distance - \t" << execTime << " sec"
             << "\t" << memoryDiff(memoryBeforeEditScript) << " MB" << endl;
 
     // echo total runtime and memory
-
-    fr.calculateEditScript();
-
     execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
     cout << endl << "Total: \t\t\t" << execTime << "sec"
             << "\t" << memoryDiff(totalMemoryBefore) << "MB" << endl;
 
-    cout << endl << "Result: " << result << endl;
-
+    cout << endl << "Result:\t" << result << endl;
+    
     cout << endl << "Edlib control ";
     // EDLIB controle
     const char * X_char = fr.X.c_str();

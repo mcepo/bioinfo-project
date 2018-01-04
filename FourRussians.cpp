@@ -80,7 +80,7 @@ void FourRussians::generateXYHashes() {
     }
 }
 
-unsigned long FourRussians::calculateEditDistance() {
+void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
@@ -105,16 +105,6 @@ unsigned long FourRussians::calculateEditDistance() {
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
     }
-
-    // calculate the result by adding the lastRow of matrix in last row
-    unsigned long result = yLen;
-
-    for (int i = 0; i < numBlocksPerRow; i++) {
-        for (uint8_t j = 0; j < T; j++) {
-            result += (genBlocks[matrix[numRowsToCalculate - 1][i]] >> (j << 1) & 3) - 1;
-}
-    }
-    return result;
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
@@ -127,7 +117,7 @@ uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_
             );
 }
 
-void FourRussians::calculateEditScript() {
+uint32_t FourRussians::calculateEditDistanceAndScript() {
 
     int col = numBlocksPerRow - 1;
     int row = numRowsToCalculate - 1;
@@ -135,6 +125,8 @@ void FourRussians::calculateEditScript() {
     string x = "";
     string oper = "";
     string y = "";
+
+    uint32_t result = 0;
 
     uint8_t xHash, yHash, b, c;
     uint32_t index;
@@ -172,6 +164,7 @@ void FourRussians::calculateEditScript() {
                     oper += "|";
                 } else {
                     oper += ".";
+                    result++;
                 }
 
                 tableRow--;
@@ -181,12 +174,14 @@ void FourRussians::calculateEditScript() {
                 x += '-';
                 y += Y[row * T + tableRow - 1];
                 oper += " ";
+                result++;
                 tableRow--;
             } else {
                 x += X[col * T + tableCol - 1];
                 y += '-';
                 oper += " ";
                 tableCol--;
+                result++;
             }
         }
 
@@ -200,28 +195,33 @@ void FourRussians::calculateEditScript() {
         }
     }
 
-    while (row > -1) {
-
-        for (int i = tableRow + 1; i < T; i++) {
-
-            y += Y[row * T + i];
+    if (row > -1 ) {
+		
+		if (tableRow == 0) tableRow = T;
+		
+        for(int i = (row*T + tableRow - 1); i>=0;i--){
+            y += Y[i];
             x += '-';
             oper += " ";
+            result++;
         }
-        tableRow = 0;
-        row--;
     }
-
-    while (col > -1) {
-
-        for (int i = tableCol + 1; i < T; i++) {
-            x += X[col * T + i];
+    
+    if (col > -1 ) {
+		
+		if (tableCol == 0) tableCol = T;
+		
+        for(int i = (col*T + tableCol - 1); i>=0;i--){
+            x += X[i];
             y += '-';
             oper += " ";
+            result++;
         }
-        tableCol = 0;
-        col--;
     }
+    
+    
+// TODO: move this to a seperate method
+// filename shouldn't be hardcoded
 
     ofstream file("output.txt");
 
@@ -236,8 +236,9 @@ void FourRussians::calculateEditScript() {
     for (int i = y.size() - 1; i >= 0; i--) {
         file << y[i];
     }
-    file << endl;
     file.close();
+
+    return result;
 }
 
 void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
