@@ -405,13 +405,11 @@ void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIn
 
                         genBlocks[mergeHash(xHash, yHash, b, c)] =
                                 calculateBlockFast(rowIndex, colIndex, xHash, yHash, b, c);
-                        colIndex = T;
-                        rowIndex = T + 1;
                     } else {
                         generateBlocks(index - 1, rowIndex, colIndex, xHash, yHash, b, c);
-                        colIndex = T - index;
-                        rowIndex = T - index;
                     }
+                    colIndex = T - index;
+                    rowIndex = T - index + 1;
                 }
             }
             colIndex = T - index;
