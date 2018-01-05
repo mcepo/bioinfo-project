@@ -91,17 +91,44 @@ void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
+    int rowLng = numBlocksPerRow * 0.05;
+    int shift = rowLng / 2;
+
+    int colStart, colStop;
+  //  cout << "numRowsToCalculate: " << numRowsToCalculate << endl;
+  //  cout << "numBlocksPerRow: " << numRowsToCalculate << endl;
+
+  //  cout << "Shift: " << shift << endl;
+  //  cout << "RowLng: " << rowLng << endl;
+
+  //  cout << "\t1 0-" << (numBlocksPerRow - shift) << endl;
     // first row calculation
-    for (int col = 0; col < numBlocksPerRow; col++) {
+    for (int col = 0; col < shift; col++) {
 
         matrix[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
         curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
+
     // rest of the matrix
     for (int row = 1; row < numRowsToCalculate; row++) {
         curC = firstRC;
-        for (int col = 0; col < numBlocksPerRow; col++) {
+
+        if ((row - shift) < 0) {
+            colStart = 0;
+        } else {
+            colStart = (row - shift);
+        }
+
+        if ((shift + row) >= numBlocksPerRow) {
+            colStop = numBlocksPerRow;
+        } else {
+            colStop = shift + row - 1;
+        }
+
+     //   cout << "\t" << row << " " << colStart << "-" << colStop << endl;
+
+        for (int col = colStart; col < colStop; col++) {
 
             matrix[row][col] = mergeHash(
                     xHash[col],
@@ -110,6 +137,14 @@ void FourRussians::calculateMatrix() {
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
+        }
+
+        if ((shift + row) < numBlocksPerRow) {
+        matrix[row][colStop] = mergeHash(
+                xHash[colStop],
+                yHash[row],
+                firstRC, // lastRow -> b
+                curC); // lastColumn -> c
         }
     }
 }
@@ -202,33 +237,33 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
         }
     }
 
-    if (row > -1 ) {
-		
-		if (tableRow == 0) tableRow = T;
-		
-        for(int i = (row*T + tableRow - 1); i>=0;i--){
+    if (row > -1) {
+
+        if (tableRow == 0) tableRow = T;
+
+        for (int i = (row * T + tableRow - 1); i >= 0; i--) {
             y += Y[i];
             x += '-';
             oper += " ";
             result++;
         }
     }
-    
-    if (col > -1 ) {
-		
-		if (tableCol == 0) tableCol = T;
-		
-        for(int i = (col*T + tableCol - 1); i>=0;i--){
+
+    if (col > -1) {
+
+        if (tableCol == 0) tableCol = T;
+
+        for (int i = (col * T + tableCol - 1); i >= 0; i--) {
             x += X[i];
             y += '-';
             oper += " ";
             result++;
         }
     }
-    
-    
-// TODO: move this to a seperate method
-// filename shouldn't be hardcoded
+
+
+    // TODO: move this to a seperate method
+    // filename shouldn't be hardcoded
 
     ofstream file("output.txt");
 
