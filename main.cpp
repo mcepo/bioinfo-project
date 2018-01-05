@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
 
     // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
-    cout << "Input string length: " << fr.xLen << endl;
+    cout << "Input X length(expanded): " << fr.xLen << endl;
+    cout << "Input Y length(expanded): " << fr.yLen << endl;
     cout << "Used block size: " << (int) fr.T << endl;
     cout << "Optimal block size: " << (int) fr.optimalT << endl;
 
@@ -103,7 +104,7 @@ int main(int argc, char** argv) {
 
     // echo total runtime and memory
     execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
-    cout << endl << "Total: \t\t\t" << execTime << "sec"
+    cout << endl << "Total- \t\t\t" << execTime << "sec"
             << "\t" << memoryDiff(totalMemoryBefore) << "MB" << endl;
 
     cout << endl << "Result:\t" << result << endl;
@@ -115,7 +116,7 @@ int main(int argc, char** argv) {
 
     if (fr.xLen != 0 && fr.yLen != 0) {
         start = clock();
-        EdlibAlignResult resultCheck = edlibAlign(X_char, fr.xLen, Y_char, fr.yLen, edlibDefaultAlignConfig());
+        EdlibAlignResult resultCheck = edlibAlign(X_char, (fr.xLen - fr.xMod) , Y_char, (fr.yLen - fr.yMod) , edlibDefaultAlignConfig());
         if (resultCheck.status == EDLIB_STATUS_OK) {
             //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
         }

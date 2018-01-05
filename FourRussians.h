@@ -32,6 +32,8 @@ public:
     uint8_t mask;
     uint64_t numComb;
     
+    uint8_t xMod, yMod;
+    
     uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
     string X, Y;
 
@@ -45,11 +47,14 @@ public:
     uint8_t *xHash;
     uint8_t *yHash;
     
-    FourRussians(string const &x, string const &y, int blockSize); // offset encoded version
+    FourRussians(string &x, string &y, int blockSize = 0); // offset encoded version
     FourRussians();
 
 // returns the max number of calculated blocks
     uint64_t numCombinations();
+    
+// expanding XY so that all blocks in matrix are of size T
+    void expandXYforTsize();
     
 // generates hashes for strings x & y
     void generateXYHashes();

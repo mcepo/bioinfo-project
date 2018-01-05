@@ -7,28 +7,35 @@
 FourRussians::FourRussians() {
 }
 
-FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
+FourRussians::FourRussians(string &x, string &y, int blockSize) {
 
-    T = blockSize;
-
-    xLen = x.size();
-    yLen = y.size();
-
-    if (xLen >= yLen) {
+// make sure the longest string is X
+    if (x.size() >= y.size()) {
         X = (x);
         Y = (y);
-        numBlocksPerRow = xLen / blockSize;
-        numRowsToCalculate = yLen / blockSize;
     } else {
         X = (y);
         Y = (x);
-        numBlocksPerRow = yLen / blockSize;
-        numRowsToCalculate = xLen / blockSize;
     }
+ 
+// store X&Y lengths   
+    xLen = X.size();
+    yLen = Y.size();
+// calculate optimal T for string length
+    optimalTcalc();
+    
+// if block size isn't set, set T to optimal value for given strings
+    if (blockSize == 0){
+		T = optimalT;
+	} else {
+		T = blockSize;
+	}
 
-	optimalTcalc();
+// appending char A to begining of string so that it is dividable by T
+    expandXYforTsize();
+    
     generateXYHashes();
-
+    
     numComb = numCombinations();
 
     // initialize array for storing calculated blocks
@@ -61,10 +68,34 @@ FourRussians::FourRussians(string const &x, string const &y, int blockSize) {
     }
 }
 
+void FourRussians::expandXYforTsize() {
+	
+	xMod = 0;
+	yMod = 0;
+
+	while ((xLen % T) != 0) {
+		X += 'A';
+		xLen++;
+		xMod++;
+	}
+	while ((yLen % T) != 0) {
+		Y += 'A';
+		yLen++;
+		yMod++;
+	}
+	
+	numBlocksPerRow = xLen / T;
+    numRowsToCalculate = yLen / T;
+}
+
 void FourRussians::optimalTcalc() {
   int len = max(xLen, yLen);
   double t = (log(len) / log(12)) / 2;
 	optimalT = ((int)t + 1);
+	
+	if (optimalT < 2) {
+		optimalT = 2;
+	}
 }
 
 void FourRussians::generateXYHashes() {
@@ -178,6 +209,14 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
 
     uint8_t tableRow = 0;
     uint8_t tableCol = 0;
+    
+    if (xMod != 0) {
+		tableCol = T - xMod;
+	}
+	
+	if (yMod != 0) {
+		tableRow = T - yMod;
+	}
 
     int8_t diagonal, top, left;
 

@@ -16,8 +16,8 @@
 
 using namespace std;
 
-
-#define DEFAULT_STRING_LENGTH 100
+#define MAX_STRING_LENGTH 50000
+#define MIN_STRING_LENGTH 100
 
 const char charMapper[] = "ACGT"; 
 
@@ -28,16 +28,18 @@ const char charMapper[] = "ACGT";
 int main(int argc, char** argv) {
 
     clock_t start = clock();
-    int inputStringLength;
+    int xLen;
+    int yLen;
 
     if ( argc != 2 ) {
-        inputStringLength = DEFAULT_STRING_LENGTH;
+        xLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
+        yLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
     } else {
-        inputStringLength = atoi(argv[1]);
+        xLen = atoi(argv[1]);
+        yLen = atoi(argv[1]);
     }
 
-    cout << "Generating X&Y length "<< inputStringLength << " characters... ";
-
+    cout << "Generating X length "<< xLen << " characters, Y length "<< yLen << "... ";
 
     string X="", Y="";
 
@@ -49,8 +51,11 @@ int main(int argc, char** argv) {
 
     srand(time(0));
 
-    for (int i = 0; i < inputStringLength; i++) {
+    for (int i = 0; i < xLen; i++) {
         X = X + charMapper[(rand() % 4)] ;
+    }
+    
+    for (int i = 0; i < yLen; i++) {
         Y = Y + charMapper[(rand() % 4)] ;
     }
 
