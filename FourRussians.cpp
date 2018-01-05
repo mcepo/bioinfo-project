@@ -91,19 +91,23 @@ void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
-    int rowLng = numBlocksPerRow * 0.05;
-    int shift = rowLng / 2;
+    int shift = numBlocksPerRow / numRowsToCalculate;
+    int rowLng = numBlocksPerRow * 0.04 + shift;
+    
+    if (rowLng > numBlocksPerRow){
+		rowLng = numBlocksPerRow;
+	}
 
     int colStart, colStop;
-  //  cout << "numRowsToCalculate: " << numRowsToCalculate << endl;
-  //  cout << "numBlocksPerRow: " << numRowsToCalculate << endl;
+    cout << "numRowsToCalculate: " << numRowsToCalculate << endl;
+    cout << "numBlocksPerRow: " << numBlocksPerRow << endl;
 
-  //  cout << "Shift: " << shift << endl;
-  //  cout << "RowLng: " << rowLng << endl;
+    cout << "Shift: " << shift << endl;
+    cout << "Row length: " << rowLng << endl;
 
-  //  cout << "\t1 0-" << (numBlocksPerRow - shift) << endl;
+    cout << "\t1 0-" << (rowLng/2) << endl;
     // first row calculation
-    for (int col = 0; col < shift; col++) {
+    for (int col = 0; col < rowLng/2; col++) {
 
         matrix[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
         //lastColumn
@@ -114,19 +118,18 @@ void FourRussians::calculateMatrix() {
     for (int row = 1; row < numRowsToCalculate; row++) {
         curC = firstRC;
 
-        if ((row - shift) < 0) {
+        if (( (rowLng/2) + row*shift) < rowLng) {
             colStart = 0;
+            colStop = (rowLng/2) + row*shift;
         } else {
-            colStart = (row - shift);
+            colStart = colStart + shift;
+            colStop = colStop + shift;
+            if (colStop >= numBlocksPerRow){
+				colStop = numBlocksPerRow;
+			}
         }
 
-        if ((shift + row) >= numBlocksPerRow) {
-            colStop = numBlocksPerRow;
-        } else {
-            colStop = shift + row - 1;
-        }
-
-     //   cout << "\t" << row << " " << colStart << "-" << colStop << endl;
+        cout << "\t" << row << " " << colStart << "-" << colStop << endl;
 
         for (int col = colStart; col < colStop; col++) {
 
@@ -139,7 +142,7 @@ void FourRussians::calculateMatrix() {
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
 
-        if ((shift + row) < numBlocksPerRow) {
+        if (colStop != numBlocksPerRow) {
         matrix[row][colStop] = mergeHash(
                 xHash[colStop],
                 yHash[row],
