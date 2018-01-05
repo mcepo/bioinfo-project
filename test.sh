@@ -15,16 +15,15 @@
 
 
 # default values
-step=1
-max_length=10000
-min_length=1000
+
+test_length=1000
 
 # check input parameters
 if [ $# -eq 0 ] 
 then
 
 # if no params echo usage msg, continue working with default params
-    echo  "Change test params by invoking test like -> ./test.sh <min_length> <max_length> <step>."
+    echo  "Change test params by invoking test like -> ./test.sh <test_length>"
 else
 
 # set input parameters
@@ -33,21 +32,20 @@ else
     step=$3
 fi
 
-echo "Staring test: string length range $min_length - $max_length step $step"
+echo "Staring test: number of tests  $test_length"
 echo ""
 
 make clean
 make
 
 # loop given range 
-for (( x=$min_length; x<=$max_length; x+=$step ))
+for (( x=1; x<=$test_length; x+=1 ))
 do
 
 	echo "**************************************************************"
-	echo "Testing input with $x characters"
-	
+	echo "******* TEST $x *******"
 # execute generator with the current value in the loop, generates two strings in input.txt
-	./generator $x
+	./generator
 	
 # read input.txt and calculate edit distance
 	./main
