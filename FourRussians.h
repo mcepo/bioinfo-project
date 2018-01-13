@@ -34,8 +34,11 @@ public:
     
     uint8_t xMod, yMod;
     
-    uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate;
+    uint32_t xLen, yLen, numBlocksPerRow, numRowsToCalculate, index;
     string X, Y;
+    
+// used in recursion when calculating blocks
+    uint8_t xHash, yHash, b,c;
 
 // matrix
     uint32_t **matrix;
@@ -44,8 +47,8 @@ public:
     uint16_t* genBlocks;
 
 // calculated hash values for x & y string
-    uint8_t *xHash;
-    uint8_t *yHash;
+    uint8_t *xHashs;
+    uint8_t *yHashs;
     
     FourRussians(string &x, string &y, int blockSize = 0); // offset encoded version
     FourRussians();
@@ -72,16 +75,10 @@ public:
     uint32_t calculateEditDistanceAndScript();
 
 // calculate a single block used when calculating edit script and distance
-    void calculateBlock(uint8_t xHash, uint8_t yHash,
-            uint8_t b, uint8_t c);
-            
-// calculate a single block used when precalculating blocks
-    uint16_t calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
-            uint8_t b, uint8_t c);
+    void calculateBlock();
     
 // generating all blocks for matrix
-    void generateBlocks( uint8_t index, uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c);
+    void generateBlocks( uint8_t index, uint8_t rowIndex, uint8_t colIndex);
     
 // just merges hashes of b,c,x,y for a given block and returns a merged hash
 // that is used as a index when searching and storing blocks    

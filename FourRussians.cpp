@@ -9,7 +9,10 @@ FourRussians::FourRussians() {
 
 FourRussians::FourRussians(string &x, string &y, int blockSize) {
 
-// make sure the longest string is X
+
+    xHash = yHash = b = c = 0;
+
+    // make sure the longest string is X
     if (x.size() >= y.size()) {
         X = (x);
         Y = (y);
@@ -17,35 +20,31 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
         X = (y);
         Y = (x);
     }
- 
-// store X&Y lengths   
+
+    // store X&Y lengths
     xLen = X.size();
     yLen = Y.size();
-// calculate optimal T for string length
+    // calculate optimal T for string length
     optimalTcalc();
-    
-// if block size isn't set, set T to optimal value for given strings
-    if (blockSize == 0){
-		T = optimalT;
-	} else {
-		T = blockSize;
-	}
 
-// appending char A to begining of string so that it is dividable by T
+    // if block size isn't set, set T to optimal value for given strings
+    if (blockSize == 0) {
+        T = optimalT;
+    } else {
+        T = blockSize;
+    }
+
+    // appending char A to begining of string so that it is dividable by T
     expandXYforTsize();
-    
+
     generateXYHashes();
-    
+
     numComb = numCombinations();
 
     // initialize array for storing calculated blocks
     genBlocks = new uint16_t[numComb];
 
     matrix = new uint32_t*[numRowsToCalculate];
-
-    for (int row = 0; row < numRowsToCalculate; row++) {
-        matrix[row] = new uint32_t[numBlocksPerRow];
-    }
 
     // initialize 2d array that will be used in method
     // calculateBlocks for calculating the block
@@ -69,117 +68,210 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
 }
 
 void FourRussians::expandXYforTsize() {
-	
-	xMod = 0;
-	yMod = 0;
 
-	while ((xLen % T) != 0) {
-		X += 'A';
-		xLen++;
-		xMod++;
-	}
-	while ((yLen % T) != 0) {
-		Y += 'A';
-		yLen++;
-		yMod++;
-	}
-	
-	numBlocksPerRow = xLen / T;
+    xMod = 0;
+    yMod = 0;
+
+    while ((xLen % T) != 0) {
+        X += 'A';
+        xLen++;
+        xMod++;
+    }
+    while ((yLen % T) != 0) {
+        Y += 'A';
+        yLen++;
+        yMod++;
+    }
+
+    numBlocksPerRow = xLen / T;
     numRowsToCalculate = yLen / T;
 }
 
 void FourRussians::optimalTcalc() {
-  int len = max(xLen, yLen);
-  double t = (log(len) / log(12)) / 2;
-	optimalT = ((int)t + 1);
-	
-	if (optimalT < 2) {
-		optimalT = 2;
-	}
+    int len = max(xLen, yLen);
+    double t = (log(len) / log(12)) / 2;
+    optimalT = ((int) t + 1);
+
+    if (optimalT < 2) {
+        optimalT = 2;
+    }
 }
 
 void FourRussians::generateXYHashes() {
 
-    xHash = new uint8_t[numBlocksPerRow];
-    yHash = new uint8_t[numRowsToCalculate];
+    xHashs = new uint8_t[numBlocksPerRow];
+    yHashs = new uint8_t[numRowsToCalculate];
 
     for (int i = 0; i < numBlocksPerRow; i++) {
-        xHash[i] = 0;
+        xHashs[i] = 0;
         for (uint8_t j = 0; j < T; j++) {
-            xHash[i] = (xHash[i] << 2) + acgt_to_index(X[i * T + j]);
+            xHashs[i] = (xHashs[i] << 2) + acgt_to_index(X[i * T + j]);
         }
     }
 
     for (int i = 0; i < numRowsToCalculate; i++) {
-        yHash[i] = 0;
+        yHashs[i] = 0;
         for (uint8_t j = 0; j < T; j++) {
-            yHash[i] = (yHash[i] << 2) + acgt_to_index(Y[i * T + j]);
+            yHashs[i] = (yHashs[i] << 2) + acgt_to_index(Y[i * T + j]);
         }
     }
 }
+
+// TODO: matrix is of size numBlocksPerRow x numRowsToCalculate
+// this can be reduced by allocating the actual size of the row
+// also modification will need to be made in calculation of 
+// edit script and edit distance
+
+// za svaki redak upisuj colStart i onda prilikom računanja edit distance i 
+// edit script samo stavi da je prilikom dohvačanja indexa iz matrice 
+// col - colStart
 
 void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
-    int shift = numBlocksPerRow / numRowsToCalculate;
-    int rowLng = numBlocksPerRow * 0.04 + shift;
+    int shift = floor(numBlocksPerRow / numRowsToCalculate);
+    int gap = numBlocksPerRow - (shift * numRowsToCalculate);
+    int append = ceil((double) gap / numRowsToCalculate);
+
+    // the factor by which the number of blocks in row will be reduced
+    // defined by testing, not 100% accurate
+    // TODO: define reduction factor by the number of blocks in row
+    double reductionFactor;
+
+    if (yLen >= 1000000) {
+        reductionFactor = 0.01;
+    } else if (yLen >= 100000) {
+        reductionFactor = 0.020;
+    } else if (yLen >= 10000) {
+        reductionFactor = 0.040;
+    } else if (yLen >= 1000) {
+        reductionFactor = 0.50;
+    } else {
+        reductionFactor = 0.60;
+    }
+
+    int rowLng = ceil(numBlocksPerRow * reductionFactor);
+    int rowLngHalf = (rowLng / 2);
+
+    int colStart = -rowLngHalf;
+    int colStop = rowLngHalf + shift + append;
+
+    int row = 1;
+    int col;
+
+    if (colStop > numBlocksPerRow) {
+        colStop = numBlocksPerRow;
+    }
+
+    matrix[0] = new uint32_t[colStop];
     
-    if (rowLng > numBlocksPerRow){
-		rowLng = numBlocksPerRow;
-	}
-
-    int colStart, colStop;
-    cout << "numRowsToCalculate: " << numRowsToCalculate << endl;
-    cout << "numBlocksPerRow: " << numBlocksPerRow << endl;
-
-    cout << "Shift: " << shift << endl;
-    cout << "Row length: " << rowLng << endl;
-
-    cout << "\t1 0-" << (rowLng/2) << endl;
     // first row calculation
-    for (int col = 0; col < rowLng/2; col++) {
+    for (int col = 0; col < colStop; col++) {
 
-        matrix[0][col] = mergeHash(xHash[col], yHash[0], firstRC, curC);
+        matrix[0][col] = mergeHash(xHashs[col], yHashs[0], firstRC, curC);
         //lastColumn
         curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
+    
+    // za prvi red  = 0;
 
-    // rest of the matrix
-    for (int row = 1; row < numRowsToCalculate; row++) {
+    if (colStop == numBlocksPerRow) {
+        return;
+    }
+
+    // while the row starts with 0 do
+    while (colStart <= 0) {
+
+        // sve je 0 ovdje
         curC = firstRC;
 
-        if (( (rowLng/2) + row*shift) < rowLng) {
-            colStart = 0;
-            colStop = (rowLng/2) + row*shift;
-        } else {
-            colStart = colStart + shift;
-            colStop = colStop + shift;
-            if (colStop >= numBlocksPerRow){
-				colStop = numBlocksPerRow;
-			}
-        }
-
-        cout << "\t" << row << " " << colStart << "-" << colStop << endl;
-
-        for (int col = colStart; col < colStop; col++) {
+        matrix[row] = new uint32_t[colStop + shift + append];
+        
+        for (col = 0; col < colStop; col++) {
 
             matrix[row][col] = mergeHash(
-                    xHash[col],
-                    yHash[row],
-                    genBlocks[matrix[row - 1][col]] & mask, // lastRow -> b
+                    xHashs[col],
+                    yHashs[row],
+                    (genBlocks[matrix[row - 1][col]] & mask), // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
 
-        if (colStop != numBlocksPerRow) {
-        matrix[row][colStop] = mergeHash(
-                xHash[colStop],
-                yHash[row],
-                firstRC, // lastRow -> b
-                curC); // lastColumn -> c
+        colStop += shift + append;
+
+        for (; col < colStop; col++) {
+            matrix[row][col] = mergeHash(
+                    xHashs[col],
+                    yHashs[row],
+                    firstRC, // lastRow -> b
+                    curC); // lastColumn -> c
+
+            //lastColumn
+            curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
+        colStart += shift;
+        row++;
+    }
+
+    // when the col doesn't start with 0
+    while (colStop < numBlocksPerRow) {
+
+        curC = firstRC;
+        
+        matrix[row] = new uint32_t[colStop + shift + append];
+
+        for (col = colStart; col < colStop; col++) {
+
+            matrix[row][col] = mergeHash(
+                    xHashs[col],
+                    yHashs[row],
+                    (genBlocks[matrix[row - 1][col]] & mask), // lastRow -> b
+                    curC); // lastColumn -> c
+            //lastColumn
+            curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
+        }
+
+        colStop += shift + append;
+
+        if (colStop >= numBlocksPerRow) {
+            colStop = numBlocksPerRow;
+        }
+
+        for (; col < colStop; col++) {
+
+            matrix[row][col] = mergeHash(
+                    xHashs[col],
+                    yHashs[row],
+                    firstRC, // lastRow -> b
+                    curC); // lastColumn -> c
+
+            //lastColumn
+            curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
+        }
+        colStart += shift;
+        row++;
+    }
+
+    // for the rest of matrix, it ends on numRowsToCalculate
+    for (; row < numRowsToCalculate; row++) {
+
+        curC = firstRC;
+        
+        matrix[row] = new uint32_t[colStop];
+
+        for (col = colStart; col < colStop; col++) {
+
+            matrix[row][col] = mergeHash(
+                    xHashs[col],
+                    yHashs[row],
+                    (genBlocks[matrix[row - 1][col]] & mask), // lastRow -> b
+                    curC); // lastColumn -> c
+            //lastColumn
+            curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
+        }
+        colStart += shift;
     }
 }
 
@@ -204,35 +296,34 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
 
     uint32_t result = 0;
 
-    uint8_t xHash, yHash, b, c;
-    uint32_t index;
-
     uint8_t tableRow = 0;
     uint8_t tableCol = 0;
-    
+
     if (xMod != 0) {
-		tableCol = T - xMod;
-	}
-	
-	if (yMod != 0) {
-		tableRow = T - yMod;
-	}
+        tableCol = T - xMod;
+    }
+
+    if (yMod != 0) {
+        tableRow = T - yMod;
+    }
 
     int8_t diagonal, top, left;
 
     while (row > -1 && col > -1) {
+
+        //        cout << row << " " << col << endl;
 
         if (tableRow == 0) tableRow = T;
         if (tableCol == 0) tableCol = T;
 
         index = matrix[row][col];
 
-        xHash = index & mask;
-        yHash = (index >> (T << 1)) & mask;
-        c = (index >> (T << 2)) & mask;
-        b = (index >> ((T << 2) + (T << 1))) & mask;
+        //        cout << index << endl;
 
-        calculateBlock(xHash, yHash, b, c);
+        calculateBlock();
+
+        //        print(xHash, yHash);
+        //        cout << endl;
 
         while (tableRow > 0 && tableCol > 0) {
 
@@ -254,18 +345,18 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
                 tableRow--;
                 tableCol--;
 
-            } else if (left >= top) {
-                x += '-';
-                y += Y[row * T + tableRow - 1];
-                oper += " ";
-                result++;
-                tableRow--;
-            } else {
+            } else if (left <= top) {
                 x += X[col * T + tableCol - 1];
                 y += '-';
                 oper += " ";
                 tableCol--;
                 result++;
+            } else {
+                x += '-';
+                y += Y[row * T + tableRow - 1];
+                oper += " ";
+                result++;
+                tableRow--;
             }
         }
 
@@ -325,8 +416,12 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
     return result;
 }
 
-void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c) {
+void FourRussians::calculateBlock() {
+
+    xHash = index & mask;
+    yHash = (index >> (T << 1)) & mask;
+    c = (index >> (T << 2)) & mask;
+    b = (index >> ((T << 2) + (T << 1))) & mask;
 
     // convert offset to real and fill the first row and column
     for (uint8_t i = 1; i <= T; i++) {
@@ -352,76 +447,6 @@ void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
             }
         }
     }
-}
-
-uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
-        uint8_t b, uint8_t c) {
-
-    // convert offset to real and fill the first row
-    for (uint8_t i = colIndex; i <= T; i++) {
-        // B row
-        table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
-    }
-    // convert offset to real and fill the first column
-    for (uint8_t i = rowIndex; i <= T; i++) {
-        // C column
-        table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
-    }
-
-    // calculate columns right
-    for (uint8_t row = 1; row < rowIndex; row++) {
-        for (uint8_t col = colIndex; col <= T; col++) {
-
-            if (((xHash >> ((T - col) << 1)) & 3)
-                    != ((yHash >> ((T - row) << 1)) & 3)) {
-                table[row][col] =
-                        min(
-                        min(table[row - 1][ col - 1],
-                        table[row - 1][ col]
-                        ), table[row][ col - 1]) + 1;
-            } else {
-                table[row][col] = table[row - 1][ col - 1];
-            }
-        }
-    }
-
-    // calculate rows lower
-    for (uint8_t row = rowIndex; row <= T; row++) {
-        for (uint8_t col = 1; col <= T; col++) {
-
-            if (((xHash >> ((T - col) << 1)) & 3)
-                    != ((yHash >> ((T - row) << 1)) & 3)) {
-                table[row][col] =
-                        min(
-                        min(table[row - 1][ col - 1],
-                        table[row - 1][ col]
-                        ), table[row][ col - 1]) + 1;
-            } else {
-                table[row][col] = table[row - 1][ col - 1];
-            }
-        }
-    }
-
-    //      c + b
-    // lastColumn + lastRow
-    uint16_t f = 0;
-
-    // dodao sam +1 u offsete kako bi rješio problem sa -1
-    // i prebacivanjem istoga
-
-    // last column
-    for (uint8_t i = 0; i < T; i++) {
-        f = (f << 2) + ((table[i + 1][T] - table[i][T]) + 1);
-    }
-
-    // last row
-    for (uint8_t i = 0; i < T; i++) {
-        f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
-    }
-
-    //print (xHash, yHash );
-    //cout << endl;
-    return f;
 }
 
 uint8_t FourRussians::acgt_to_index(const char acgt) {
@@ -472,34 +497,93 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash) {
     cout << endl;
 }
 
-// TODO: mislim da je moguće ovo još više reducirati
+void FourRussians::generateBlocks(uint8_t level, uint8_t rowIndex, uint8_t colIndex) {
 
-void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIndex,
-        uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
-
-    uint8_t m = (~0) << ((index + 1) << 1);
+    uint8_t m = (~0) << ((level + 1) << 1);
     for (uint8_t yValue = 0; yValue < 4; yValue++) {
-        yHash = (yHash & m) + (yValue << (index << 1));
+        yHash = (yHash & m) + (yValue << (level << 1));
         for (uint8_t cValue = 0; cValue < 3; cValue++) {
-            c = (c & m) + (cValue << (index << 1));
+            c = (c & m) + (cValue << (level << 1));
             for (uint8_t xValue = 0; xValue < 4; xValue++) {
-                xHash = (xHash & m) + (xValue << (index << 1));
+                xHash = (xHash & m) + (xValue << (level << 1));
                 for (uint8_t bValue = 0; bValue < 3; bValue++) {
-                    b = (b & m) + (bValue << (index << 1));
-                    if (index == 0) {
+                    b = (b & m) + (bValue << (level << 1));
+                    if (level == 0) {
+                        // convert offset to real and fill the first row
+                        for (uint8_t i = colIndex; i <= T; i++) {
+                            // B row
+                            table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
+                        }
+                        // convert offset to real and fill the first column
+                        for (uint8_t i = rowIndex; i <= T; i++) {
+                            // C column
+                            table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
+                        }
 
-                        genBlocks[mergeHash(xHash, yHash, b, c)] =
-                                calculateBlockFast(rowIndex, colIndex, xHash, yHash, b, c);
+                        // calculate columns right
+                        for (uint8_t row = 1; row < rowIndex; row++) {
+                            for (uint8_t col = colIndex; col <= T; col++) {
+
+                                if (((xHash >> ((T - col) << 1)) & 3)
+                                        != ((yHash >> ((T - row) << 1)) & 3)) {
+                                    table[row][col] =
+                                            min(
+                                            min(table[row - 1][ col - 1],
+                                            table[row - 1][ col]
+                                            ), table[row][ col - 1]) + 1;
+                                } else {
+                                    table[row][col] = table[row - 1][ col - 1];
+                                }
+                            }
+                        }
+
+                        // calculate rows lower
+                        for (uint8_t row = rowIndex; row <= T; row++) {
+                            for (uint8_t col = 1; col <= T; col++) {
+
+                                if (((xHash >> ((T - col) << 1)) & 3)
+                                        != ((yHash >> ((T - row) << 1)) & 3)) {
+                                    table[row][col] =
+                                            min(
+                                            min(table[row - 1][ col - 1],
+                                            table[row - 1][ col]
+                                            ), table[row][ col - 1]) + 1;
+                                } else {
+                                    table[row][col] = table[row - 1][ col - 1];
+                                }
+                            }
+                        }
+
+                        //      c + b
+                        // lastColumn + lastRow
+                        uint16_t f = 0;
+
+                        // dodao sam +1 u offsete kako bi rješio problem sa -1
+                        // i prebacivanjem istoga
+
+                        // last column
+                        for (uint8_t i = 0; i < T; i++) {
+                            f = (f << 2) + ((table[i + 1][T] - table[i][T]) + 1);
+                        }
+
+                        // last row
+                        for (uint8_t i = 0; i < T; i++) {
+                            f = (f << 2) + ((table[T][i + 1] - table[T][i]) + 1);
+                        }
+
+                        //print (xHash, yHash );
+                        //cout << endl;
+                        genBlocks[mergeHash(xHash, yHash, b, c)] = f;
+
                     } else {
-                        generateBlocks(index - 1, rowIndex, colIndex, xHash, yHash, b, c);
+                        generateBlocks(level - 1, rowIndex, colIndex);
                     }
-                    colIndex = T - index;
-                    rowIndex = T - index + 1;
+                    colIndex = T - level;
+                    rowIndex = T - level + 1;
                 }
             }
-            colIndex = T - index;
-            rowIndex = T - index;
+            colIndex = T - level;
+            rowIndex = T - level;
         }
     }
 }
-

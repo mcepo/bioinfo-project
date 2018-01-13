@@ -16,8 +16,8 @@
 
 using namespace std;
 
-#define MAX_STRING_LENGTH 50000
-#define MIN_STRING_LENGTH 100
+#define MAX_STRING_LENGTH 100000
+#define MIN_STRING_LENGTH 1
 
 const char charMapper[] = "ACGT"; 
 
@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
     clock_t start = clock();
     int xLen;
     int yLen;
+    
+    srand(time(0));
 
     if ( argc != 2 ) {
         xLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
@@ -48,8 +50,6 @@ int main(int argc, char** argv) {
         cout << "Unable to open file";
         return -1;
     }
-
-    srand(time(0));
 
     for (int i = 0; i < xLen; i++) {
         X = X + charMapper[(rand() % 4)] ;

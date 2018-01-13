@@ -76,12 +76,12 @@ int main(int argc, char** argv) {
     clock_t timeBeforeBlockCalc = clock();
     long long memoryBeforeBlockCalc = currentMemory();
 
-    fr.generateBlocks((blockSize - 1), 1, 1, 0, 0, 0, 0);
+    fr.generateBlocks((blockSize - 1), 1, 1 );
 
     execTime = (clock() - timeBeforeBlockCalc) / (double) CLOCKS_PER_SEC;
     cout << "Generating blocks - \t" << execTime << " sec"
             << "\t" << memoryDiff(memoryBeforeBlockCalc) << " MB" << endl;
-
+    
     // calculate edit distance, measure time and memory during
     clock_t timeBeforeMatrix = clock();
     long long memoryBeforeMatrix = currentMemory();
