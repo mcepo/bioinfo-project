@@ -122,10 +122,6 @@ void FourRussians::generateXYHashes() {
 // also modification will need to be made in calculation of 
 // edit script and edit distance
 
-// za svaki redak upisuj colStart i onda prilikom računanja edit distance i 
-// edit script samo stavi da je prilikom dohvačanja indexa iz matrice 
-// col - colStart
-
 void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
@@ -133,7 +129,7 @@ void FourRussians::calculateMatrix() {
     int shift = floor(numBlocksPerRow / numRowsToCalculate);
     int gap = numBlocksPerRow - (shift * numRowsToCalculate);
     int append = ceil((double) gap / numRowsToCalculate);
-
+    
     // the factor by which the number of blocks in row will be reduced
     // defined by testing, not 100% accurate
     // TODO: define reduction factor by the number of blocks in row
@@ -142,13 +138,13 @@ void FourRussians::calculateMatrix() {
     if (yLen >= 1000000) {
         reductionFactor = 0.01;
     } else if (yLen >= 100000) {
-        reductionFactor = 0.020;
+        reductionFactor = 0.04;
     } else if (yLen >= 10000) {
-        reductionFactor = 0.040;
+        reductionFactor = 0.08;
     } else if (yLen >= 1000) {
-        reductionFactor = 0.50;
+        reductionFactor = 0.4;
     } else {
-        reductionFactor = 0.60;
+        reductionFactor = 0.5;
     }
 
     int rowLng = ceil(numBlocksPerRow * reductionFactor);
@@ -165,7 +161,7 @@ void FourRussians::calculateMatrix() {
     }
 
     matrix[0] = new uint32_t[colStop];
-    
+
     // first row calculation
     for (int col = 0; col < colStop; col++) {
 
@@ -173,8 +169,6 @@ void FourRussians::calculateMatrix() {
         //lastColumn
         curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
-    
-    // za prvi red  = 0;
 
     if (colStop == numBlocksPerRow) {
         return;
@@ -187,7 +181,7 @@ void FourRussians::calculateMatrix() {
         curC = firstRC;
 
         matrix[row] = new uint32_t[colStop + shift + append];
-        
+
         for (col = 0; col < colStop; col++) {
 
             matrix[row][col] = mergeHash(
@@ -219,7 +213,7 @@ void FourRussians::calculateMatrix() {
     while (colStop < numBlocksPerRow) {
 
         curC = firstRC;
-        
+
         matrix[row] = new uint32_t[colStop + shift + append];
 
         for (col = colStart; col < colStop; col++) {

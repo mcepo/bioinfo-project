@@ -42,7 +42,7 @@ public:
 
 // matrix
     uint32_t **matrix;
-
+    
 // storage of all calculated blocks
     uint16_t* genBlocks;
 
