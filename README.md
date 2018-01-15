@@ -1,4 +1,4 @@
-# Calculating edit distance between two sequences using 4 Russians method
+# Calculating edit distance of two sequences using 4 Russians method
 
 ## Build project
 
@@ -42,4 +42,11 @@ main takes 3 arguments; block size, input file name (containing two sequences) a
 ./main block_size input_file.txt output.maf
 ```
 help message is generated on run with insufficient or incorrect parameters.
+
+### Authors ###
+
+* Authors: Marko Čepo, Tomislav Lokotar
+* Project made as part of Bionformatics course at Faculty of Electrical Engineering and Computing, fall 2017/2018
+* Link to course: https://www.fer.unizg.hr/predmet/bio
+
 

@@ -1,12 +1,10 @@
 //
-// Created by loki on 11/4/17.
+// Created by Marko Cepo and Tomislav Lokotar on 11/4/17.
 //
 
 #include "FourRussians.h"
 
-FourRussians::FourRussians() {
-}
-
+// constructor
 FourRussians::FourRussians(string &x, string &y, int blockSize) {
 
 // make sure the longest string is X
@@ -71,6 +69,7 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
     }
 }
 
+// expand X and Y so they can fit all the blocks (i.e be divisible by)
 void FourRussians::expandXYforTsize() {
 	
 	xMod = 0;
@@ -91,6 +90,7 @@ void FourRussians::expandXYforTsize() {
     numRowsToCalculate = yLen / T;
 }
 
+// calculate optimal T using formula
 void FourRussians::optimalTcalc() {
   int len = max(xLen, yLen);
   double t = (log(len) / log(12)) / 2;
@@ -101,6 +101,7 @@ void FourRussians::optimalTcalc() {
 	}
 }
 
+// X and Y hashes. List of them is to be generated, for faster use later on (while generatin hashes)
 void FourRussians::generateXYHashes() {
 
     xHash = new uint8_t[numBlocksPerRow];
@@ -148,6 +149,7 @@ void FourRussians::calculateMatrix() {
     }
 }
 
+// combine 'hashes' into a single 'hash' (index)
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
     return (
@@ -162,26 +164,28 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
 
 
     // pocni od zadnjeg retka i stupca
+    // start at last row and column
     int col = numBlocksPerRow - 1;
     int row = numRowsToCalculate - 1;
 
+    // initialize the result representing sequences
     // stringovi koji su zapravo rezultat. oper sluzi za graficki prikaz poklapanja.
     string x = "";
     string oper = "";
     string y = "";
 
-    // edit distance
+    // init. edit distance
     uint32_t result = 0;
 
     // potrebne temp. varijable
     uint8_t xHash, yHash, b, c;
     uint32_t index;
 
-    // broj retka i stupca u tablici?
+    // current row and column of table block
     uint8_t tableRow = 0;
     uint8_t tableCol = 0;
 
-    // retci i stupci u toj tablici?
+    // start index corrections (if X or Y weren't divisible by T)
     if (xMod != 0) {
 		tableCol = T - xMod;
 	}
@@ -190,9 +194,11 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
 		tableRow = T - yMod;
 	}
 
+    // relevant elements for construction of edit script
     // relevantni elementi na kojima se bazira odluka
     int8_t diagonal, top, left;
 
+    // do while indexes of DP table are inside it (out -> done)
     // radim ovo dok jedan od indeksa ne izleti van DP tablice
     while (row > -1 && col > -1) {
 
@@ -200,6 +206,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
         if (tableCol == 0) tableCol = T;
 
         // trenutni cachirani index (index == id tableblocka)
+        // use cached table block. This is the index of it
         index = matrix[row][col];
 
 
@@ -208,16 +215,20 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
         c = (index >> (T << 2)) & mask;
         b = (index >> ((T << 2) + (T << 1))) & mask;
 
+        // recalculate the block based on index ('hash'). Store it in variable 'table'
         // izracunava elemente blokova, posprema ga u 'table'
         calculateBlock(xHash, yHash, b, c);
 
+        // inside of block:
         // unutar bloka..//
         while (tableRow > 0 && tableCol > 0) {
 
+            // relevant elements
             diagonal = table[tableRow - 1][tableCol - 1];
             left = table[tableRow][tableCol - 1];
             top = table[tableRow - 1][tableCol];
 
+            // the old-fashioned (NW-way) of calculating edit script
             if (diagonal <= left && diagonal <= top) {
                 x += X[col * T + tableCol - 1];
                 y += Y[row * T + tableRow - 1];
@@ -231,7 +242,6 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
 
                 tableRow--;
                 tableCol--;
-
             } else if (left >= top) {
                 x += '-';
                 y += Y[row * T + tableRow - 1];
@@ -248,6 +258,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
         }
 
         // racuna mora li ici u drugi blok... Ako da, izracuna u koji blok (lijevi, gornjelijevi, desni)
+        // calculates if recalculation of block (upper, left, or upper-left diagonal block) is needed
         if (tableRow == 0 && tableCol == 0) {
             row--;
             col--;
@@ -257,6 +268,8 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
             row--;
         }
     }
+
+    // last-element edit script calculation: (for row and column)
 
     // ako row nije izletio iz DP tablice
     if (row > -1 ) {
@@ -285,8 +298,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
     }
 
     outputMAF(x, y, result, outputPath);
-    
-// TODO: move this to a separate method
+
 //
 //    ofstream file(outputPath);
 //
@@ -306,6 +318,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
     return result;
 }
 
+// MAF format output of sequence alignments
 void FourRussians::outputMAF(string sequence1, string sequence2, unsigned long score, string outputPath){
     ofstream file(outputPath);
 
@@ -320,6 +333,7 @@ void FourRussians::outputMAF(string sequence1, string sequence2, unsigned long s
     file.close();
 };
 
+// calculate block the Needleman–Wunsch-way
 void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
@@ -349,6 +363,7 @@ void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
     }
 }
 
+// calculate block using indexes
 uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {
 
@@ -419,6 +434,7 @@ uint16_t FourRussians::calculateBlockFast(uint8_t rowIndex, uint8_t colIndex, ui
     return f;
 }
 
+// fast way to convert bases to their integer-representative
 uint8_t FourRussians::acgt_to_index(const char acgt) {
     if (acgt == 'A') return 0;
     if (acgt == 'C') return 1;
@@ -426,6 +442,7 @@ uint8_t FourRussians::acgt_to_index(const char acgt) {
     if (acgt == 'T') return 3;
 }
 
+// calculates how many possible (different) blocks are there
 uint64_t FourRussians::numCombinations() {
 
     uint64_t result = 0U;
@@ -440,6 +457,7 @@ uint64_t FourRussians::numCombinations() {
     return result;
 }
 
+// print table block...
 void FourRussians::print(uint8_t xHash, uint8_t yHash) {
 
     cout << "TB" << "| x  ";
@@ -468,7 +486,7 @@ void FourRussians::print(uint8_t xHash, uint8_t yHash) {
 }
 
 // TODO: mislim da je moguće ovo još više reducirati
-
+// generate all blocks
 void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIndex,
         uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
@@ -497,4 +515,5 @@ void FourRussians::generateBlocks(uint8_t index, uint8_t rowIndex, uint8_t colIn
         }
     }
 }
+
 

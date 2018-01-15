@@ -1,16 +1,16 @@
-#!/bin/bash
+#!/bin/env bash
 # 
 # File:   test.sh
-# Author: marko
+# Author: marko cepo
 #
 # Created on Nov 22, 2017, 8:32:21 PM
 #
 
 # Simple bash test
-# loops throu a rang of numbers, feeds the current value in the loop to generator
+# loops through a range of numbers, feeds the current value in the loop to generator
 # generator in return generates 2 random string with the passed length and
 # stores them in input.txt
-# main.exe is then executed and caluclates the difference of the two strings in 
+# main.exe is then executed and calculates the difference of the two strings in
 # file input.txt
 
 
@@ -51,3 +51,4 @@ do
 	./main
 	echo ""
 done
+

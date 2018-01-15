@@ -1,5 +1,5 @@
 //
-// Created by Tomislav Lokotar on 11/4/17.
+// Created by Marko Cepo and Tomislav Lokotar on 11/4/17.
 //
 #ifndef BIO_INF_FOUR_RUSSIANS_H
 #define BIO_INF_FOUR_RUSSIANS_H
@@ -96,3 +96,4 @@ public:
 };
 
 #endif //BIO_INF_FOUR_RUSSIANS_H
+

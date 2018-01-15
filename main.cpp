@@ -125,13 +125,15 @@ int main(int argc, char** argv) {
     cout << endl << "Result:\t" << result << endl;
     
     cout << endl << "Edlib control ";
-    // EDLIB controle
+
+    // EDLIB check
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
 
     if (fr.xLen != 0 && fr.yLen != 0) {
         start = clock();
-        EdlibAlignResult resultCheck = edlibAlign(X_char, (fr.xLen - fr.xMod) , Y_char, (fr.yLen - fr.yMod) , edlibDefaultAlignConfig());
+        EdlibAlignResult resultCheck = edlibAlign(X_char, (fr.xLen - fr.xMod) , Y_char,
+                                                  (fr.yLen - fr.yMod) , edlibDefaultAlignConfig());
         if (resultCheck.status == EDLIB_STATUS_OK) {
             //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
         }
@@ -147,3 +149,4 @@ int main(int argc, char** argv) {
     cout << endl;
     return 0;
 }
+
