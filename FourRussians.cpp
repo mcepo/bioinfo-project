@@ -21,6 +21,9 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
 // store X&Y lengths   
     xLen = X.size();
     yLen = Y.size();
+
+    //xMod = xLen % T;
+    //yMod = yLen % T;
 // calculate optimal T for string length
     optimalTcalc();
     
@@ -148,30 +151,37 @@ void FourRussians::calculateMatrix() {
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
 
     return (
-            (b << ((T << 2) + (T << 1))) // shift b to the begining of index
+            (b << ((T << 2) + (T << 1))) // shift b to the beginning of index
             + (c << (T << 2)) // shift c to be behind b
             + (yHash << (T << 1)) // shift xHash to be behind c
             + xHash // xHash is at the end of index
             );
 }
 
-uint32_t FourRussians::calculateEditDistanceAndScript() {
+uint32_t FourRussians::calculateEditDistanceAndScript(string outputPath) {
 
+
+    // pocni od zadnjeg retka i stupca
     int col = numBlocksPerRow - 1;
     int row = numRowsToCalculate - 1;
 
+    // stringovi koji su zapravo rezultat. oper sluzi za graficki prikaz poklapanja.
     string x = "";
     string oper = "";
     string y = "";
 
+    // edit distance
     uint32_t result = 0;
 
+    // potrebne temp. varijable
     uint8_t xHash, yHash, b, c;
     uint32_t index;
 
+    // broj retka i stupca u tablici?
     uint8_t tableRow = 0;
     uint8_t tableCol = 0;
-    
+
+    // retci i stupci u toj tablici?
     if (xMod != 0) {
 		tableCol = T - xMod;
 	}
@@ -180,22 +190,28 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
 		tableRow = T - yMod;
 	}
 
+    // relevantni elementi na kojima se bazira odluka
     int8_t diagonal, top, left;
 
+    // radim ovo dok jedan od indeksa ne izleti van DP tablice
     while (row > -1 && col > -1) {
 
         if (tableRow == 0) tableRow = T;
         if (tableCol == 0) tableCol = T;
 
+        // trenutni cachirani index (index == id tableblocka)
         index = matrix[row][col];
+
 
         xHash = index & mask;
         yHash = (index >> (T << 1)) & mask;
         c = (index >> (T << 2)) & mask;
         b = (index >> ((T << 2) + (T << 1))) & mask;
 
+        // izracunava elemente blokova, posprema ga u 'table'
         calculateBlock(xHash, yHash, b, c);
 
+        // unutar bloka..//
         while (tableRow > 0 && tableCol > 0) {
 
             diagonal = table[tableRow - 1][tableCol - 1];
@@ -231,6 +247,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
             }
         }
 
+        // racuna mora li ici u drugi blok... Ako da, izracuna u koji blok (lijevi, gornjelijevi, desni)
         if (tableRow == 0 && tableCol == 0) {
             row--;
             col--;
@@ -241,6 +258,7 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
         }
     }
 
+    // ako row nije izletio iz DP tablice
     if (row > -1 ) {
 		
 		if (tableRow == 0) tableRow = T;
@@ -252,7 +270,8 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
             result++;
         }
     }
-    
+
+    // ako col nije izletio iz DP tablice
     if (col > -1 ) {
 		
 		if (tableCol == 0) tableCol = T;
@@ -264,28 +283,42 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
             result++;
         }
     }
+
+    outputMAF(x, y, result, outputPath);
     
-    
-// TODO: move this to a seperate method
-// filename shouldn't be hardcoded
-
-    ofstream file("output.txt");
-
-    for (int i = x.size() - 1; i >= 0; i--) {
-        file << x[i];
-    }
-    file << endl;
-    for (int i = oper.size() - 1; i >= 0; i--) {
-        file << oper[i];
-    }
-    file << endl;
-    for (int i = y.size() - 1; i >= 0; i--) {
-        file << y[i];
-    }
-    file.close();
-
+// TODO: move this to a separate method
+//
+//    ofstream file(outputPath);
+//
+//    for (int i = x.size() - 1; i >= 0; i--) {
+//        file << x[i];
+//    }
+//    file << endl;
+//    for (int i = oper.size() - 1; i >= 0; i--) {
+//        file << oper[i];
+//    }
+//    file << endl;
+//    for (int i = y.size() - 1; i >= 0; i--) {
+//        file << y[i];
+//    }
+//    file.close();
+//
     return result;
 }
+
+void FourRussians::outputMAF(string sequence1, string sequence2, unsigned long score, string outputPath){
+    ofstream file(outputPath);
+
+    file << "##maf version=1 scoring=Levenshtein program=bioinf-projekt-FourRussians-FER2017_2018-Cepo-Lokotar" << endl;
+    file << endl;
+    file << "a score=" << score << ".0" << endl << endl;
+
+    file << "s sequence1 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
+    file << "s sequence2 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
+    file << endl;
+
+    file.close();
+};
 
 void FourRussians::calculateBlock(uint8_t xHash, uint8_t yHash,
         uint8_t b, uint8_t c) {

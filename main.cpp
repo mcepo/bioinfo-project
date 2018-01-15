@@ -43,13 +43,28 @@ int main(int argc, char** argv) {
     string inputFilename = DEFAULT_FILENAME;
     string X, Y;
 
-    if (argc > 1) {
-        blockSize = stoi(argv[1]);
+    // input arguments: T inputFilePath OutputFilePath
+
+    // check user input
+    if (argc != 4 || (((argv[1][0] < '0') && (argv[1][0] > '9')))){
+        cout << "invalid parameters entered!\n\nusage:\n./fourRussians T inputFilePath outputFilePath" << endl << endl;
+        cout << "T             : caching block size (T, T). 2 to 4 is preferred" << endl << endl;
+        cout << "inputFilePath : input file path. File should have two rows," << endl;
+        cout << "                with a single sequence in each line" << endl << endl;
+        cout << "OutputFilePath: output file containing edit script (in MAF format)," << endl;
+        cout << "                using Levenshtein (edit) distance metric" << endl;
+        exit(-1);
     }
 
-    if (argc > 2) {
-        inputFilename = argv[2];
-    }
+    //if (argc > 1) {
+    string t_input = "";
+    t_input += argv[1][0];
+    blockSize = stoi(t_input);
+    //}
+
+    inputFilename = argv[2];
+
+    string outputFilename = argv[3];
 
     ifstream inputFile(inputFilename);
 
@@ -65,8 +80,8 @@ int main(int argc, char** argv) {
 
     // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
-    cout << "Input X length(expanded): " << fr.xLen << endl;
-    cout << "Input Y length(expanded): " << fr.yLen << endl;
+    cout << "Input X length: " << fr.xLen - fr.xMod << endl;
+    cout << "Input Y length: " << fr.yLen - fr.yMod << endl;
     cout << "Used block size: " << (int) fr.T << endl;
     cout << "Optimal block size: " << (int) fr.optimalT << endl;
 
@@ -96,7 +111,7 @@ int main(int argc, char** argv) {
     clock_t timeBeforeEditScript = clock();
     long long memoryBeforeEditScript = currentMemory();
 
-    unsigned long result = fr.calculateEditDistanceAndScript();
+    unsigned long result = fr.calculateEditDistanceAndScript(outputFilename);
 
     execTime = (clock() - timeBeforeEditScript) / (double) CLOCKS_PER_SEC;
     cout << "Edit script&distance - \t" << execTime << " sec"

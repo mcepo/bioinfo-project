@@ -30,20 +30,32 @@ int main(int argc, char** argv) {
     clock_t start = clock();
     int xLen;
     int yLen;
+    string fileName = "input.txt";
 
-    if ( argc != 2 ) {
+    if ( argc == 1){
         xLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
         yLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
-    } else {
-        xLen = atoi(argv[1]);
-        yLen = atoi(argv[1]);
+    }else if ( argc == 2 ) {
+        fileName = argv[1];
+        xLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
+        yLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
+    } else if (argc == 3){
+        fileName = argv[1];
+        xLen = atoi(argv[2]);
+        yLen = atoi(argv[2]);
+    } else if (argc == 4) {
+        fileName = argv[1];
+        xLen = atoi(argv[2]);
+        yLen = atoi(argv[3]);
+    } else{
+        cout << "wrong number of arguments! \n\nusage: generator outputFile firstSequenceLength [secondSequenceLength]" << endl;
     }
 
     cout << "Generating X length "<< xLen << " characters, Y length "<< yLen << "... ";
 
     string X="", Y="";
 
-    ofstream outputFile("input.txt");
+    ofstream outputFile(fileName);
     if (!outputFile) {
         cout << "Unable to open file";
         return -1;

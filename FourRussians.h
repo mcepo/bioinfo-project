@@ -69,7 +69,8 @@ public:
 // calculating edit script
 // returns edit distance
 // writes edit script into a file
-    uint32_t calculateEditDistanceAndScript();
+    uint32_t calculateEditDistanceAndScript(string outputPath="output.maf");
+    void outputMAF(string sequence1, string sequence2, unsigned long score, string outputPath="output.maf");
 
 // calculate a single block used when calculating edit script and distance
     void calculateBlock(uint8_t xHash, uint8_t yHash,
