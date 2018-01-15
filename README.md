@@ -22,7 +22,7 @@ generator usage:
 ```
 
 default filename is input.txt, default sequence length is 100. If only a single (first) sequence length is provided,
-both sequence length will have the same length.
+both sequences will have the same length.
 
 Example runs:
 ```
