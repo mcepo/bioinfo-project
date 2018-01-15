@@ -11,9 +11,11 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
     if (x.size() >= y.size()) {
         X = (x);
         Y = (y);
+        switchedXY = false;
     } else {
         X = (y);
         Y = (x);
+        switchedXY = true;
     }
  
 // store X&Y lengths   
@@ -326,8 +328,14 @@ void FourRussians::outputMAF(string sequence1, string sequence2, unsigned long s
     file << endl;
     file << "a score=" << score << ".0" << endl << endl;
 
-    file << "s sequence1 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
-    file << "s sequence2 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
+    if (!switchedXY) {
+        file << "s sequence1 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
+        file << "s sequence2 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
+    }
+    else{
+        file << "s sequence1 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
+        file << "s sequence2 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
+    }
     file << endl;
 
     file.close();

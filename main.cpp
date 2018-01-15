@@ -138,6 +138,7 @@ int main(int argc, char** argv) {
             //      printf("\n*********** \n Edlib control check -> edit_distance = %d\n", resultCheck.editDistance);
         }
         edlibFreeAlignResult(resultCheck);
+
         execTime = (clock() - start) / (double) CLOCKS_PER_SEC;
         if ((result - resultCheck.editDistance) == 0) {
             cout << " *** PASSED ***  check in " << execTime << "sec" << endl;

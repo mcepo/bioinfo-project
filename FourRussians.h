@@ -23,6 +23,8 @@ public:
     uint8_t T; //dimension of block (txt). Not more than 255
     uint8_t optimalT;
 
+    bool switchedXY = false;
+
 // structure used as storage when calculating lastRow and lastColumn
 // in method calculateBlock
     int8_t **table;
