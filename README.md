@@ -1,4 +1,4 @@
-# Calculating edit distance between two strings using 4 Russians 
+# Calculating edit distance between two sequences using 4 Russians method
 
 ## Build project
 
@@ -17,7 +17,9 @@ generator
 By running generator you will get output file containing two random sequences, each string in a single line. When running generator you can specify the length of the generated strings (default value 100).
 generator usage:
 
+```
 ./generator [inputFilename, firstSequenceLength, secondSequenceLength]
+```
 
 default filename is input.txt, default sequence length is 100. If only a single (first) sequence length is provided,
 both sequence length will have the same length.
