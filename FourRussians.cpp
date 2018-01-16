@@ -158,8 +158,10 @@ void FourRussians::calculateMatrix() {
     int row = 1;
     int col;
 
-    if (colStop > numBlocksPerRow) {
+    if (yLen <= 100) {
         colStop = numBlocksPerRow;
+        shift = 1;
+        append = 0;
     }
 
     matrix[0] = new uint32_t[colStop];
@@ -171,17 +173,13 @@ void FourRussians::calculateMatrix() {
         //lastColumn
         curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
-
-    if (colStop == numBlocksPerRow) {
-        return;
-    }
-
+    
     // while the row starts with 0 do
-    while (colStart <= 0) {
+    while (colStart <= 0 && row < numRowsToCalculate) {
 
         // sve je 0 ovdje
         curC = firstRC;
-
+        
         matrix[row] = new uint32_t[colStop + shift + append];
 
         for (col = 0; col < colStop; col++) {
@@ -194,7 +192,6 @@ void FourRussians::calculateMatrix() {
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-
         colStop += shift + append;
 
         for (; col < colStop; col++) {
@@ -256,7 +253,7 @@ void FourRussians::calculateMatrix() {
     for (; row < numRowsToCalculate; row++) {
 
         curC = firstRC;
-
+        
         matrix[row] = new uint32_t[colStop];
             for (col = 0; col < colStop; col++) {
             matrix[row][col] = mergeHash(

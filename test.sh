@@ -16,7 +16,7 @@
 
 # default values
 
-test_length=50
+test_length=100
 
 # check input parameters
 if [ $# -eq 0 ]
@@ -45,7 +45,7 @@ do
 	echo "**************************************************************"
 	echo "******* TEST $x *******"
 # execute generator with the current value in the loop, generates two strings in input.txt
-	./generator
+	./generator 100000
 
 # read input.txt and calculate edit distance
 	./main
