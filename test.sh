@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 # 
 # File:   test.sh
 # Author: marko cepo
