@@ -126,9 +126,11 @@ void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
-    int shift = floor(numBlocksPerRow / numRowsToCalculate);
+    shift = floor(numBlocksPerRow / numRowsToCalculate);
     int gap = numBlocksPerRow - (shift * numRowsToCalculate);
     int append = ceil((double) gap / numRowsToCalculate);
+    
+    int totalAppend = 0;
     
     // the factor by which the number of blocks in row will be reduced
     // defined by testing, not 100% accurate
@@ -144,13 +146,13 @@ void FourRussians::calculateMatrix() {
     } else if (yLen >= 1000) {
         reductionFactor = 0.4;
     } else {
-        reductionFactor = 0.5;
+        reductionFactor = 1;
     }
 
     int rowLng = ceil(numBlocksPerRow * reductionFactor);
     int rowLngHalf = (rowLng / 2);
 
-    int colStart = -rowLngHalf;
+    colStart = -rowLngHalf;
     int colStop = rowLngHalf + shift + append;
 
     int row = 1;
@@ -206,37 +208,39 @@ void FourRussians::calculateMatrix() {
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
         colStart += shift;
+        totalAppend += append;
         row++;
     }
+    
+    colStart = shift;
 
     // when the col doesn't start with 0
-    while (colStop < numBlocksPerRow) {
+        while ((colStop + colStart) <= numBlocksPerRow) {
 
         curC = firstRC;
 
-        matrix[row] = new uint32_t[colStop + shift + append];
-
-        for (col = colStart; col < colStop; col++) {
-
+        matrix[row] = new uint32_t[colStop + append];
+            for (col = 0; col < colStop - shift; col++) {
             matrix[row][col] = mergeHash(
-                    xHashs[col],
+                    xHashs[col + colStart],
                     yHashs[row],
-                    (genBlocks[matrix[row - 1][col]] & mask), // lastRow -> b
+                    (genBlocks[matrix[row - 1][col + shift]] & mask), // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-
-        colStop += shift + append;
-
-        if (colStop >= numBlocksPerRow) {
-            colStop = numBlocksPerRow;
+        if (totalAppend >= gap ) {
+            append = 0;
+        } else {
+            totalAppend += append;
         }
+        
+        colStop += append;
 
         for (; col < colStop; col++) {
 
             matrix[row][col] = mergeHash(
-                    xHashs[col],
+                    xHashs[col + colStart],
                     yHashs[row],
                     firstRC, // lastRow -> b
                     curC); // lastColumn -> c
@@ -252,21 +256,22 @@ void FourRussians::calculateMatrix() {
     for (; row < numRowsToCalculate; row++) {
 
         curC = firstRC;
-        
+
         matrix[row] = new uint32_t[colStop];
-
-        for (col = colStart; col < colStop; col++) {
-
+            for (col = 0; col < colStop; col++) {
             matrix[row][col] = mergeHash(
-                    xHashs[col],
+                    xHashs[col + colStart],
                     yHashs[row],
-                    (genBlocks[matrix[row - 1][col]] & mask), // lastRow -> b
+                    (genBlocks[matrix[row - 1][col + shift]] & mask), // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
         colStart += shift;
+        colStop -= shift;
     }
+
+    colStart -= shift;
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
@@ -305,14 +310,18 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
 
     while (row > -1 && col > -1) {
 
-        //        cout << row << " " << col << endl;
+     //   cout << row << " " << col << " - ";
 
         if (tableRow == 0) tableRow = T;
         if (tableCol == 0) tableCol = T;
 
-        index = matrix[row][col];
+        if (colStart > 0 ) {
+            index = matrix[row][col - colStart];
+        } else {
+            index = matrix[row][col];
+        }
 
-        //        cout << index << endl;
+     //   cout << index << endl;
 
         calculateBlock();
 
@@ -357,10 +366,12 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
         if (tableRow == 0 && tableCol == 0) {
             row--;
             col--;
+            colStart -= shift;
         } else if (tableRow != 0) {
             col--;
         } else {
             row--;
+            colStart -= shift;
         }
     }
 
