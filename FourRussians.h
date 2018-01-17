@@ -40,8 +40,6 @@ public:
 // used in recursion when calculating blocks
     uint8_t xHash, yHash, b,c;
 
-    int colStart, shift;
-
     int *rowOffset;
 
 // matrix

@@ -65,8 +65,6 @@ FourRussians::FourRussians(string &x, string &y, int blockSize) {
         firstRC = (firstRC << 2) + 2;
         mask = (mask << 2) + 3;
     }
-    
-    cout << bitset<8>(firstRC) << endl;
 }
 
 void FourRussians::expandXYforTsize() {
@@ -124,18 +122,16 @@ void FourRussians::generateXYHashes() {
 // also modification will need to be made in calculation of 
 // edit script and edit distance
 
-/*void FourRussians::calculateMatrix() {
+void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
 
-    shift = floor(numBlocksPerRow / numRowsToCalculate);
-    int gap = numBlocksPerRow - (shift * numRowsToCalculate);
-    int append = ceil((double) gap / numRowsToCalculate);
-    
-    int totalAppend = 0;
-    
-    // the factor by which the number of blocks in row will be reduced
-    // defined by testing, not 100% accurate
+    int shift = numBlocksPerRow / numRowsToCalculate;
+    double shiftReal = ((double) numBlocksPerRow / numRowsToCalculate);
+    double shiftTotal = 0;
+
+    rowOffset = new int[numRowsToCalculate];
+
     // TODO: define reduction factor by the number of blocks in row
     double reductionFactor;
 
@@ -151,22 +147,21 @@ void FourRussians::generateXYHashes() {
         reductionFactor = 1;
     }
 
-    int rowLng = ceil(numBlocksPerRow * reductionFactor);
-    int rowLngHalf = (rowLng / 2);
+    int rowLng = ceil(numBlocksPerRow * reductionFactor) / 2;
 
-    colStart = -rowLngHalf;
-    int colStop = rowLngHalf + shift + append;
+    shiftTotal = -rowLng;
+    int colStop = rowLng + shift ;
 
     int row = 1;
     int col;
 
     if (yLen <= 100) {
         colStop = numBlocksPerRow;
-        shift = 1;
-        append = 0;
+        shiftReal = 1;
     }
 
     matrix[0] = new uint32_t[colStop];
+    rowOffset[0] = 0;
 
     // first row calculation
     for (int col = 0; col < colStop; col++) {
@@ -175,14 +170,15 @@ void FourRussians::generateXYHashes() {
         //lastColumn
         curC = (genBlocks[matrix[0][col]] >> (T << 1)) & mask;
     }
-    
-    // while the row starts with 0 do
-    while (colStart <= 0 && row < numRowsToCalculate) {
 
-        // sve je 0 ovdje
+    // while the row starts with 0 do
+    while (shiftTotal <= 0 && row < numRowsToCalculate) {
+
         curC = firstRC;
-        
-        matrix[row] = new uint32_t[colStop + shift + append];
+
+        rowOffset[row] = 0;
+
+        matrix[row] = new uint32_t[colStop + shift ];
 
         for (col = 0; col < colStop; col++) {
 
@@ -194,7 +190,7 @@ void FourRussians::generateXYHashes() {
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-        colStop += shift + append;
+        colStop += shift;
 
         for (; col < colStop; col++) {
             matrix[row][col] = mergeHash(
@@ -206,40 +202,34 @@ void FourRussians::generateXYHashes() {
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-        colStart += shift;
-        totalAppend += append;
+        shiftTotal += shiftReal;
         row++;
     }
-    
-    colStart = shift;
+
+    shiftTotal = shiftReal;
+    int diff;
 
     // when the col doesn't start with 0
-        while ((colStop + colStart) <= numBlocksPerRow) {
+    while ((colStop + shiftTotal) <= numBlocksPerRow) {
 
         curC = firstRC;
-
-        matrix[row] = new uint32_t[colStop + append];
-            for (col = 0; col < colStop - shift; col++) {
+        rowOffset[row] = shiftTotal;
+        diff = rowOffset[row] - rowOffset[row - 1];
+        matrix[row] = new uint32_t[colStop];
+        for (col = 0; col < colStop - diff; col++) {
             matrix[row][col] = mergeHash(
-                    xHashs[col + colStart],
+                    xHashs[col + rowOffset[row]],
                     yHashs[row],
-                    (genBlocks[matrix[row - 1][col + shift]] & mask), // lastRow -> b
+                    (genBlocks[matrix[row - 1][col + diff]] & mask), // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-        if (totalAppend >= gap ) {
-            append = 0;
-        } else {
-            totalAppend += append;
-        }
-        
-        colStop += append;
 
         for (; col < colStop; col++) {
 
             matrix[row][col] = mergeHash(
-                    xHashs[col + colStart],
+                    xHashs[col + rowOffset[row]],
                     yHashs[row],
                     firstRC, // lastRow -> b
                     curC); // lastColumn -> c
@@ -247,7 +237,7 @@ void FourRussians::generateXYHashes() {
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-        colStart += shift;
+        shiftTotal += shiftReal;
         row++;
     }
 
@@ -255,117 +245,21 @@ void FourRussians::generateXYHashes() {
     for (; row < numRowsToCalculate; row++) {
 
         curC = firstRC;
-        
+        rowOffset[row] = shiftTotal;
+        diff = rowOffset[row] - rowOffset[row - 1];
         matrix[row] = new uint32_t[colStop];
-            for (col = 0; col < colStop; col++) {
+        for (col = 0; col < colStop; col++) {
             matrix[row][col] = mergeHash(
-                    xHashs[col + colStart],
+                    xHashs[col + rowOffset[row]],
                     yHashs[row],
-                    (genBlocks[matrix[row - 1][col + shift]] & mask), // lastRow -> b
+                    (genBlocks[matrix[row - 1][col + diff]] & mask), // lastRow -> b
                     curC); // lastColumn -> c
             //lastColumn
             curC = (genBlocks[matrix[row][col]] >> (T << 1)) & mask;
         }
-        colStart += shift;
+        shiftTotal += shiftReal;
         colStop -= shift;
     }
-
-    colStart -= shift;
-} */
-
-void FourRussians::calculateMatrix() {
-
-    uint8_t curC = firstRC;
-    
-    uint16_t lastColumnF = 0;
-    uint16_t lastRowF = 0;
-    
-    int lastColRepeat = ceil((double)numBlocksPerRow/numRowsToCalculate)*2;
-    
-    int countLastCol;
-    
-    int colOffset =0;
-    
-    int diff = 0;
-    int diffNext = 0;
-    
-    rowOffset = new int[numRowsToCalculate];
-    
-    int previousRowLastCol = 0;
-    int colMatrix = 0;
-    int colStore = 0;
-    bool set ;
-    
-    for (int8_t i = 0; i < T; i++) {
-        lastColumnF = (lastColumnF << 2) + 2;
-    }
-    lastRowF = lastColumnF << (T << 1);
-    
-    cout << "Last row " << (int)lastRowF << endl;
-    cout << "Last column " << (int)lastColumnF << endl;
-
-    cout << "Max repeat " << lastColRepeat << endl;
-    cout << "numbBlocks " << numBlocksPerRow << endl;
-    cout << "numbRows " << numRowsToCalculate << endl;
-    
-    rowOffset[0] = 0;
-    
-    // rest of the matrix
-    for (int row = 0; row < numRowsToCalculate; row++) {
-        
-        curC = firstRC;
-        
-        matrix[row] = new uint32_t[numBlocksPerRow];
-        cout << row << "\t- " << rowOffset[row] << " - " << diff << " - ";
-        rowOffset[row + 1] = rowOffset[row]; 
-        colMatrix = rowOffset[row];
-       colMatrix = 0;
-       colStore = 0;
-        while (colMatrix != rowOffset[row]) {
-            cout << "       ";
-            colMatrix++;
-       }
-        set = false;
-        while (previousRowLastCol > colMatrix) { 
-            matrix[row][colMatrix] = mergeHash(xHashs[colMatrix], yHashs[row], (genBlocks[matrix[row - 1][colMatrix]] & mask), curC);
-            //lastColumn
-            curC = (genBlocks[matrix[row][colMatrix]] >> (T << 1)) & mask;
-            cout << colMatrix << "-" << colStore << "-" << (int)(genBlocks[matrix[row][colMatrix]]) << " ";
-            
-            if (!set && curC != lastColumnF ) {
-                rowOffset[row + 1] = colMatrix;
-                diffNext = rowOffset[row + 1] - rowOffset[row ];
-                set = true;
-            }
-            colStore ++;
-            colMatrix ++;
-        };
-
-        cout << " NEXT PART ";
-        countLastCol = 0;
-        while (colMatrix < numBlocksPerRow) {
-            matrix[row][colMatrix] = mergeHash(xHashs[colMatrix], yHashs[row], firstRC, curC);
-            //lastColumn
-            curC = (genBlocks[matrix[row][colMatrix]] >> (T << 1)) & mask;
-            cout << colMatrix << "-"<< colStore << "-" << (int)(genBlocks[matrix[row][colMatrix]]) << " ";
-            
-            if ((genBlocks[matrix[row][colMatrix]] & mask) == lastColumnF) { 
-         //   if ((genBlocks[matrix[row][colMatrix]]) == lastColumnF) { 
-                countLastCol++;
-                if (countLastCol ==lastColRepeat){
-                    break;
-                }
-            }
-            colStore ++;
-            colMatrix ++;
-        };
-        cout << " ----> " << (colMatrix - rowOffset[row] + 1) << endl;
-        //cout <<  endl;
-        diff = diffNext;
-        previousRowLastCol = colMatrix; 
-    }
-    
-    cout << endl;
 }
 
 uint32_t FourRussians::mergeHash(uint8_t xHash, uint8_t yHash, uint8_t b, uint8_t c) {
@@ -404,23 +298,18 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
 
     while (row > -1 && col > -1) {
 
-    //    cout << row << " " << col << " - ";
+        //     cout << row << " " << col << endl;
 
         if (tableRow == 0) tableRow = T;
         if (tableCol == 0) tableCol = T;
 
-     //   if (colStart > 0 ) {
-     //       index = matrix[row][col - colStart];
-     //   } else {
-            index = matrix[row][col];
-     //  }
-
-     //   cout << index << endl;
+        index = matrix[row][col - rowOffset[row] ];
+        //   cout << index << endl;
 
         calculateBlock();
 
-     //   print(xHash, yHash);
-    //    cout << endl;
+        //    print(xHash, yHash);
+        //   cout << endl;
 
         while (tableRow > 0 && tableCol > 0) {
 
@@ -428,7 +317,6 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
             left = table[tableRow][tableCol - 1];
             top = table[tableRow - 1][tableCol];
             if (diagonal <= left && diagonal <= top) {
-                // ovdje zna baciti neku grešku da nemože allocirati prostor
                 x += X[col * T + tableCol - 1];
                 y += Y[row * T + tableRow - 1];
                 if (X[col * T + tableCol - 1] == Y[row * T + tableRow - 1]) {
@@ -442,13 +330,14 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
                 tableCol--;
 
             } else if (left <= top) {
+
                 x += X[col * T + tableCol - 1];
                 y += '-';
                 oper += " ";
                 tableCol--;
                 result++;
-                
             } else {
+
                 x += '-';
                 y += Y[row * T + tableRow - 1];
                 oper += " ";
@@ -460,12 +349,11 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
         if (tableRow == 0 && tableCol == 0) {
             row--;
             col--;
-         //   colStart -= shift;
+
         } else if (tableRow != 0) {
             col--;
         } else {
             row--;
-         //   colStart -= shift;
         }
     }
 
