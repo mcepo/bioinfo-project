@@ -12,6 +12,50 @@
 
 #define DEFAULT_FILENAME "input.txt"
 
+#define FASTA_ALL false
+
+string loadFromFasta(string filename){
+    ifstream file(filename);
+    
+    if(!file){
+        cout << "unable to open FASTA file";
+        exit(-1);        
+    }
+    string fasta((std::istreambuf_iterator<char>(file)),
+                 std::istreambuf_iterator<char>());
+    file.close();
+
+    string outputString = "";
+    
+    
+    
+    
+    if(!FASTA_ALL){
+        unsigned long i = 0;
+        while(fasta[i] != '\n') i++;
+        while(fasta[i] != '>' && (i < fasta.size())) {
+            if(fasta[i] == 'A' || fasta[i] == 'C' || fasta[i] == 'G' || fasta[i] == 'T'){
+                outputString += fasta[i++];
+                }
+            else if(fasta[i] == '>'){
+                break;
+                i++;
+            }
+            else{
+                i ++;
+            }
+        }
+        return outputString;
+    }
+    if(FASTA_ALL){
+        unsigned long i = 0;
+        while(i < fasta.size()){
+            if(fasta[i] == '>') while(fasta[i] != '\n') i++;
+            outputString += fasta[i];
+        }
+        return outputString;
+    }    
+}
 
 // return amount of current memory consumed
 
@@ -46,37 +90,52 @@ int main(int argc, char** argv) {
     // input arguments: T inputFilePath OutputFilePath
 
     // check user input
-    if (argc != 4 || (((argv[1][0] < '0') && (argv[1][0] > '9')))){
+    if ((argc != 4 && argc != 5) || (((argv[1][0] < '0') && (argv[1][0] > '9')))){
         cout << "invalid parameters entered!\n\nusage:\n./fourRussians T inputFilePath outputFilePath" << endl << endl;
         cout << "T             : caching block size (T, T). 2 to 4 is preferred" << endl << endl;
         cout << "inputFilePath : input file path. File should have two rows," << endl;
         cout << "                with a single sequence in each line" << endl << endl;
         cout << "OutputFilePath: output file containing edit script (in MAF format)," << endl;
         cout << "                using Levenshtein (edit) distance metric" << endl;
+        cout << "\nor\n";
+        cout << "\n./fourRussians T inputFASTA1 inputFASTA2 outputFilePath" << endl << endl;
+        cout << "use T == 0 for automatic T" << endl;
         exit(-1);
     }
-
-    //if (argc > 1) {
+    
     string t_input = "";
+    
     t_input += argv[1][0];
     blockSize = stoi(t_input);
     //}
+    string outputFilename = "";
+    if(argc == 4){
 
-    inputFilename = argv[2];
 
-    string outputFilename = argv[3];
+        inputFilename = argv[2];
+        outputFilename = argv[3];
 
-    ifstream inputFile(inputFilename);
+        ifstream inputFile(inputFilename);
 
-    if (inputFile) {
-        getline(inputFile, X);
-        getline(inputFile, Y);
-    } else {
-        cout << "Unable to open file" << endl;
-        return -1;
+        if (inputFile) {
+            getline(inputFile, X);
+            getline(inputFile, Y);
+        } else {
+            cout << "Unable to open file" << endl;
+            return -1;
+        }
+
+        inputFile.close();
     }
-
-    inputFile.close();
+    else{
+        string fasta1 = argv[2];
+        string fasta2 = argv[3];
+        X = loadFromFasta(fasta1);
+        Y = loadFromFasta(fasta2);
+        outputFilename = argv[4];
+    }
+    
+    //cout << X << endl << endl << Y << endl << endl;
 
     // initialize the algorithm
     FourRussians fr = FourRussians(X, Y, blockSize);
@@ -84,6 +143,8 @@ int main(int argc, char** argv) {
     cout << "Input Y length: " << fr.yLen - fr.yMod << endl;
     cout << "Used block size: " << (int) fr.T << endl;
     cout << "Optimal block size: " << (int) fr.optimalT << endl;
+
+    //cin.ignore();
 
     cout << "\tAction\t\tRuntime\t\tMemory" << endl;
 
