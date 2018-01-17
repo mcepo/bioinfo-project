@@ -449,12 +449,12 @@ void FourRussians::outputMAF(string sequence1, string sequence2, unsigned long s
     file << "a score=" << score << ".0" << endl << endl;
 
     if (!switchedXY) {
-        file << "s sequence1 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
-        file << "s sequence2 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
+        file << "s sequence1 0 " << xLen - xMod << " " << "+" << " " << xLen - xMod << " " << sequence1 << endl;
+        file << "s sequence2 0 " << yLen - yMod << " " << "+" << " " << yLen - yMod << " " << sequence2 << endl;
     }
     else{
-        file << "s sequence1 \t0 \t" << yLen - yMod << "\t" << "+" << " " << yLen - yMod << "\t" << sequence2 << endl;
-        file << "s sequence2 \t0 \t" << xLen - xMod << "\t" << "+" << " " << xLen - xMod << "\t" << sequence1 << endl;
+        file << "s sequence1 0 " << yLen - yMod << " " << "+" << " " << yLen - yMod << " " << sequence2 << endl;
+        file << "s sequence2 0 " << xLen - xMod << " " << "+" << " " << xLen - xMod << " " << sequence1 << endl;
     }
     file << endl;
 
