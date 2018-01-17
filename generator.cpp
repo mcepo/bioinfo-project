@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define MAX_STRING_LENGTH 50000
+#define MAX_STRING_LENGTH 100000
 #define MIN_STRING_LENGTH 100
 
 const char charMapper[] = "ACGT"; 
@@ -31,6 +31,8 @@ int main(int argc, char** argv) {
     int xLen;
     int yLen;
     string fileName = "input.txt";
+    
+    srand(time(0));
 
     if ( argc == 1){
         xLen = (rand() % MAX_STRING_LENGTH) + MIN_STRING_LENGTH;
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
         xLen = atoi(argv[2]);
         yLen = atoi(argv[3]);
     } else{
-        cout << "wrong number of arguments! \n\nusage: generator outputFile firstSequenceLength [secondSequenceLength]" << endl;
+        cout << "Wrong number of arguments! \n\nUsage: generator outputFile firstSequenceLength [secondSequenceLength]" << endl;
     }
 
     cout << "Generating X length "<< xLen << " characters, Y length "<< yLen << "... ";
@@ -62,7 +64,7 @@ int main(int argc, char** argv) {
     }
 
     srand(time(0));
-
+    
     for (int i = 0; i < xLen; i++) {
         X = X + charMapper[(rand() % 4)] ;
     }
