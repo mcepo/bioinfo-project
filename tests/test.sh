@@ -36,6 +36,8 @@ fi
 echo "Staring test: number of tests  $test_length"
 echo ""
 
+cd ../src/
+
 make clean
 make
 

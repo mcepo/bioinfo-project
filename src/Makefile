@@ -9,7 +9,7 @@ all: main generator
 generator: generator.o
 	$(CC) generator.o -o generator
 
-main: main.o edlib.o FourRussians.o
+main: main.o ../edlib/edlib.o FourRussians.o
 	$(CC)  $(LFLAGS) main.o edlib.o FourRussians.o -o main
 	
 generator.o: generator.cpp
@@ -21,8 +21,8 @@ main.o : main.cpp FourRussians.o edlib.o
 FourRussians.o : FourRussians.cpp FourRussians.h
 	$(CC) $(CFLAGS) FourRussians.cpp
 	
-edlib.o : edlib/edlib.cpp edlib/edlib.h
-	$(CC) $(CFLAGS) edlib/edlib.cpp
+edlib.o : ../edlib/edlib.cpp ../edlib/edlib.h
+	$(CC) $(CFLAGS) ../edlib/edlib.cpp
 		
 clean:
 	rm *.o main generator

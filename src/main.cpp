@@ -8,7 +8,7 @@
 #include "sys/sysinfo.h"
 
 #include "FourRussians.h"
-#include "edlib/edlib.h"
+#include "../edlib/edlib.h"
 
 #define DEFAULT_FILENAME "input.txt"
 
