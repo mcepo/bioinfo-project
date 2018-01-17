@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     clock_t timeBeforeBlockCalc = clock();
     long long memoryBeforeBlockCalc = currentMemory();
 
-    fr.generateBlocks((blockSize - 1), 1, 1 );
+    fr.generateBlocks((fr.T - 1), 1, 1 );
 
     execTime = (clock() - timeBeforeBlockCalc) / (double) CLOCKS_PER_SEC;
     cout << "Generating blocks - \t" << execTime << " sec"
@@ -109,8 +109,15 @@ int main(int argc, char** argv) {
 
     cout << endl << "Result:\t" << result << endl;
     
+    
+    
+    
+    
+    
+    
+    /*************************  EDLIB controle  *********************************/
+    
     cout << endl << "Edlib control ";
-    // EDLIB controle
     const char * X_char = fr.X.c_str();
     const char * Y_char = fr.Y.c_str();
 

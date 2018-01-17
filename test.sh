@@ -41,7 +41,7 @@ make
 # loop given range
 for (( x=1; x<=$test_length; x+=1 ))
 do
-        sleep .5
+        sleep 2
 	echo "**************************************************************"
 	echo "******* TEST $x *******"
 # execute generator with the current value in the loop, generates two strings in input.txt

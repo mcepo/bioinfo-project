@@ -16,8 +16,8 @@
 
 using namespace std;
 
-#define MAX_STRING_LENGTH 1000
-#define MIN_STRING_LENGTH 1
+#define MAX_STRING_LENGTH 100000
+#define MIN_STRING_LENGTH 100
 
 const char charMapper[] = "ACGT"; 
 

@@ -117,11 +117,6 @@ void FourRussians::generateXYHashes() {
     }
 }
 
-// TODO: matrix is of size numBlocksPerRow x numRowsToCalculate
-// this can be reduced by allocating the actual size of the row
-// also modification will need to be made in calculation of 
-// edit script and edit distance
-
 void FourRussians::calculateMatrix() {
 
     uint8_t curC = firstRC;
@@ -136,13 +131,13 @@ void FourRussians::calculateMatrix() {
     double reductionFactor;
 
     if (yLen >= 1000000) {
-        reductionFactor = 0.01;
+        reductionFactor = 0.01*((double)3/T);
     } else if (yLen >= 100000) {
-        reductionFactor = 0.04;
+        reductionFactor = 0.04*((double)3/T);
     } else if (yLen >= 10000) {
-        reductionFactor = 0.08;
+        reductionFactor = 0.08*((double)3/T);
     } else if (yLen >= 1000) {
-        reductionFactor = 0.4;
+        reductionFactor = 0.4*((double)3/T);
     } else {
         reductionFactor = 1;
     }
@@ -306,7 +301,35 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
         index = matrix[row][col - rowOffset[row] ];
         //   cout << index << endl;
 
-        calculateBlock();
+        xHash = index & mask;
+        yHash = (index >> (T << 1)) & mask;
+        c = (index >> (T << 2)) & mask;
+        b = (index >> ((T << 2) + (T << 1))) & mask;
+
+        // convert offset to real and fill the first row and column
+        for (uint8_t i = 1; i <= T; i++) {
+            // B row
+            table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
+            // C column
+            table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
+        }
+
+        // calculate the block
+        for (uint8_t row = 1; row <= T; row++) {
+            for (uint8_t col = 1; col <= T; col++) {
+
+                if (((xHash >> ((T - col) << 1)) & 3)
+                        != ((yHash >> ((T - row) << 1)) & 3)) {
+                    table[row][col] =
+                            min(
+                            min(table[row - 1][ col - 1],
+                            table[row - 1][ col]
+                            ), table[row][ col - 1]) + 1;
+                } else {
+                    table[row][col] = table[row - 1][ col - 1];
+                }
+            }
+        }
 
         //    print(xHash, yHash);
         //   cout << endl;
@@ -401,39 +424,6 @@ uint32_t FourRussians::calculateEditDistanceAndScript() {
     file.close();
 
     return result;
-}
-
-void FourRussians::calculateBlock() {
-
-    xHash = index & mask;
-    yHash = (index >> (T << 1)) & mask;
-    c = (index >> (T << 2)) & mask;
-    b = (index >> ((T << 2) + (T << 1))) & mask;
-
-    // convert offset to real and fill the first row and column
-    for (uint8_t i = 1; i <= T; i++) {
-        // B row
-        table[0][i] = (table[0][i - 1] + ((b >> ((T - i) << 1)) & 3)) - 1;
-        // C column
-        table[i][0] = (table[i - 1][0] + ((c >> ((T - i) << 1)) & 3)) - 1;
-    }
-
-    // calculate the block
-    for (uint8_t row = 1; row <= T; row++) {
-        for (uint8_t col = 1; col <= T; col++) {
-
-            if (((xHash >> ((T - col) << 1)) & 3)
-                    != ((yHash >> ((T - row) << 1)) & 3)) {
-                table[row][col] =
-                        min(
-                        min(table[row - 1][ col - 1],
-                        table[row - 1][ col]
-                        ), table[row][ col - 1]) + 1;
-            } else {
-                table[row][col] = table[row - 1][ col - 1];
-            }
-        }
-    }
 }
 
 uint8_t FourRussians::acgt_to_index(const char acgt) {
