@@ -42,6 +42,7 @@ public:
 
     int colStart, shift;
 
+    int *rowOffset;
 
 // matrix
     uint32_t **matrix;
